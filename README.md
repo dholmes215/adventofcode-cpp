@@ -1,5 +1,5 @@
-# C++ Template
-A demonstration of how to configure a modern C++ project properly.
+# Advent of Code in C++
+David's solutions to Advent of Code problems in C++.
 
 ## Requirements
 
@@ -24,10 +24,10 @@ cmake --build [output_dir]
 
 ## Running
 
-Run `hello` (on Windows `hello.exe`) with no arguments:
+Run `aoc` (on Windows `aoc.exe`) with no arguments:
 ```
-> hello.exe
-Hello World!
+> aoc.exe
+TODO
 ```
 
 ## License
