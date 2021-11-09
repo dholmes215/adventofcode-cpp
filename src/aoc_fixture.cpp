@@ -1,8 +1,9 @@
-#include "greeting.hpp"
+#include "aoc_fixture.hpp"
 
 namespace hello {
 
-auto operator<<(std::ostream& out, const greeting& obj) -> std::ostream& {
+auto operator<<(std::ostream& out, const greeting& obj) -> std::ostream&
+{
     if (obj.name.empty()) {
         return out << "Hello!";
     }

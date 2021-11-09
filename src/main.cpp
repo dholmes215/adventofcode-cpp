@@ -1,4 +1,4 @@
-#include "greeting.hpp"
+#include "aoc_fixture.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>

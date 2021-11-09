@@ -9,10 +9,10 @@ update_submodule("${CMAKE_CURRENT_LIST_DIR}/vcpkg")
 include(cmake/ConfigureVcpkg.cmake)
 configure_vcpkg("${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
-project(hello VERSION 0.0.1
-              DESCRIPTION "Application to print \"Hello World!\""
-              HOMEPAGE_URL https://github.com/dholmes215/cpp-template-2
-              LANGUAGES CXX)
+project(aoc VERSION 0.0.1
+            DESCRIPTION "Application to print \"Hello World!\""
+            HOMEPAGE_URL https://github.com/dholmes215/cpp-template-2
+            LANGUAGES CXX)
 
 # Find dependencies.
 find_package(Catch2 REQUIRED)
