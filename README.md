@@ -32,4 +32,4 @@ TODO
 
 ## License
 
-This project is in the public domain (see `LICENSE`).
+This project released under the Boost Software License 1.0 (see [LICENSE_1_0.txt](LICENSE_1_0.txt) for details).
