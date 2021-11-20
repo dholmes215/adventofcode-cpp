@@ -4,3 +4,41 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
+
+#include "aoc.hpp"
+
+#include <fmt/core.h>
+#include <tl/expected.hpp>
+
+#include <filesystem>
+#include <fstream>
+
+namespace aoc {
+ifstream_expected open_file(const std::filesystem::path& datadir,
+                            aoc::solution_id id) noexcept
+{
+    const auto path_suffix{fmt::format("{:04}/{:02}.txt", id.year, id.day)};
+    auto input_file{datadir / path_suffix};
+    if (!std::filesystem::exists(input_file)) {
+        return tl::unexpected{
+            fmt::format("Input file does not exist: {}", input_file.string())};
+    }
+
+    // Load input
+    std::ifstream file{input_file};
+
+    if (!file.is_open()) {
+        return tl::unexpected{
+            fmt::format("Failed to open file: {}", input_file.string())};
+    }
+
+    return file;
+}
+
+bool is_whitespace(char c)
+{
+    // Cast is necessary because `isspace` on a negative `char` is UB.
+    return std::isspace(static_cast<unsigned char>(c));
+}
+
+}  // namespace aoc

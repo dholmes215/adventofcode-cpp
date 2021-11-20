@@ -7,13 +7,34 @@
 
 #include <aoc.hpp>
 
-namespace aoc {
-namespace year2015 {
+#include <fmt/core.h>
 
-aoc::solution_result day01(std::istream&)
+#include <string>
+
+namespace aoc::year2015 {
+
+aoc::solution_result day01(std::istream& input)
 {
-    return {};
+    int floor{0};
+    int position{1};
+    std::optional<int> first_position_in_basement{};
+    for (const char c : istream_range{input}) {
+        if (c == '(') {
+            floor++;
+        }
+        else if (c == ')') {
+            floor--;
+        }
+        else if (!is_whitespace(c)) {
+            fmt::print(stderr, "Read unexpected input character '{}'.\n", c);
+        }
+        if (floor < 0 && !first_position_in_basement) {
+            first_position_in_basement = position;
+        }
+        position++;
+    }
+
+    return {std::to_string(floor), std::to_string(*first_position_in_basement)};
 }
 
-}  // namespace year2015
-}  // namespace aoc
+}  // namespace aoc::year2015

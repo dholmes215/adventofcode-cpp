@@ -16,7 +16,10 @@ project(aoc VERSION 0.0.1
 
 # Find dependencies.
 find_package(Catch2 REQUIRED)
+find_package(cxxopts REQUIRED)
 find_package(fmt REQUIRED)
+find_package(range-v3 REQUIRED)
+find_package(tl-expected REQUIRED)
 
 # Targets can "link" this "library" to inherit project options.
 add_library(project_options INTERFACE)
