@@ -39,7 +39,9 @@ ifstream_expected open_file(const std::filesystem::path& datadir,
 
 std::string slurp(std::istream& stream)
 {
-    return ranges::istream_view<char>(stream) | ranges::to<std::string>;
+    // return ranges::istream_view<char>(stream) | ranges::to<std::string>;
+    const istream_range input{stream};
+    return input | ranges::to<std::string>;
 }
 
 bool is_whitespace(char c)
