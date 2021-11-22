@@ -11,11 +11,7 @@
 
 #include <term.hpp>
 
-__pragma(warning(push))
-// suppress "conditional expression is constant" warning
-__pragma(warning(disable:4127)) 
 #include <fmt/chrono.h>
-__pragma(warning(pop))
 #include <fmt/core.h>
 #include <cxxopts.hpp>
 

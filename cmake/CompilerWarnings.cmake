@@ -28,6 +28,7 @@ function(set_project_warnings project_name)
       /w14906 # string literal cast to 'LPWSTR'
       /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
       /permissive- # standards conformance mode for MSVC compiler.
+      /wd4127 # Disable "conditional expression is constant" which breaks fmt/chrono.h
   )
 
   set(CLANG_WARNINGS
