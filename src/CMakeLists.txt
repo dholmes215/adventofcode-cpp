@@ -9,4 +9,4 @@ target_link_libraries(aoc_solutions PUBLIC project_options fmt::fmt aoc_lib
                                     PRIVATE project_warnings aoc2015)
 
 add_executable(runner main.cpp runner_options.cpp runner_options.hpp)
-target_link_libraries(runner PRIVATE project_options project_warnings aoc_solutions fmt::fmt cxxopts::cxxopts tl::expected)
+target_link_libraries(runner PRIVATE project_options project_warnings aoc_solutions fmt::fmt cxxopts::cxxopts tl::expected dh::term)

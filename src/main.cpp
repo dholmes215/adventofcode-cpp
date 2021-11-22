@@ -9,6 +9,8 @@
 #include <aoc_solutions.hpp>
 #include <runner_options.hpp>
 
+#include <term.hpp>
+
 __pragma(warning(push))
 // suppress "conditional expression is constant" warning
 __pragma(warning(disable:4127)) 
@@ -42,7 +44,9 @@ int main(int argc, char** argv)
         end_date.year = options.dates->year;
         end_date.day = options.dates->day ? *options.dates->day : 25;
     }
-
+    fmt::print(
+        "Running solutions from {0:red}{1}{0:reset} to {0:green}{2}{0:reset}\n",
+        dh::color{}, begin_date, end_date);
     fmt::print("{:20} {:>20} {:>20} {:>10}\n", "Day", "Part A", "Part B",
                "Duration");
     const auto solutions_range{

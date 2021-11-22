@@ -4,6 +4,7 @@
     "dependencies": [
         "catch2",
         "cxxopts",
+        "dh-term",
         "fmt",
         "range-v3",
         "tl-expected"
