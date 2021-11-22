@@ -11,12 +11,17 @@
 
 #include <fmt/core.h>
 
+#include <vector>
+
 namespace aoc {
 
-const std::map<solution_id, solution_func>& solutions()
+const std::map<date, std::vector<solution>>& solutions()
 {
-    static const std::map<solution_id, solution_func> solutions{
-        {{2015, 1}, aoc::year2015::day01}};
+    static const std::map<date, std::vector<solution>> solutions{
+        {{2015, 1},
+         {{aoc::year2015::day01, "imperative"},
+          {aoc::year2015::day01algorithm, "algorithm"},
+          {aoc::year2015::day01ranges, "ranges"}}}};
     return solutions;
 }
 

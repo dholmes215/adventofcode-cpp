@@ -32,8 +32,8 @@ int main(int argc, char** argv)
     }
 
     // Select range of dates to run.
-    aoc::solution_id begin_date{aoc::solutions().begin()->first};
-    aoc::solution_id end_date{std::prev(aoc::solutions().end())->first};
+    aoc::date begin_date{aoc::solutions().begin()->first};
+    aoc::date end_date{std::prev(aoc::solutions().end())->first};
     if (options.dates) {
         begin_date.year = options.dates->year;
         begin_date.day = options.dates->day ? *options.dates->day : 1;
@@ -41,32 +41,51 @@ int main(int argc, char** argv)
         end_date.day = options.dates->day ? *options.dates->day : 25;
     }
     fmt::print(
-        "Running solutions from {0:red}{1}{0:reset} to {0:green}{2}{0:reset}\n",
-        dh::color{}, begin_date, end_date);
-    fmt::print("{:20} {:>20} {:>20} {:>10}\n", "Day", "Part A", "Part B",
-               "Duration");
+        "Running solutions from {0:red}{1}{0:reset} to {0:green}{2}{0:reset} "
+        "{3} times\n",
+        dh::color{}, begin_date, end_date, options.repeat);
+    fmt::print("{:20} {:10} {:>20} {:>20} {:>10}\n", "Day", "Solution",
+               "Part A", "Part B", "Duration");
     const auto solutions_range{
         aoc::submap(aoc::solutions(), begin_date, end_date)};
-    for (const auto& [id, solution] : solutions_range) {
+    for (const auto& [date, solution_vec] : solutions_range) {
         // Load input
-        auto maybe_input{aoc::open_file(*options.datadir, id)};
+        auto maybe_input{aoc::open_file(*options.datadir, date)};
         if (maybe_input) {
-            // Solve problem
-            using std::chrono::duration_cast;
-            using std::chrono::microseconds;
-            using Clock = std::chrono::high_resolution_clock;
-            using FpMicroseconds =
-                std::chrono::duration<float, microseconds::period>;
+            for (const auto& solution : solution_vec) {
+                maybe_input->seekg(0);
+                // Solve problem
+                using std::chrono::duration_cast;
+                using std::chrono::microseconds;
+                using Clock = std::chrono::high_resolution_clock;
+                using FpMicroseconds =
+                    std::chrono::duration<float, microseconds::period>;
 
-            const auto start{Clock::now()};
-            const auto& result{solution(*maybe_input)};
-            const auto end{Clock::now()};
-            const auto elapsed{duration_cast<FpMicroseconds>(end - start)};
-            fmt::print("{:20} {:>20} {:>20} {:>10}\n", id, result.part_a,
-                       result.part_b, elapsed);
+                const auto start{Clock::now()};
+
+                const auto& result{solution.func(*maybe_input)};
+                for (int i{1}; i < options.repeat; ++i) {
+                    maybe_input->seekg(0);
+                    const auto& new_result{solution.func(*maybe_input)};
+                    if (new_result != result) {
+                        fmt::print(
+                            "{1:20} {2:10} {0:red}{3:>20} {4:>20} "
+                            "{5:}{0:reset}\n",
+                            dh::color{}, date.day, solution.label,
+                            new_result.part_a, new_result.part_b,
+                            "inconsistent result on repeated iteration");
+                    }
+                }
+                const auto end{Clock::now()};
+                const auto elapsed{duration_cast<FpMicroseconds>(end - start)};
+                const auto avg_elapsed{elapsed / options.repeat};
+                fmt::print("{:20} {:10} {:>20} {:>20} {:>10}\n", date,
+                           solution.label, result.part_a, result.part_b,
+                           avg_elapsed);
+            }
         }
         else {
-            fmt::print("{:20} {}\n", id, maybe_input.error());
+            fmt::print("{:20} {}\n", date, maybe_input.error());
         }
     }
 }

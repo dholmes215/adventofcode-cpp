@@ -14,10 +14,11 @@
 #include <fmt/format.h>
 
 #include <map>
+#include <vector>
 
 namespace aoc {
 
-const std::map<solution_id, solution_func>& solutions();
+const std::map<date, std::vector<solution>>& solutions();
 
 }  // namespace aoc
 

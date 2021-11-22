@@ -11,6 +11,7 @@ namespace aoc {
 namespace year2015 {
 
 aoc::solution_result day01(std::istream&);
-
+aoc::solution_result day01algorithm(std::istream&);
+aoc::solution_result day01ranges(std::istream&);
 }
 }  // namespace aoc

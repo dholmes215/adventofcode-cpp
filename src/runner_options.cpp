@@ -41,7 +41,8 @@ runner_options process_args(int argc, char** argv)
         ("year", "Run only a single year's solutions", cxxopts::value<int>())
         ("day", "Run only a single day's solution (requires --year)", cxxopts::value<int>())
         ("datadir", "Input data directory (excludes --inputfile)", cxxopts::value<std::string>())
-        ("inputfile", "Input file (requires --day, excludes --datadir)", cxxopts::value<std::string>());
+        ("inputfile", "Input file (requires --day, excludes --datadir)", cxxopts::value<std::string>())
+        ("repeat", "Run each solution this many times (default: 1)", cxxopts::value<int>());
     // clang-format on
     auto parsed_options{options.parse(argc, argv)};
     if (parsed_options.count("datadir") > 0) {
@@ -88,6 +89,10 @@ runner_options process_args(int argc, char** argv)
                    "directory was found by search.  Create a data directory, "
                    "or provide either --inputfile or --datadir.\n");
         std::abort();
+    }
+
+    if (parsed_options.count("repeat") > 0) {
+        out.repeat = parsed_options["repeat"].as<int>();
     }
 
     return out;

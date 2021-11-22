@@ -21,31 +21,37 @@
 
 namespace aoc {
 
-struct solution_id {
+struct date {
     int year;
     int day;
-    friend auto operator<=>(const solution_id& lhs,
-                            const solution_id& rhs) = default;
+    friend auto operator<=>(const date& lhs, const date& rhs) = default;
 };
 
 struct solution_result {
     std::string part_a;
     std::string part_b;
+    friend bool operator==(const solution_result& lhs,
+                           const solution_result& rhs) = default;
 };
 
 using solution_func = solution_result (*)(std::istream&);
 
+struct solution {
+    solution_func func;
+    std::string label;
+};
+
 using ifstream_expected = tl::expected<std::ifstream, std::string>;
 ifstream_expected open_file(const std::filesystem::path& datadir,
-                            aoc::solution_id id) noexcept;
+                            aoc::date date) noexcept;
 
 // Helper to allow iterating the `char`s in an `istream` with a ranged for loop.
 struct istream_range {
    public:
     using Iterator = std::istreambuf_iterator<char>;
     istream_range(std::istream& stream) : begin_iter(stream) {}
-    Iterator begin() { return begin_iter; }
-    Iterator end() { return {}; }
+    Iterator begin() const noexcept { return begin_iter; }
+    Iterator end() const noexcept { return {}; }
 
    private:
     Iterator begin_iter{};
@@ -70,11 +76,12 @@ auto submap(const std::map<Key, Value>& map,
 
 // Custom formatter for aoc::solution_id
 template <>
-struct fmt::formatter<aoc::solution_id> : public formatter<std::string_view> {
+struct fmt::formatter<aoc::date> : public formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const aoc::solution_id& s, FormatContext& ctx)
+    auto format(const aoc::date& date, FormatContext& ctx)
     {
-        const auto out{fmt::format("Year {:04} Day {:02}", s.year, s.day)};
+        const auto out{
+            fmt::format("Year {:04} Day {:02}", date.year, date.day)};
         return formatter<std::string_view>::format(out, ctx);
     }
 };

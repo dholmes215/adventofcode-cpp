@@ -15,9 +15,9 @@
 
 namespace aoc {
 ifstream_expected open_file(const std::filesystem::path& datadir,
-                            aoc::solution_id id) noexcept
+                            aoc::date date) noexcept
 {
-    const auto path_suffix{fmt::format("{:04}/{:02}.txt", id.year, id.day)};
+    const auto path_suffix{fmt::format("{:04}/{:02}.txt", date.year, date.day)};
     auto input_file{datadir / path_suffix};
     if (!std::filesystem::exists(input_file)) {
         return tl::unexpected{
