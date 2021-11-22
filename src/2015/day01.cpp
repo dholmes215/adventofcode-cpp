@@ -86,17 +86,8 @@ aoc::solution_result day01ranges(std::string_view input)
     using ranges::views::partial_sum;
     using ranges::views::transform;
 
-    // const auto input_range{
-    //     ranges::subrange{std::istreambuf_iterator<char>{input},
-    //                      std::istreambuf_iterator<char>{}}};
-    // TODO: Why is subrange slow?
-    // TODO: Use const char* anyways.  Or std::string_view?  Or iterator
-    // template parameters?
-    // TODO: Run multiple iterations and benchmark them
-
-    // const ranges::istream_view<char> input_range{input};
-    const auto sums_range = input | transform(process_input) | partial_sum;
-    const auto counted = ranges::views::enumerate(sums_range);
+    const auto counted =
+        input | transform(process_input) | partial_sum | enumerate;
 
     const auto found = ranges::find_if(
         counted, [](const auto& pair) { return pair.second == -1; });
@@ -110,7 +101,6 @@ aoc::solution_result day01ranges(std::string_view input)
     for (const auto& pair : rest_of_range) {
         last_floor = pair.second;
     }
-
     return {std::to_string(last_floor),
             std::to_string(first_position_in_basement)};
 }

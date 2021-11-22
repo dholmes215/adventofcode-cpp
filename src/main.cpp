@@ -70,7 +70,7 @@ int main(int argc, char** argv)
                         fmt::print(
                             "{1:20} {2:10} {0:red}{3:>20} {4:>20} "
                             "{5:}{0:reset}\n",
-                            dh::color{}, date.day, solution.label,
+                            dh::color{}, date, solution.label,
                             new_result.part_a, new_result.part_b,
                             "inconsistent result on repeated iteration");
                     }
