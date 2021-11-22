@@ -16,10 +16,17 @@
 #include <filesystem>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
 namespace aoc {
+
+// Exception thrown by solutions on unexpected input.
+class input_error : public std::runtime_error {
+   public:
+    input_error(std::string msg) : runtime_error{std::move(msg)} {}
+};
 
 struct date {
     int year;
