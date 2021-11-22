@@ -10,8 +10,8 @@
 namespace aoc {
 namespace year2015 {
 
-aoc::solution_result day01(std::istream&);
-aoc::solution_result day01algorithm(std::istream&);
-aoc::solution_result day01ranges(std::istream&);
+aoc::solution_result day01(std::string_view);
+aoc::solution_result day01algorithm(std::string_view);
+aoc::solution_result day01ranges(std::string_view);
 }
 }  // namespace aoc

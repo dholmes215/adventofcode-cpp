@@ -14,16 +14,17 @@
 #include <algorithm>
 #include <numeric>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace aoc::year2015 {
 
-aoc::solution_result day01(std::istream& input)
+aoc::solution_result day01(std::string_view input)
 {
     int floor{0};
     int position{1};
     std::optional<int> first_position_in_basement{};
-    for (const char c : istream_range{input}) {
+    for (const char c : input) {
         if (c == '(') {
             floor++;
         }
@@ -61,12 +62,11 @@ int process_input(const char c)
     return (c - '(') * -2 + 1;
 }
 
-aoc::solution_result day01algorithm(std::istream& input)
+aoc::solution_result day01algorithm(std::string_view input)
 {
-    const auto input_range{istream_range{input}};
     std::vector<int> moves;
-    std::transform(input_range.begin(), input_range.end(),
-                   std::back_inserter(moves), process_input);
+    std::transform(input.begin(), input.end(), std::back_inserter(moves),
+                   process_input);
     const auto begin = moves.begin();
     const auto end = moves.end();
     // const auto sum{std::accumulate(begin, end, 0)};
@@ -80,13 +80,12 @@ aoc::solution_result day01algorithm(std::istream& input)
             std::to_string(first_position_in_basement)};
 }
 
-aoc::solution_result day01ranges(std::istream& input)
+aoc::solution_result day01ranges(std::string_view input)
 {
     using ranges::views::enumerate;
     using ranges::views::partial_sum;
     using ranges::views::transform;
 
-    const auto input_range{istream_range{input}};
     // const auto input_range{
     //     ranges::subrange{std::istreambuf_iterator<char>{input},
     //                      std::istreambuf_iterator<char>{}}};
@@ -96,8 +95,7 @@ aoc::solution_result day01ranges(std::istream& input)
     // TODO: Run multiple iterations and benchmark them
 
     // const ranges::istream_view<char> input_range{input};
-    const auto sums_range =
-        input_range | transform(process_input) | partial_sum;
+    const auto sums_range = input | transform(process_input) | partial_sum;
     const auto counted = ranges::views::enumerate(sums_range);
 
     const auto found = ranges::find_if(

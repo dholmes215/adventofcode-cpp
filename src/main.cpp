@@ -52,8 +52,8 @@ int main(int argc, char** argv)
         // Load input
         auto maybe_input{aoc::open_file(*options.datadir, date)};
         if (maybe_input) {
+            const auto input{aoc::slurp(*maybe_input)};
             for (const auto& solution : solution_vec) {
-                maybe_input->seekg(0);
                 // Solve problem
                 using std::chrono::duration_cast;
                 using std::chrono::microseconds;
@@ -63,10 +63,9 @@ int main(int argc, char** argv)
 
                 const auto start{Clock::now()};
 
-                const auto& result{solution.func(*maybe_input)};
+                const auto& result{solution.func(input)};
                 for (int i{1}; i < options.repeat; ++i) {
-                    maybe_input->seekg(0);
-                    const auto& new_result{solution.func(*maybe_input)};
+                    const auto& new_result{solution.func(input)};
                     if (new_result != result) {
                         fmt::print(
                             "{1:20} {2:10} {0:red}{3:>20} {4:>20} "

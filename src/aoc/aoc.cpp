@@ -7,6 +7,8 @@
 
 #include "aoc.hpp"
 
+#include <range/v3/all.hpp>
+
 #include <fmt/core.h>
 #include <tl/expected.hpp>
 
@@ -33,6 +35,11 @@ ifstream_expected open_file(const std::filesystem::path& datadir,
     }
 
     return file;
+}
+
+std::string slurp(std::istream& stream)
+{
+    return ranges::istream_view<char>(stream) | ranges::to<std::string>;
 }
 
 bool is_whitespace(char c)

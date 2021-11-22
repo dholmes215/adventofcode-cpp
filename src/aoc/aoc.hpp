@@ -34,7 +34,7 @@ struct solution_result {
                            const solution_result& rhs) = default;
 };
 
-using solution_func = solution_result (*)(std::istream&);
+using solution_func = solution_result (*)(std::string_view);
 
 struct solution {
     solution_func func;
@@ -44,6 +44,9 @@ struct solution {
 using ifstream_expected = tl::expected<std::ifstream, std::string>;
 ifstream_expected open_file(const std::filesystem::path& datadir,
                             aoc::date date) noexcept;
+
+// Read an entire istream into a string.
+std::string slurp(std::istream&);
 
 // Helper to allow iterating the `char`s in an `istream` with a ranged for loop.
 struct istream_range {
