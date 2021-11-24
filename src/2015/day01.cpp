@@ -71,7 +71,7 @@ aoc::solution_result day01(std::string_view input)
         floor += process_input(c);
     }
 
-    return {std::to_string(floor), std::to_string(first_position_in_basement)};
+    return {floor, first_position_in_basement};
 }
 
 aoc::solution_result day01algorithm(std::string_view input)
@@ -93,8 +93,7 @@ aoc::solution_result day01algorithm(std::string_view input)
     const auto found = std::find(begin, end, -1);
     const auto first_position_in_basement{1 + found - begin};
 
-    return {std::to_string(moves.back()),
-            std::to_string(first_position_in_basement)};
+    return {moves.back(), first_position_in_basement};
 }
 
 aoc::solution_result day01ranges(std::string_view input)
@@ -118,8 +117,7 @@ aoc::solution_result day01ranges(std::string_view input)
         last_floor = pair.second;
     }
 
-    return {std::to_string(last_floor),
-            std::to_string(first_position_in_basement)};
+    return {last_floor, first_position_in_basement};
 }
 
 }  // namespace aoc::year2015

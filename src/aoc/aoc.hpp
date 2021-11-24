@@ -37,6 +37,11 @@ struct date {
 struct solution_result {
     std::string part_a;
     std::string part_b;
+    solution_result() = default;
+    solution_result(auto&& a, auto&& b)
+        : part_a{fmt::format("{}", a)}, part_b{fmt::format("{}", b)}
+    {
+    }
     friend bool operator==(const solution_result& lhs,
                            const solution_result& rhs) = default;
 };
