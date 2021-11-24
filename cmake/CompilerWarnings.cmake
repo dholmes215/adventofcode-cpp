@@ -29,6 +29,7 @@ function(set_project_warnings project_name)
       /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
       /permissive- # standards conformance mode for MSVC compiler.
       /wd4127 # Disable "conditional expression is constant" which breaks fmt/chrono.h
+      /wd4702 # Disable "unreachable code" which breaks range/v3/detail/variant.hpp
   )
 
   set(CLANG_WARNINGS

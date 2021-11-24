@@ -10,7 +10,7 @@
 
 #include <fmt/core.h>
 #include <fmt/format.h>
-#include <range/v3/view/subrange.hpp>
+#include <range/v3/all.hpp>
 #include <tl/expected.hpp>
 
 #include <filesystem>
@@ -80,6 +80,23 @@ auto submap(const std::map<Key, Value>& map,
 {
     return ranges::subrange(map.lower_bound(first_key),
                             map.upper_bound(last_key));
+}
+
+// Split a range by a delimiter into a range of string_views.
+// XXX In C++23, split_view can produce ranges that are directly convertable to
+// string_views, making this much simpler.
+auto sv_split_range(auto&& rng, char delim)
+{
+    return rng | ranges::views::split(delim) |
+           ranges::views::transform([](auto&& rng2) {
+               return std::string_view(&*rng2.begin(), ranges::distance(rng2));
+           });
+}
+
+// Split a range of characters into a range of string_views by line.
+auto lines(auto&& rng)
+{
+    return sv_split_range(rng, '\n');
 }
 
 }  // namespace aoc
