@@ -94,7 +94,9 @@ auto sv_split_range(auto&& rng, char delim)
 {
     return rng | ranges::views::split(delim) |
            ranges::views::transform([](auto&& rng2) {
-               return std::string_view(&*rng2.begin(), ranges::distance(rng2));
+               return std::string_view(
+                   &*rng2.begin(),
+                   static_cast<std::size_t>(ranges::distance(rng2)));
            });
 }
 
