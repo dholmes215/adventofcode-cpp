@@ -101,7 +101,7 @@ auto sv_split_range(auto&& rng, char delim)
 }
 
 // Split a range of characters into a range of string_views by line.
-auto lines(auto&& rng)
+auto sv_lines(auto&& rng)
 {
     return sv_split_range(rng, '\n');
 }

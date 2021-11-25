@@ -15,9 +15,6 @@
 #include <array>
 #include <charconv>
 #include <string_view>
-#include <vector>
-
-#include <numeric>
 
 namespace aoc::year2015 {
 
@@ -55,24 +52,23 @@ box string_to_box(std::string_view s)
     // TODO: validate input
     std::array<foot, 3> a;
     const auto dims{sv_split_range(s, 'x') | transform(to_int)};
-    ranges::copy(dims, ranges::begin(a));
+    ranges::copy(dims, a.begin());
     return {a[0], a[1], a[2]};
 }
 
 // Calculate wrapping paper required for a single box.
-sqft paper_required(const box& b)
+sqft paper_required(const box& b) noexcept
 {
-    std::array<sqft, 3> side_areas{b.length * b.width, b.length * b.height,
-                                   b.width * b.height};
-    std::sort(side_areas.begin(), side_areas.end());
-
-    sqft paper = side_areas[0] * 3  // smallest side
-                 + side_areas[1] * 2 + side_areas[2] * 2;
+    const std::array<sqft, 3> side_areas{
+        b.length * b.width, b.length * b.height, b.width * b.height};
+    const sqft smallest_side = *ranges::min_element(side_areas);
+    const sqft paper = side_areas[0] * 2 + side_areas[1] * 2 +
+                       side_areas[2] * 2 + smallest_side;
     return paper;
 }
 
 // Calculate ribbon required for a single box.
-foot ribbon_required(const box& b)
+foot ribbon_required(const box& b) noexcept
 {
     const std::array<foot, 3> side_perimeters{2 * (b.length + b.width),
                                               2 * (b.length + b.height),
@@ -87,22 +83,23 @@ struct paper_and_ribbon {
     sqft paper{0};
     foot ribbon{0};
     friend paper_and_ribbon operator+(const paper_and_ribbon& lhs,
-                                      const paper_and_ribbon& rhs)
+                                      const paper_and_ribbon& rhs) noexcept
     {
         return {lhs.paper + rhs.paper, lhs.ribbon + rhs.ribbon};
     }
 };
 
-paper_and_ribbon materials_required(const box& b)
+paper_and_ribbon materials_required(const box& b) noexcept
 {
     return {paper_required(b), ribbon_required(b)};
 }
 
 aoc::solution_result day02(std::string_view input)
 {
-    const auto materials = accumulate(
-        lines(input) | transform(string_to_box) | transform(materials_required),
-        paper_and_ribbon{});
+    const auto materials =
+        accumulate(sv_lines(input) | transform(string_to_box) |
+                       transform(materials_required),
+                   paper_and_ribbon{});
     return {materials.paper, materials.ribbon};
 }
 
