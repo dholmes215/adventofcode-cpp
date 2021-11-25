@@ -60,51 +60,9 @@ ifstream_expected open_file(const std::filesystem::path& datadir,
 // Read an entire istream into a string.
 std::string slurp(std::istream&);
 
-// Helper to allow iterating the `char`s in an `istream` with a ranged for loop.
-struct istream_range {
-   public:
-    using Iterator = std::istreambuf_iterator<char>;
-    istream_range(std::istream& stream) : begin_iter(stream) {}
-    Iterator begin() const noexcept { return begin_iter; }
-    Iterator end() const noexcept { return {}; }
-
-   private:
-    Iterator begin_iter{};
-};
-
 // Return true if `c` is a whitespace character.  Takes a `char` safely without
 // a cast unlike std::isspace.
 bool is_whitespace(char c);
-
-// Given a std::map<Key,Value>, return the subset of the map ranging from
-// first_key to last_key.
-template <typename Key, typename Value>
-auto submap(const std::map<Key, Value>& map,
-            const Key& first_key,
-            const Key& last_key)
-{
-    return ranges::subrange(map.lower_bound(first_key),
-                            map.upper_bound(last_key));
-}
-
-// Split a range by a delimiter into a range of string_views.
-// XXX In C++23, split_view can produce ranges that are directly convertable to
-// string_views, making this much simpler.
-auto sv_split_range(auto&& rng, char delim)
-{
-    return rng | ranges::views::split(delim) |
-           ranges::views::transform([](auto&& rng2) {
-               return std::string_view(
-                   &*rng2.begin(),
-                   static_cast<std::size_t>(ranges::distance(rng2)));
-           });
-}
-
-// Split a range of characters into a range of string_views by line.
-auto sv_lines(auto&& rng)
-{
-    return sv_split_range(rng, '\n');
-}
 
 }  // namespace aoc
 

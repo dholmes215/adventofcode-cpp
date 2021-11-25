@@ -6,8 +6,7 @@
 //
 
 #include <aoc.hpp>
-
-#include <range/v3/all.hpp>
+#include <aoc_range.hpp>
 
 #include <fmt/core.h>
 
@@ -23,15 +22,15 @@ namespace {
 // Input should be only '(' and ')', followed by only whitespace.
 auto validate_input(std::string_view input)
 {
-    const auto end_of_input{ranges::find_if(
-        input, [](const char c) { return !(c == ')' || c == '('); })};
+    const auto end_of_input{
+        find_if(input, [](const char c) { return !(c == ')' || c == '('); })};
     const auto invalid =
         std::find_if(end_of_input, input.end(),
                      [](const char c) { return !is_whitespace(c); });
     if (invalid != input.end()) {
         throw input_error("Invalid input.");
     }
-    return ranges::subrange{input.begin(), end_of_input};
+    return subrange{input.begin(), end_of_input};
 }
 
 // Convert '(' and ')' to -1 or 1.
@@ -98,19 +97,15 @@ aoc::solution_result day01algorithm(std::string_view input)
 
 aoc::solution_result day01ranges(std::string_view input)
 {
-    using ranges::views::enumerate;
-    using ranges::views::partial_sum;
-    using ranges::views::transform;
-
     const auto counted = validate_input(input) | transform(process_input) |
                          partial_sum | enumerate;
-    const auto found = ranges::find_if(
-        counted, [](const auto& pair) { return pair.second == -1; });
+    const auto found =
+        find_if(counted, [](const auto& pair) { return pair.second == -1; });
 
     const auto basement_pair = *found;
     const auto first_position_in_basement = basement_pair.first + 1;
 
-    const auto rest_of_range = ranges::subrange{found, ranges::end(counted)};
+    const auto rest_of_range = subrange{found, counted.end()};
     // const auto last_pair = rest_of_range | ranges::views::take_last(1);
     int last_floor{0};
     for (const auto& pair : rest_of_range) {

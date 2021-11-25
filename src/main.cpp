@@ -6,6 +6,7 @@
 //
 
 #include <aoc.hpp>
+#include <aoc_range.hpp>
 #include <aoc_solutions.hpp>
 #include <runner_options.hpp>
 

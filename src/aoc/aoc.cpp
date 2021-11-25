@@ -6,6 +6,7 @@
 //
 
 #include "aoc.hpp"
+#include "aoc_range.hpp"
 
 #include <range/v3/all.hpp>
 
@@ -37,11 +38,25 @@ ifstream_expected open_file(const std::filesystem::path& datadir,
     return file;
 }
 
+namespace {
+// Helper to allow iterating the `char`s in an `istream` with a ranged for loop.
+struct istream_range {
+   public:
+    using Iterator = std::istreambuf_iterator<char>;
+    istream_range(std::istream& stream) : begin_iter(stream) {}
+    Iterator begin() const noexcept { return begin_iter; }
+    Iterator end() const noexcept { return {}; }
+
+   private:
+    Iterator begin_iter{};
+};
+}  // namespace
+
 std::string slurp(std::istream& stream)
 {
     // return ranges::istream_view<char>(stream) | ranges::to<std::string>;
     const istream_range input{stream};
-    return input | ranges::to<std::string>;
+    return input | to<std::string>;
 }
 
 bool is_whitespace(char c)

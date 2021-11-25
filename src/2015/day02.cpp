@@ -6,11 +6,10 @@
 //
 
 #include <aoc.hpp>
+#include <aoc_range.hpp>
 
 #include <fmt/core.h>
 #include <fmt/format.h>
-
-#include <range/v3/all.hpp>
 
 #include <array>
 #include <charconv>
@@ -18,10 +17,7 @@
 
 namespace aoc::year2015 {
 
-using ranges::accumulate;
-using ranges::to;
-using ranges::views::transform;
-
+namespace {
 // TODO: use a units library
 using foot = int;
 using sqft = int;
@@ -52,7 +48,7 @@ box string_to_box(std::string_view s)
     // TODO: validate input
     std::array<foot, 3> a;
     const auto dims{sv_split_range(s, 'x') | transform(to_int)};
-    ranges::copy(dims, a.begin());
+    copy(dims, a.begin());
     return {a[0], a[1], a[2]};
 }
 
@@ -61,7 +57,7 @@ sqft paper_required(const box& b) noexcept
 {
     const std::array<sqft, 3> side_areas{
         b.length * b.width, b.length * b.height, b.width * b.height};
-    const sqft smallest_side = *ranges::min_element(side_areas);
+    const sqft smallest_side = *min_element(side_areas);
     const sqft paper = side_areas[0] * 2 + side_areas[1] * 2 +
                        side_areas[2] * 2 + smallest_side;
     return paper;
@@ -73,7 +69,7 @@ foot ribbon_required(const box& b) noexcept
     const std::array<foot, 3> side_perimeters{2 * (b.length + b.width),
                                               2 * (b.length + b.height),
                                               2 * (b.width + b.height)};
-    const foot shortest_perimeter = *ranges::min_element(side_perimeters);
+    const foot shortest_perimeter = *min_element(side_perimeters);
     const foot bow = b.length * b.width * b.height;
     const foot ribbon = shortest_perimeter + bow;
     return ribbon;
@@ -93,6 +89,7 @@ paper_and_ribbon materials_required(const box& b) noexcept
 {
     return {paper_required(b), ribbon_required(b)};
 }
+}  // namespace
 
 aoc::solution_result day02(std::string_view input)
 {
