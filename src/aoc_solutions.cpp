@@ -22,7 +22,8 @@ const std::map<date, std::vector<solution>>& solutions()
          {{aoc::year2015::day01, "imperative"},
           {aoc::year2015::day01algorithm, "algorithm"},
           {aoc::year2015::day01ranges, "ranges"}}},
-        {{2015, 2}, {{aoc::year2015::day02, ""}}}};
+        {{2015, 2}, {{aoc::year2015::day02, ""}}},
+        {{2015, 3}, {{aoc::year2015::day03, ""}}}};
     return solutions;
 }
 

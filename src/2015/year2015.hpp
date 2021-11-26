@@ -9,10 +9,10 @@
 
 namespace aoc {
 namespace year2015 {
-
 aoc::solution_result day01(std::string_view);
 aoc::solution_result day01algorithm(std::string_view);
 aoc::solution_result day01ranges(std::string_view);
 aoc::solution_result day02(std::string_view);
-}
+aoc::solution_result day03(std::string_view);
+}  // namespace year2015
 }  // namespace aoc
