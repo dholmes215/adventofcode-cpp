@@ -30,6 +30,7 @@ function(set_project_warnings project_name)
       /permissive- # standards conformance mode for MSVC compiler.
       /wd4127 # Disable "conditional expression is constant" which breaks fmt/chrono.h
       /wd4702 # Disable "unreachable code" which breaks range/v3/detail/variant.hpp
+      /wd4459 # Disable "declaration hides global declaration" which breaks range/v3/algorithm/sort.hpp
   )
 
   set(CLANG_WARNINGS
