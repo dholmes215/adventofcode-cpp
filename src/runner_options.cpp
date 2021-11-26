@@ -44,7 +44,8 @@ runner_options process_args(int argc, char** argv)
         ("day", "Run only a single day's solution (requires --year)", cxxopts::value<int>())
         ("datadir", "Input data directory (excludes --inputfile)", cxxopts::value<std::string>())
         ("inputfile", "Input file (requires --day, excludes --datadir)", cxxopts::value<std::string>())
-        ("repeat", "Run each solution this many times (default: 1)", cxxopts::value<int>());
+        ("repeat", "Repeat each solution this many times (default: 1)", cxxopts::value<int>())
+        ("seconds", "Repeat each solution at most this long (default: 1)", cxxopts::value<int>());
     // clang-format on
     auto parsed_options{options.parse(argc, argv)};
     if (parsed_options.count("datadir") > 0) {
@@ -95,6 +96,10 @@ runner_options process_args(int argc, char** argv)
 
     if (parsed_options.count("repeat") > 0) {
         out.repeat = parsed_options["repeat"].as<int>();
+    }
+
+    if (parsed_options.count("seconds") > 0) {
+        out.seconds = parsed_options["seconds"].as<int>();
     }
 
     return out;

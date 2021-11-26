@@ -20,6 +20,51 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <string_view>
+
+namespace aoc {
+
+void run_solution(aoc::date date,
+                  const solution& sol,
+                  std::string_view input,
+                  const runner_options& options)
+{
+    using std::chrono::duration_cast;
+    using std::chrono::microseconds;
+    using std::chrono::seconds;
+    using Clock = std::chrono::high_resolution_clock;
+    using FpMicroseconds = std::chrono::duration<float, microseconds::period>;
+
+    const auto start{Clock::now()};
+
+    const auto& result{sol.func(input)};
+    int i{1};
+    for (; i < options.repeat; i++) {
+        // Solve problem
+        const auto& new_result{sol.func(input)};
+        if (new_result != result) {
+            fmt::print(
+                "{1:20} {2:10} {0:red}{3:>20} {4:>20} "
+                "{5:}{0:reset}\n",
+                dh::color{}, date, sol.label, new_result.part_a,
+                new_result.part_b, "inconsistent result on repeated iteration");
+        }
+        const auto end_iteration{Clock::now()};
+        const auto elapsed_seconds{
+            duration_cast<seconds>(end_iteration - start)};
+        if (elapsed_seconds.count() >= options.seconds) {
+            i++;
+            break;
+        }
+    }
+    const auto end{Clock::now()};
+    const auto elapsed{duration_cast<FpMicroseconds>(end - start)};
+    const auto avg_elapsed{elapsed / i};
+    fmt::print("{:20} {:10} {:>20} {:>20} {:>10} {:>10}\n", date, sol.label,
+               result.part_a, result.part_b, avg_elapsed, i);
+}
+
+}  // namespace aoc
 
 int main(int argc, char** argv)
 {
@@ -45,8 +90,8 @@ int main(int argc, char** argv)
         "Running solutions from {0:red}{1}{0:reset} to {0:green}{2}{0:reset} "
         "{3} times\n",
         dh::color{}, begin_date, end_date, options.repeat);
-    fmt::print("{:20} {:10} {:>20} {:>20} {:>10}\n", "Day", "Solution",
-               "Part A", "Part B", "Duration");
+    fmt::print("{:20} {:10} {:>20} {:>20} {:>10} {:>10}\n", "Day", "Solution",
+               "Part A", "Part B", "Duration", "Iterations");
     const auto solutions_range{
         aoc::submap(aoc::solutions(), begin_date, end_date)};
     for (const auto& [date, solution_vec] : solutions_range) {
@@ -55,33 +100,7 @@ int main(int argc, char** argv)
         if (maybe_input) {
             const auto input{aoc::slurp(*maybe_input)};
             for (const auto& solution : solution_vec) {
-                // Solve problem
-                using std::chrono::duration_cast;
-                using std::chrono::microseconds;
-                using Clock = std::chrono::high_resolution_clock;
-                using FpMicroseconds =
-                    std::chrono::duration<float, microseconds::period>;
-
-                const auto start{Clock::now()};
-
-                const auto& result{solution.func(input)};
-                for (int i{1}; i < options.repeat; ++i) {
-                    const auto& new_result{solution.func(input)};
-                    if (new_result != result) {
-                        fmt::print(
-                            "{1:20} {2:10} {0:red}{3:>20} {4:>20} "
-                            "{5:}{0:reset}\n",
-                            dh::color{}, date, solution.label,
-                            new_result.part_a, new_result.part_b,
-                            "inconsistent result on repeated iteration");
-                    }
-                }
-                const auto end{Clock::now()};
-                const auto elapsed{duration_cast<FpMicroseconds>(end - start)};
-                const auto avg_elapsed{elapsed / options.repeat};
-                fmt::print("{:20} {:10} {:>20} {:>20} {:>10}\n", date,
-                           solution.label, result.part_a, result.part_b,
-                           avg_elapsed);
+                run_solution(date, solution, input, options);
             }
         }
         else {

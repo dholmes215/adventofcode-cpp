@@ -23,6 +23,7 @@ struct runner_options {
     std::optional<std::filesystem::path> datadir;
     std::optional<date_filter> dates;
     int repeat{1};
+    int seconds{1};
 };
 
 runner_options process_args(int argc, char** argv);
