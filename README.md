@@ -24,11 +24,21 @@ cmake --build [output_dir]
 
 ## Running
 
-Run `aoc` (on Windows `aoc.exe`) with no arguments:
+Run `runner` (on Windows `runner.exe`) with no arguments:
 ```
-> aoc.exe
-TODO
+> runner.exe
+Running solutions from Year 2015 Day 01 to Year 2015 Day 05 1 times
+Day                  Solution                 Part A               Part B        Duration Iterations
+Year 2015 Day 01     imperative                  138                 1771           8.4µs          1
+Year 2015 Day 01     algorithm                   138                 1771          23.2µs          1
+Year 2015 Day 01     ranges                      138                 1771           9.3µs          1
+Year 2015 Day 02                             1606483              3842356            51µs          1
+Year 2015 Day 03                                2572                 2631        1250.5µs          1
+Year 2015 Day 04                              346386              9958218   1.56922e+06µs          1
+Year 2015 Day 05                                 255                   55         443.1µs          1
 ```
+
+TODO: Document command-line options.
 
 ## License
 
