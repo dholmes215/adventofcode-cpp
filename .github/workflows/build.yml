@@ -9,9 +9,9 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-        - { os: windows-2022, cc: cl.exe,   cxx: cl.exe }
-        - { os: ubuntu-20.04, cc: gcc-10,   cxx: g++-10 }
-        - { os: ubuntu-20.04, cc: clang-12, cxx: clang++-12 }
+        - { os: windows-2022, cc: cl.exe,   cxx: cl.exe,      mono: '' }
+        - { os: ubuntu-20.04, cc: gcc-10,   cxx: g++-10,      mono: 'mono' }
+        - { os: ubuntu-20.04, cc: clang-12, cxx: clang++-12,  mono: 'mono' }
         # - { os: macos-10.15,  cc: clang,    cxx: clang++ }  # Presently doesn't support enough of C++20
         build_type: [Release, Debug]
 
@@ -21,9 +21,32 @@ jobs:
       # CMake will choose a compiler using these environment variables.
       CC: ${{matrix.platform.cc}}
       CXX: ${{matrix.platform.cxx}}
+      VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite'
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Bootstrap vcpkg (Windows)
+      if: ${{ matrix.platform.os == 'windows-2022' }}
+      run: ./vcpkg/bootstrap-vcpkg
+
+    - name: Bootstrap vcpkg (Ubuntu)
+      if: ${{ matrix.platform.os == 'ubuntu-20.04' }}
+      run: ./vcpkg/bootstrap-vcpkg.sh
+
+    # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
+    - name: 'Setup NuGet Credentials'
+      shell: 'bash'
+      run: >
+        ${{ matrix.platform.mono }} `vcpkg/vcpkg fetch nuget | tail -n 1`
+        sources add
+        -source "https://nuget.pkg.github.com/dholmes215/index.json"
+        -storepasswordincleartext
+        -name "GitHub"
+        -username "dholmes215"
+        -password "${{ secrets.GITHUB_TOKEN }}"
 
     - name: Create Build Environment
       # We'll use this as our working directory for all subsequent commands.
