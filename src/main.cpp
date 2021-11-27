@@ -60,7 +60,7 @@ void run_solution(aoc::date date,
     const auto end{Clock::now()};
     const auto elapsed{duration_cast<FpMicroseconds>(end - start)};
     const auto avg_elapsed{elapsed / i};
-    fmt::print("{:20} {:10} {:>20} {:>20} {:>10} {:>10}\n", date, sol.label,
+    fmt::print("{:20} {:10} {:>20} {:>20} {:>15} {:>10}\n", date, sol.label,
                result.part_a, result.part_b, avg_elapsed, i);
 }
 
@@ -90,13 +90,15 @@ int main(int argc, char** argv)
         "Running solutions from {0:red}{1}{0:reset} to {0:green}{2}{0:reset} "
         "{3} times\n",
         dh::color{}, begin_date, end_date, options.repeat);
-    fmt::print("{:20} {:10} {:>20} {:>20} {:>10} {:>10}\n", "Day", "Solution",
+    fmt::print("{:20} {:10} {:>20} {:>20} {:>15} {:>10}\n", "Day", "Solution",
                "Part A", "Part B", "Duration", "Iterations");
     const auto solutions_range{
         aoc::submap(aoc::solutions(), begin_date, end_date)};
     for (const auto& [date, solution_vec] : solutions_range) {
         // Load input
-        auto maybe_input{aoc::open_file(*options.datadir, date)};
+        auto maybe_input{options.inputfile
+                             ? aoc::open_file(*options.inputfile)
+                             : aoc::open_file(*options.datadir, date)};
         if (maybe_input) {
             const auto input{aoc::slurp(*maybe_input)};
             for (const auto& solution : solution_vec) {

@@ -1,4 +1,4 @@
-add_executable(tests tests.cpp hello_tests.cpp)
-target_link_libraries(tests PRIVATE project_options project_warnings Catch2::Catch2)
+add_executable(tests tests.cpp aoctests.cpp year2015tests.cpp)
+target_link_libraries(tests PRIVATE project_options project_warnings Catch2::Catch2 aoc2015 md5 aoc_lib)
 
 catch_discover_tests(tests)

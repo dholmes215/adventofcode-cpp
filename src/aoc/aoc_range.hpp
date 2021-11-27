@@ -19,8 +19,10 @@ using ranges::accumulate;
 using ranges::copy;
 using ranges::count;
 using ranges::distance;
+using ranges::equal;
 using ranges::find;
 using ranges::find_if;
+using ranges::find_if_not;
 using ranges::max_element;
 using ranges::min_element;
 using ranges::sort;
@@ -31,11 +33,16 @@ using ranges::views::concat;
 using ranges::views::drop;
 using ranges::views::enumerate;
 using ranges::views::filter;
+using ranges::views::iota;
+using ranges::views::join;
 using ranges::views::partial_sum;
+using ranges::views::reverse;
 using ranges::views::split;
 using ranges::views::stride;
 using ranges::views::take;
+using ranges::views::take_while;
 using ranges::views::transform;
+using ranges::views::zip_with;
 
 // Given a std::map<Key,Value>, return the subset of the map ranging from
 // first_key to last_key.

@@ -15,24 +15,30 @@
 
 #include <filesystem>
 #include <fstream>
+#include <functional>
+#include <string_view>
 
 namespace aoc {
 ifstream_expected open_file(const std::filesystem::path& datadir,
                             aoc::date date) noexcept
 {
     const auto path_suffix{fmt::format("{:04}/{:02}.txt", date.year, date.day)};
-    auto input_file{datadir / path_suffix};
-    if (!std::filesystem::exists(input_file)) {
+    return open_file(datadir / path_suffix);
+}
+
+ifstream_expected open_file(const std::filesystem::path& inputfile) noexcept
+{
+    if (!std::filesystem::exists(inputfile)) {
         return tl::unexpected{
-            fmt::format("Input file does not exist: {}", input_file.string())};
+            fmt::format("Input file does not exist: {}", inputfile.string())};
     }
 
     // Load input
-    std::ifstream file{input_file};
+    std::ifstream file{inputfile};
 
     if (!file.is_open()) {
         return tl::unexpected{
-            fmt::format("Failed to open file: {}", input_file.string())};
+            fmt::format("Failed to open file: {}", inputfile.string())};
     }
 
     return file;
@@ -63,6 +69,17 @@ bool is_whitespace(char c)
 {
     // Cast is necessary because `isspace` on a negative `char` is UB.
     return std::isspace(static_cast<unsigned char>(c));
+}
+
+// Strip leading and trailing whitespace from a string, including newlines.
+std::string_view strip(std::string_view s) noexcept
+{
+    const auto b = find_if_not(s, is_whitespace);
+    if (b == s.end()) {
+        return {};
+    }
+    const auto e = find_if_not(s | reverse, is_whitespace);
+    return {&*b, (&*e) + 1};
 }
 
 }  // namespace aoc

@@ -56,6 +56,7 @@ struct solution {
 using ifstream_expected = tl::expected<std::ifstream, std::string>;
 ifstream_expected open_file(const std::filesystem::path& datadir,
                             aoc::date date) noexcept;
+ifstream_expected open_file(const std::filesystem::path& inputfile) noexcept;
 
 // Read an entire istream into a string.
 std::string slurp(std::istream&);
@@ -63,6 +64,7 @@ std::string slurp(std::istream&);
 // Return true if `c` is a whitespace character.  Takes a `char` safely without
 // a cast unlike std::isspace.
 bool is_whitespace(char c);
+std::string_view strip(std::string_view s) noexcept;
 
 }  // namespace aoc
 

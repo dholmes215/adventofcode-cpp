@@ -84,6 +84,13 @@ runner_options process_args(int argc, char** argv)
                        "--inputfile and --datadir are mutually exclusive\n");
             std::abort();
         }
+        out.inputfile = std::filesystem::path{
+            parsed_options["inputfile"].as<std::string>()};
+        if (!std::filesystem::exists(*out.inputfile)) {
+            fmt::print(stderr, "Input file '{}' does not exist\n",
+                       out.inputfile->string());
+            std::abort();
+        }
     }
 
     if (!out.inputfile && !out.datadir) {
