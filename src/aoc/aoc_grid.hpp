@@ -1,0 +1,157 @@
+//
+// Copyright (c) 2021 David Holmes (dholmes at dholmes dot us)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
+#ifndef AOC_GRID_HPP
+#define AOC_GRID_HPP
+
+#include <aoc_range.hpp>
+#include <aoc_vec.hpp>
+
+#include <compare>
+
+namespace aoc {
+
+template <typename Range>
+auto grid_rows(Range& r, int width) noexcept
+{
+    return r | rv::chunk(width);
+}
+
+template <typename Range>
+auto grid_row(Range& r, int width, int row) noexcept
+{
+    return grid_rows(r, width)[row];
+}
+
+template <typename Range>
+auto grid_col(Range& r, int width, int col) noexcept
+{
+    return r | rv::drop(col) | rv::stride(width);
+}
+
+template <typename Range>
+auto grid_cols(Range& r, int width) noexcept
+{
+    return rv::ints(0, width) |
+           rv::transform([&r, width](int i) { return grid_col(r, width, i); });
+}
+
+template <typename Base>
+class subgrid {
+   public:
+    subgrid(Base& base, vec2<int> top_left, vec2<int> dimensions) noexcept
+        : base_{base}, r_{top_left, dimensions}
+    {
+    }
+
+    auto row(int y) const noexcept
+    {
+        return base_.row(r_.top_left.y + y) | rv::drop(r_.top_left.x) |
+               rv::take(r_.dimensions.x);
+    }
+
+    auto rows() const noexcept
+    {
+        return rv::ints(0, r_.dimensions.y) |
+               rv::transform([&](int y) { return row(y); });
+    }
+
+    auto col(int x) const noexcept
+    {
+        return base_.col(r_.top_left.x + x) | rv::drop(r_.top_left.y) |
+               rv::take(r_.dimensions.y);
+    }
+
+    auto cols() const noexcept
+    {
+        return rv::ints(0, r_.dimensions.x) |
+               rv::transform([&](int x) { return col(x); });
+    }
+
+    auto data() const noexcept
+    {
+        auto at_point{[sub = *this](vec2<int> p) -> decltype(base_[p])& {
+            return sub.base_[p];
+        }};
+        return r_.all_points() | rv::transform(at_point);
+    }  // namespace aoc
+
+    auto& operator[](vec2<int> index) const noexcept
+    {
+        return base_[index + r_.top_left];
+    }
+
+   private:
+    Base& base_;
+    rect<int> r_;
+};
+
+template <typename Range, int width>
+class grid_adapter {
+   public:
+    grid_adapter(Range& range) noexcept : range_(range) {}
+
+    auto row(int y) const noexcept { return grid_row(range_, width, y); }
+    auto rows() const noexcept { return grid_rows(range_, width); }
+    auto col(int x) const noexcept { return grid_col(range_, width, x); }
+    auto cols() const noexcept { return grid_col(range_, width); }
+
+    auto data() const noexcept { return rv::all(range_); }
+
+    auto& operator[](vec2<int> index) const noexcept
+    {
+        return rows()[index.y][index.x];
+    }
+
+    subgrid<grid_adapter> subgrid(rect<int> r) noexcept
+    {
+        return {*this, r.top_left, r.dimensions};
+    }
+
+   private:
+    Range& range_;
+};
+
+template <typename Value, int width, int height>
+class static_grid
+    : public grid_adapter<std::array<Value, width * height>, width> {
+   public:
+    static_grid() noexcept
+        : grid_adapter<std::array<Value, width * height>, width>{data_},
+          data_{0}
+    {
+    }
+    std::array<Value, width * height> data_;
+};
+
+template <typename Value, int size>
+class heap_data {
+   public:
+    heap_data() noexcept : data_{std::make_unique<std::array<Value, size>>()}
+    {
+        r::fill(*data_, Value{});
+    }
+    auto begin() noexcept { return data_->begin(); }
+    auto end() noexcept { return data_->end(); }
+
+   private:
+    std::unique_ptr<std::array<Value, size>> data_;
+};
+
+template <typename Value, int width, int height>
+class heap_grid : public grid_adapter<heap_data<Value, width * height>, width> {
+   public:
+    heap_grid() noexcept
+        : grid_adapter<heap_data<Value, width * height>, width>{data_}, data_{}
+    {
+    }
+    heap_data<Value, width * height> data_;
+};
+
+}  // namespace aoc
+
+#endif  // AOC_GRID_HPP

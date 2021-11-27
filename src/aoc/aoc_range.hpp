@@ -15,6 +15,10 @@
 
 namespace aoc {
 
+namespace r = ranges;
+namespace rv = ranges::views;
+namespace ra = ranges::actions;
+
 using ranges::accumulate;
 using ranges::adjacent_difference;
 using ranges::adjacent_find;
@@ -60,15 +64,20 @@ auto submap(const std::map<Key, Value>& map,
     return subrange(map.lower_bound(first_key), map.upper_bound(last_key));
 }
 
+// Convert a char range to a std::string_view.
+// FIXME if the range isn't actually contiguous, this will never work.
+auto sv(auto&& rng)
+{
+    return std::string_view{&*rng.begin(),
+                            static_cast<std::size_t>(distance(rng))};
+}
+
 // Split a range by a delimiter into a range of string_views.
 // XXX In C++23, split_view can produce ranges that are directly convertable to
 // string_views, making this much simpler.
 auto sv_split_range(auto&& rng, char delim)
 {
-    return rng | split(delim) | transform([](auto&& rng2) {
-               return std::string_view(
-                   &*rng2.begin(), static_cast<std::size_t>(distance(rng2)));
-           });
+    return rng | split(delim) | transform([&](auto&& rng) { return sv(rng); });
 }
 
 // Split a range of characters into a range of string_views by line.

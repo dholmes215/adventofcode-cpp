@@ -37,7 +37,32 @@ struct vec2 {
     }
 
     friend auto operator<=>(const vec2&, const vec2&) = default;
-    friend bool operator==(const vec2&, const vec2&) = default;
+};
+
+template <typename Scalar>
+struct rect {
+    vec2<Scalar> top_left{};
+    vec2<Scalar> dimensions{};
+
+    friend auto operator<=>(const rect& lhs,
+                            const rect& rhs) noexcept = default;
+
+    auto all_points() const noexcept
+    {
+        static_assert(std::is_integral_v<Scalar>);
+        return rv::cartesian_product(
+                   rv::iota(top_left.y) | rv::take(dimensions.y),
+                   rv::iota(top_left.x) | rv::take(dimensions.x)) |
+               rv::transform([](auto p) {
+                   return vec2<Scalar>{std::get<1>(p), std::get<0>(p)};
+               });
+    }
+
+    bool contains(vec2<int> const& point)
+    {
+        return point.x >= top_left.x && point.x < top_left.x + dimensions.x &&
+               point.y >= top_left.y && point.y < top_left.y + dimensions.y;
+    }
 };
 
 }  // namespace aoc
