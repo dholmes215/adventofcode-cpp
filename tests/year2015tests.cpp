@@ -34,7 +34,8 @@ TEST_CASE("md5 hashes are computed correctly", "[md5]")
 {
     MD5_CTX ctx;
     MD5_Init(&ctx);
-    MD5_Update(&ctx, "abcdef609043", strlen("abcdef609043"));
+    MD5_Update(&ctx, "abcdef609043",
+               static_cast<unsigned long>(strlen("abcdef609043")));
     unsigned char digest[16];
     MD5_Final(digest, &ctx);
 
