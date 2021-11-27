@@ -16,15 +16,21 @@
 namespace aoc {
 
 using ranges::accumulate;
+using ranges::adjacent_difference;
+using ranges::adjacent_find;
+using ranges::any_of;
 using ranges::copy;
 using ranges::count;
+using ranges::count_if;
 using ranges::distance;
 using ranges::equal;
+using ranges::equal_to;
 using ranges::find;
 using ranges::find_if;
 using ranges::find_if_not;
 using ranges::max_element;
 using ranges::min_element;
+using ranges::search;
 using ranges::sort;
 using ranges::subrange;
 using ranges::to;
