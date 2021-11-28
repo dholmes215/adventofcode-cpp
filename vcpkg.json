@@ -8,6 +8,7 @@
         "fmt",
         {
             "name": "qt",
+            "default-features": false,
             "platform": "!static & !((arm | x86) & windows)"
         },
         "range-v3",
