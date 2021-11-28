@@ -6,7 +6,10 @@
         "cxxopts",
         "dh-term",
         "fmt",
-        "qt",
+        {
+            "name": "qt",
+            "platform": "!static & !((arm | x86) & windows)"
+        },
         "range-v3",
         "tl-expected"
     ]
