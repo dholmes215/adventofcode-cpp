@@ -6,6 +6,7 @@
         "cxxopts",
         "dh-term",
         "fmt",
+        "qt",
         "range-v3",
         "tl-expected"
     ]
