@@ -77,7 +77,7 @@ auto sv(auto&& rng)
 // string_views, making this much simpler.
 auto sv_split_range(auto&& rng, char delim)
 {
-    return rng | split(delim) | transform([&](auto&& rng) { return sv(rng); });
+    return rng | split(delim) | transform([&](auto&& r) { return sv(r); });
 }
 
 // Split a range of characters into a range of string_views by line.
