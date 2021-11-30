@@ -21,18 +21,18 @@ namespace aoc::year2015 {
 
 namespace lights {
 
-action string_to_action(std::string_view s)
+light_action string_to_action(std::string_view s)
 {
     if (s == "turn on") {
-        return action::on;
+        return light_action::on;
     }
     else if (s == "turn off") {
-        return action::off;
+        return light_action::off;
     }
     else if (s == "toggle") {
-        return action::toggle;
+        return light_action::toggle;
     }
-    throw input_error(fmt::format("unknown action [{}]", s));
+    throw input_error(fmt::format("unknown light_action [{}]", s));
 }
 
 // TODO: CTRE?

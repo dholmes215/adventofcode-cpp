@@ -18,7 +18,7 @@ namespace {
 auto str(auto&& rng)
 {
     return rng | r::to<std::string>();
-};
+}
 }  // namespace
 
 TEST_CASE("grid_rows", "[grid]")

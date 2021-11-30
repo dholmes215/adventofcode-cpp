@@ -25,14 +25,14 @@ namespace aoc::year2015::lights {
 using Scalar = int;
 using Vec2 = aoc::vec2<Scalar>;
 
-enum class action {
+enum class light_action {
     on,
     off,
     toggle,
 };
 
 struct instruction {
-    action action;
+    light_action action;
     rect<int> region;
     friend auto operator<=>(const instruction& lhs,
                             const instruction& rhs) noexcept = default;
@@ -70,16 +70,16 @@ class dimmable_light {
 using binary_light_grid = heap_grid<binary_light, 1000, 1000>;
 using dimmable_light_grid = heap_grid<dimmable_light, 1000, 1000>;
 
-void do_action(auto& l, action a) noexcept
+void do_action(auto& l, light_action a) noexcept
 {
     switch (a) {
-        case action::on:
+        case light_action::on:
             l.turn_on();
             return;
-        case action::off:
+        case light_action::off:
             l.turn_off();
             return;
-        case action::toggle:
+        case light_action::toggle:
             l.toggle();
             return;
     }

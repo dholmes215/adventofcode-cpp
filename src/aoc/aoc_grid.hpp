@@ -41,9 +41,9 @@ auto grid_cols(Range& r, int width) noexcept
 }
 
 template <typename Base>
-class subgrid {
+class subgrid_view {
    public:
-    subgrid(Base& base, vec2<int> top_left, vec2<int> dimensions) noexcept
+    subgrid_view(Base& base, vec2<int> top_left, vec2<int> dimensions) noexcept
         : base_{base}, r_{top_left, dimensions}
     {
     }
@@ -107,7 +107,7 @@ class grid_adapter {
         return rows()[index.y][index.x];
     }
 
-    subgrid<grid_adapter> subgrid(rect<int> r) noexcept
+    subgrid_view<grid_adapter> subgrid(rect<int> r) noexcept
     {
         return {*this, r.top_left, r.dimensions};
     }
@@ -118,20 +118,29 @@ class grid_adapter {
 
 template <typename Value, int width, int height>
 class static_grid
-    : public grid_adapter<std::array<Value, width * height>, width> {
+    : public grid_adapter<
+          std::array<Value, static_cast<std::size_t>(width* height)>,
+          width> {
+    static constexpr auto size{width * height};
+    static_assert(size > 0, "size must be greater than 0");
+    static constexpr auto allowed_size{static_cast<std::size_t>(size)};
+
    public:
     static_grid() noexcept
-        : grid_adapter<std::array<Value, width * height>, width>{data_},
-          data_{0}
+        : grid_adapter<std::array<Value, allowed_size>, width>{data_}, data_{0}
     {
     }
-    std::array<Value, width * height> data_;
+    std::array<Value, allowed_size> data_;
 };
 
 template <typename Value, int size>
 class heap_data {
+    static_assert(size > 0, "size must be greater than 0");
+    static constexpr auto allowed_size{static_cast<std::size_t>(size)};
+
    public:
-    heap_data() noexcept : data_{std::make_unique<std::array<Value, size>>()}
+    heap_data() noexcept
+        : data_{std::make_unique<std::array<Value, allowed_size>>()}
     {
         r::fill(*data_, Value{});
     }
@@ -139,7 +148,7 @@ class heap_data {
     auto end() noexcept { return data_->end(); }
 
    private:
-    std::unique_ptr<std::array<Value, size>> data_;
+    std::unique_ptr<std::array<Value, allowed_size>> data_;
 };
 
 template <typename Value, int width, int height>
