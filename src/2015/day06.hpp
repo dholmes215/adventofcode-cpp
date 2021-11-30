@@ -33,7 +33,7 @@ enum class action {
 
 struct instruction {
     action action;
-    rect<int> rect;
+    rect<int> region;
     friend auto operator<=>(const instruction& lhs,
                             const instruction& rhs) noexcept = default;
 };

@@ -60,7 +60,7 @@ using namespace lights;
 
 void apply_instruction(auto& lights, const instruction& i)
 {
-    auto data = lights.subgrid(i.rect).data();
+    auto data = lights.subgrid(i.region).data();
     for (auto& l : data) {
         do_action(l, i.action);
     }
