@@ -8,6 +8,7 @@
 #include "aoc_solutions.hpp"
 
 #include <year2015.hpp>
+#include <year2021.hpp>
 
 #include <fmt/core.h>
 
@@ -26,7 +27,8 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2015, 3}, {{aoc::year2015::day03, ""}}},
         {{2015, 4}, {{aoc::year2015::day04, ""}}},
         {{2015, 5}, {{aoc::year2015::day05, ""}}},
-        {{2015, 6}, {{aoc::year2015::day06, ""}}}};
+        {{2015, 6}, {{aoc::year2015::day06, ""}}},
+        {{2021, 1}, {{aoc::year2021::day01, ""}}}};
     return solutions;
 }
 
