@@ -8,8 +8,6 @@
 #include "aoc.hpp"
 #include "aoc_range.hpp"
 
-#include <range/v3/all.hpp>
-
 #include <fmt/core.h>
 #include <tl/expected.hpp>
 

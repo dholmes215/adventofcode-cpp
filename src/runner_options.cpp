@@ -7,7 +7,7 @@
 
 #include "runner_options.hpp"
 
-#include <range/v3/all.hpp>
+#include <aoc_range.hpp>
 
 #include <fmt/core.h>
 #include <cxxopts.hpp>

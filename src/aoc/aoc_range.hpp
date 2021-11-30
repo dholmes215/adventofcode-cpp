@@ -8,7 +8,17 @@
 #ifndef AOC_RANGE_HPP
 #define AOC_RANGE_HPP
 
+// XXX In order to avoid build failures, do not include any range-v3 headers
+// directly in any file! Instead, include this header to ensure this warning is
+// suppressed.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4242)
+#endif
 #include <range/v3/all.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <map>
 #include <string_view>
