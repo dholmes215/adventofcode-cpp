@@ -65,7 +65,7 @@ auto md5generator(std::string_view key)
 
 aoc::solution_result day04(std::string_view input)
 {
-    input = strip(input);
+    input = trim(input);
     auto my_md5 = md5generator(input);
     int i{0};
     while (!starts_with_five_zeroes(my_md5(i))) {

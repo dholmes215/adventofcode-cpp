@@ -11,13 +11,13 @@
 
 using namespace aoc;
 
-TEST_CASE("strip assorted strings", "[strip]")
+TEST_CASE("trim assorted strings", "[trim]")
 {
-    CHECK(strip("") == "");
-    CHECK(strip("   ") == "");
-    CHECK(strip(" \n ") == "");
-    CHECK(strip("begin ") == "begin");
-    CHECK(strip(" end") == "end");
-    CHECK(strip(" middle ") == "middle");
-    CHECK(strip("\nbetween lines\n") == "between lines");
+    CHECK(trim("") == "");
+    CHECK(trim("   ") == "");
+    CHECK(trim(" \n ") == "");
+    CHECK(trim("begin ") == "begin");
+    CHECK(trim(" end") == "end");
+    CHECK(trim(" middle ") == "middle");
+    CHECK(trim("\nbetween lines\n") == "between lines");
 }

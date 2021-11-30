@@ -70,7 +70,7 @@ bool is_whitespace(char c)
 }
 
 // Strip leading and trailing whitespace from a string, including newlines.
-std::string_view strip(std::string_view s) noexcept
+std::string_view trim(std::string_view s) noexcept
 {
     const auto b = r::find_if_not(s, is_whitespace);
     if (b == s.end()) {

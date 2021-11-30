@@ -63,7 +63,8 @@ std::string slurp(std::istream&);
 // Return true if `c` is a whitespace character.  Takes a `char` safely without
 // a cast unlike std::isspace.
 bool is_whitespace(char c);
-std::string_view strip(std::string_view s) noexcept;
+
+std::string_view trim(std::string_view s) noexcept;
 
 }  // namespace aoc
 
