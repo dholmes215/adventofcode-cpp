@@ -24,10 +24,10 @@ std::string byte_to_hex(unsigned char byte)
 }
 std::string to_hex(const unsigned char* bytes, size_t size)
 {
-    auto hexes{subrange(bytes, bytes + size) | transform(byte_to_hex) |
-               to<std::vector>()};
-    auto joined = hexes | join;
-    return joined | to<std::string>;
+    auto hexes{r::subrange(bytes, bytes + size) | rv::transform(byte_to_hex) |
+               r::to<std::vector>()};
+    auto joined = hexes | rv::join;
+    return joined | r::to<std::string>;
 }
 }  // namespace
 }  // namespace aoc

@@ -21,12 +21,12 @@ bool is_vowel(char c)
 
 bool three_vowels(std::string_view s)
 {
-    return count_if(s, is_vowel) >= 3;
+    return r::count_if(s, is_vowel) >= 3;
 }
 
 bool letter_twice_in_a_row(std::string_view s)
 {
-    return adjacent_find(s, equal_to{}) != s.end();
+    return r::adjacent_find(s, r::equal_to{}) != s.end();
 }
 
 bool bad_pair(char c1, char c2)
@@ -37,7 +37,7 @@ bool bad_pair(char c1, char c2)
 
 bool no_bad_substring(std::string_view s)
 {
-    return adjacent_find(s, bad_pair) == s.end();
+    return r::adjacent_find(s, bad_pair) == s.end();
 }
 
 bool nice_string_a(std::string_view s)
@@ -51,7 +51,7 @@ bool non_overlapping_repeated_pair(std::string_view s)
     for (auto iter = s.begin(); iter != s.end() - 2; ++iter) {
         std::string_view pair{iter, iter + 2};
         std::string_view rest{iter + 2, s.end()};
-        if (search(rest, pair).begin() != rest.end()) {
+        if (r::search(rest, pair).begin() != rest.end()) {
             return true;
         }
     }
@@ -77,8 +77,8 @@ bool nice_string_b(std::string_view s)
 
 aoc::solution_result day05(std::string_view input)
 {
-    const auto nice_count_a{count_if(sv_lines(input), nice_string_a)};
-    const auto nice_count_b{count_if(sv_lines(input), nice_string_b)};
+    const auto nice_count_a{r::count_if(sv_lines(input), nice_string_a)};
+    const auto nice_count_b{r::count_if(sv_lines(input), nice_string_b)};
     return {nice_count_a, nice_count_b};
 }
 

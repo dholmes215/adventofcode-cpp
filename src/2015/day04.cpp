@@ -51,7 +51,7 @@ bool starts_with_six_zeroes(const Digest& d)
 auto md5generator(std::string_view key)
 {
     std::array<char, 64> md5input{0};
-    const char* key_end{copy(key, md5input.data()).out};
+    const char* key_end{r::copy(key, md5input.data()).out};
     const std::size_t number_index{
         static_cast<std::size_t>(key_end - md5input.data())};
     return [md5input, number_index](int i) mutable {

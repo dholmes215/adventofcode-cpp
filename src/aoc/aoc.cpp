@@ -60,7 +60,7 @@ std::string slurp(std::istream& stream)
 {
     // return ranges::istream_view<char>(stream) | ranges::to<std::string>;
     const istream_range input{stream};
-    return input | to<std::string>;
+    return input | r::to<std::string>;
 }
 
 bool is_whitespace(char c)
@@ -72,11 +72,11 @@ bool is_whitespace(char c)
 // Strip leading and trailing whitespace from a string, including newlines.
 std::string_view strip(std::string_view s) noexcept
 {
-    const auto b = find_if_not(s, is_whitespace);
+    const auto b = r::find_if_not(s, is_whitespace);
     if (b == s.end()) {
         return {};
     }
-    const auto e = find_if_not(s | reverse, is_whitespace);
+    const auto e = r::find_if_not(s | rv::reverse, is_whitespace);
     return {&*b, (&*e) + 1};
 }
 

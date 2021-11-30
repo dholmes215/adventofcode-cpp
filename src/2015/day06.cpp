@@ -75,7 +75,8 @@ void apply_instructions(auto& lights, const auto& instructions)
 
 aoc::solution_result day06(std::string_view input)
 {
-    const auto instructions{sv_lines(input) | transform(string_to_instruction) |
+    const auto instructions{sv_lines(input) |
+                            rv::transform(string_to_instruction) |
                             r::to<std::vector>};
 
     binary_light_grid lights;
@@ -87,7 +88,7 @@ aoc::solution_result day06(std::string_view input)
     auto to_int{[](const dimmable_light l) -> int { return l; }};
 
     return {r::count(lights.data(), true),
-            r::accumulate(lights_b.data() | transform(to_int), 0)};
+            r::accumulate(lights_b.data() | rv::transform(to_int), 0)};
 }
 
 }  // namespace aoc::year2015
