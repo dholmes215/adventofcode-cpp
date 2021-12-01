@@ -28,7 +28,7 @@ using signal = std::uint16_t;
 using input = std::variant<signal, wire>;
 
 enum class gate_type {
-    input,
+    assign,
     and_,
     or_,
     not_,
@@ -37,7 +37,7 @@ enum class gate_type {
 };
 
 constexpr std::array<std::string_view, 6> gate_type_sv{
-    "INPUT", "AND", "OR", "NOT", "LSHIFT", "RSHIFT",
+    "ASSIGN", "AND", "OR", "NOT", "LSHIFT", "RSHIFT",
 };
 
 gate_type gate_type_from_sv(const std::string_view& sv);

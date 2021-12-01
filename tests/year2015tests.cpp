@@ -64,9 +64,9 @@ using namespace aoc::year2015::gates;
 TEST_CASE("2015 day 07 regex", "[2015-07]")
 {
     CHECK(gate_from_sv("123 -> x") ==
-          gate_description{gate_type::input, "x", signal{123}, {}});
+          gate_description{gate_type::assign, "x", signal{123}, {}});
     CHECK(gate_from_sv("456 -> y") ==
-          gate_description{gate_type::input, "y", signal{456}, {}});
+          gate_description{gate_type::assign, "y", signal{456}, {}});
     CHECK(gate_from_sv("x AND y -> d") ==
           gate_description{gate_type::and_, "d", "x", "y"});
     CHECK(gate_from_sv("x OR y -> e") ==
@@ -78,7 +78,7 @@ TEST_CASE("2015 day 07 regex", "[2015-07]")
     CHECK(gate_from_sv("NOT x -> h") ==
           gate_description{gate_type::not_, "h", "x", {}});
     CHECK(gate_from_sv("lx -> a") ==
-          gate_description{gate_type::input, "a", "lx", {}});
+          gate_description{gate_type::assign, "a", "lx", {}});
 }
 
 TEST_CASE("2015 day 07 circuit", "[2015-07]")

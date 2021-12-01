@@ -46,7 +46,7 @@ gate_description gate_from_sv(std::string_view sv)
     std::smatch m;
     const std::string str{sv};
     if (std::regex_match(str, m, input_pattern)) {
-        return {gate_type::input, m[2].str(), input_from_sv(m[1].str()), {}};
+        return {gate_type::assign, m[2].str(), input_from_sv(m[1].str()), {}};
     }
     else if (std::regex_match(str, m, not_pattern)) {
         return {gate_type::not_, m[2].str(), input_from_sv(m[1].str()), {}};
@@ -70,8 +70,8 @@ signal circuit::get_signal(wire w) const
 
 void circuit::evaluate()
 {
-    for (const auto& wire : gates_ | rv::keys) {
-        evaluate_wire(wire);
+    for (const auto& w : gates_ | rv::keys) {
+        evaluate_wire(w);
     }
 }
 
@@ -94,7 +94,7 @@ signal circuit::evaluate_input(const input& i)
 signal circuit::gate_op(gate_type type, signal i1, std::optional<signal> i2)
 {
     switch (type) {
-        case gate_type::input:
+        case gate_type::assign:
             return i1;
         case gate_type::and_:
             return i1 & *i2;
@@ -105,7 +105,7 @@ signal circuit::gate_op(gate_type type, signal i1, std::optional<signal> i2)
         case gate_type::lshift:
             return static_cast<signal>(i1 << *i2);
         case gate_type::rshift:
-            return i1 >> *i2;
+            return static_cast<signal>(i1 >> *i2);
     }
     std::abort();  // Unreachable
 }
