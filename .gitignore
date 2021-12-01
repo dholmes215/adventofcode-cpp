@@ -36,3 +36,6 @@ build
 
 # VSCode settings directory
 .vscode
+
+# Visual Studio settings directory
+.vs/
