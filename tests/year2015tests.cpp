@@ -93,7 +93,8 @@ x LSHIFT 2 -> f
 y RSHIFT 2 -> g
 NOT x -> h
 NOT y -> i)"};
-    const auto circuit{build_circuit(in)};
+    auto circuit{build_circuit(in)};
+    circuit.evaluate();
     CHECK(circuit.get_signal("d") == signal{72});
     CHECK(circuit.get_signal("e") == signal{507});
     CHECK(circuit.get_signal("f") == signal{492});
