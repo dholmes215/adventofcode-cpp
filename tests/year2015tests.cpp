@@ -8,6 +8,7 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 #include <day06.hpp>
+#include <gate.hpp>
 
 extern "C" {
 #include <md5.h>
@@ -57,4 +58,48 @@ TEST_CASE("2015 day 06 regex", "[2015-06]")
           instruction{light_action::toggle, {{322, 558}, {656, 401}}});
     CHECK_THROWS_AS(string_to_instruction("twiddle 0,0 through 42,21"),
                     aoc::input_error);
+}
+
+using namespace aoc::year2015::gates;
+TEST_CASE("2015 day 07 regex", "[2015-07]")
+{
+    CHECK(gate_from_sv("123 -> x") ==
+          gate_description{gate_type::input, "x", signal{123}, {}});
+    CHECK(gate_from_sv("456 -> y") ==
+          gate_description{gate_type::input, "y", signal{456}, {}});
+    CHECK(gate_from_sv("x AND y -> d") ==
+          gate_description{gate_type::and_, "d", "x", "y"});
+    CHECK(gate_from_sv("x OR y -> e") ==
+          gate_description{gate_type::or_, "e", "x", "y"});
+    CHECK(gate_from_sv("x LSHIFT 2 -> f") ==
+          gate_description{gate_type::lshift, "f", "x", signal{2}});
+    CHECK(gate_from_sv("y RSHIFT 2 -> g") ==
+          gate_description{gate_type::rshift, "g", "y", signal{2}});
+    CHECK(gate_from_sv("NOT x -> h") ==
+          gate_description{gate_type::not_, "h", "x", {}});
+    CHECK(gate_from_sv("lx -> a") ==
+          gate_description{gate_type::input, "a", "lx", {}});
+}
+
+TEST_CASE("2015 day 07 circuit", "[2015-07]")
+{
+    auto in{
+        R"(
+123 -> x
+456 -> y
+x AND y -> d
+x OR y -> e
+x LSHIFT 2 -> f
+y RSHIFT 2 -> g
+NOT x -> h
+NOT y -> i)"};
+    const auto circuit{build_circuit(in)};
+    CHECK(circuit.get_signal("d") == signal{72});
+    CHECK(circuit.get_signal("e") == signal{507});
+    CHECK(circuit.get_signal("f") == signal{492});
+    CHECK(circuit.get_signal("g") == signal{114});
+    CHECK(circuit.get_signal("h") == signal{65412});
+    CHECK(circuit.get_signal("i") == signal{65079});
+    CHECK(circuit.get_signal("x") == signal{123});
+    CHECK(circuit.get_signal("y") == signal{456});
 }

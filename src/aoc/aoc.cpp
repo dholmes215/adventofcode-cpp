@@ -69,6 +69,18 @@ bool is_whitespace(char c)
     return std::isspace(static_cast<unsigned char>(c));
 }
 
+bool is_digit(char c)
+{
+    // Cast is necessary because `isdigit` on a negative `char` is UB.
+    return std::isdigit(static_cast<unsigned char>(c));
+}
+
+bool is_letter(char c)
+{
+    // Cast is necessary because `isalpha` on a negative `char` is UB.
+    return std::isalpha(static_cast<unsigned char>(c));
+}
+
 // Strip leading and trailing whitespace from a string, including newlines.
 std::string_view trim(std::string_view s) noexcept
 {

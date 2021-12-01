@@ -40,6 +40,13 @@ void run_solution(aoc::date date,
     const auto& result{sol.func(input)};
     int i{1};
     for (; i < options.repeat; i++) {
+        const auto end_iteration{Clock::now()};
+        const auto elapsed_seconds{
+            duration_cast<seconds>(end_iteration - start)};
+        if (elapsed_seconds.count() >= options.seconds) {
+            break;
+        }
+
         // Solve problem
         const auto& new_result{sol.func(input)};
         if (new_result != result) {
@@ -48,13 +55,6 @@ void run_solution(aoc::date date,
                 "{5:}{0:reset}\n",
                 dh::color{}, date, sol.label, new_result.part_a,
                 new_result.part_b, "inconsistent result on repeated iteration");
-        }
-        const auto end_iteration{Clock::now()};
-        const auto elapsed_seconds{
-            duration_cast<seconds>(end_iteration - start)};
-        if (elapsed_seconds.count() >= options.seconds) {
-            i++;
-            break;
         }
     }
     const auto end{Clock::now()};
@@ -102,7 +102,13 @@ int main(int argc, char** argv)
         if (maybe_input) {
             const auto input{aoc::slurp(*maybe_input)};
             for (const auto& solution : solution_vec) {
-                run_solution(date, solution, input, options);
+                try {
+                    run_solution(date, solution, input, options);
+                }
+                catch (std::runtime_error& e) {
+                    fmt::print("{:20} {:10} Exception thrown: {}\n", date,
+                               solution.label, e.what());
+                }
             }
         }
         else {
