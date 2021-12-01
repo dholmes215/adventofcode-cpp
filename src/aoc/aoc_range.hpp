@@ -8,6 +8,8 @@
 #ifndef AOC_RANGE_HPP
 #define AOC_RANGE_HPP
 
+#include "aoc.hpp"
+
 // XXX In order to avoid build failures, do not include any range-v3 headers
 // directly in any file! Instead, include this header to ensure this warning is
 // suppressed.
@@ -50,16 +52,22 @@ auto sv(auto&& rng)
 // Split a range by a delimiter into a range of string_views.
 // XXX In C++23, split_view can produce ranges that are directly convertable to
 // string_views, making this much simpler.
-auto sv_split_range(auto&& rng, char delim)
+auto sv_split_range(auto&& rng, char delim) noexcept
 {
     return rng | rv::split(delim) |
            rv::transform([&](auto&& r) { return sv(r); });
 }
 
 // Split a range of characters into a range of string_views by line.
-auto sv_lines(auto&& rng)
+auto sv_lines(auto&& rng) noexcept
 {
     return sv_split_range(rng, '\n');
+}
+
+// Split a range of characters into a range of ints by line
+auto int_lines(auto&& rng) noexcept
+{
+    return sv_lines(rng) | rv::transform(to_int);
 }
 
 }  // namespace aoc

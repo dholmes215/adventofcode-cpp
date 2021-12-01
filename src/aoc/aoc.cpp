@@ -8,9 +8,10 @@
 #include "aoc.hpp"
 #include "aoc_range.hpp"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <tl/expected.hpp>
 
+#include <charconv>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -91,5 +92,24 @@ std::string_view trim(std::string_view s) noexcept
     const auto e = r::find_if_not(s | rv::reverse, is_whitespace);
     return {&*b, (&*e) + 1};
 }
+int to_int(std::string_view sv)
+{
+    int out{0};
+    const auto result{std::from_chars(&*sv.begin(), &*sv.end(), out)};
+    if (result.ec != std::errc{}) {
+        throw input_error{
+            fmt::format("error parsing \"{}\" as int: {}", sv, result.ec)};
+    }
+    return out;
+}
 
+int to_int_unchecked(std::string_view sv) noexcept
+{
+    // Assume every character is a digit
+    int ret{0};
+    for (char c : sv) {
+        ret = ret * 10 + c - '0';
+    }
+    return ret;
+}
 }  // namespace aoc

@@ -8,23 +8,20 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 
-#include <fmt/format.h>
-
-#include <charconv>
+#include <vector>
 
 namespace aoc::year2021 {
 
 namespace {
 
-int to_int(std::string_view sv)
+std::vector<int> parse_input(std::string_view input)
 {
-    int out{0};
-    const auto result{std::from_chars(&*sv.begin(), &*sv.end(), out)};
-    if (result.ec != std::errc{}) {
-        throw input_error{
-            fmt::format("error parsing \"{}\" as int: {}", sv, result.ec)};
-    }
-    return out;
+    // return int_lines(input) | r::to<std::vector>();
+
+    std::vector<int> depths;
+    depths.reserve(2048);
+    r::copy(int_lines(input), r::back_inserter(depths));
+    return depths;
 }
 
 bool back_greater_than_front(auto&& rng) noexcept
@@ -36,8 +33,7 @@ bool back_greater_than_front(auto&& rng) noexcept
 
 aoc::solution_result day01(std::string_view input)
 {
-    const auto depths{sv_lines(input) | rv::transform(to_int) |
-                      r::to<std::vector>()};
+    const std::vector<int> depths{parse_input(input)};
 
     const auto part_a{r::count_if(depths | rv::sliding(2), [](auto&& rng) {
         return back_greater_than_front(rng);
