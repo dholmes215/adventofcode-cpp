@@ -16,6 +16,7 @@ project(aoc VERSION 0.0.1
 
 # Find dependencies.
 find_package(Catch2 REQUIRED)
+find_package(ctre CONFIG REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(dh-term REQUIRED)
 find_package(fmt REQUIRED)

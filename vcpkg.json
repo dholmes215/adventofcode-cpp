@@ -3,6 +3,7 @@
     "version-string": "0.0.1",
     "dependencies": [
         "catch2",
+        "ctre",
         "cxxopts",
         "dh-term",
         "fmt",

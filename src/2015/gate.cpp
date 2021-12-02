@@ -7,6 +7,8 @@
 
 #include "gate.hpp"
 
+#include <ctre.hpp>
+
 #include <cstdlib>
 #include <regex>
 
@@ -39,21 +41,24 @@ input input_from_sv(std::string_view sv)
 
 gate_description gate_from_sv(std::string_view sv)
 {
-    const std::regex input_pattern{"(\\w+) -> ([a-z]+)"};
-    const std::regex not_pattern{"NOT (\\w+) -> ([a-z]+)"};
-    const std::regex binary_pattern{"(\\w+) ([A-Z]+) (\\w+) -> ([a-z]+)"};
+    auto input_matcher{ctre::match<"(\\w+) -> ([a-z]+)">};
+    auto not_matcher{ctre::match<"NOT (\\w+) -> ([a-z]+)">};
+    auto binary_matcher{ctre::match<"(\\w+) ([A-Z]+) (\\w+) -> ([a-z]+)">};
 
-    std::smatch m;
-    const std::string str{sv};
-    if (std::regex_match(str, m, input_pattern)) {
-        return {gate_type::assign, m[2].str(), input_from_sv(m[1].str()), {}};
+    using namespace ctre::literals;
+    if (auto [whole1, input1, output1] = input_matcher(sv); whole1) {
+        return {
+            gate_type::assign, output1.to_string(), input_from_sv(input1), {}};
     }
-    else if (std::regex_match(str, m, not_pattern)) {
-        return {gate_type::not_, m[2].str(), input_from_sv(m[1].str()), {}};
+    else if (auto [whole2, input2, output2] = not_matcher(sv); whole2) {
+        return {
+            gate_type::not_, output2.to_string(), input_from_sv(input2), {}};
     }
-    else if (std::regex_match(str, m, binary_pattern)) {
-        return {gate_type_from_sv(m[2].str()), m[4].str(),
-                input_from_sv(m[1].str()), input_from_sv(m[3].str())};
+    else if (auto [whole3, input3, gate3, input3b, output3] =
+                 binary_matcher(sv);
+             whole3) {
+        return {gate_type_from_sv(gate3), output3.to_string(),
+                input_from_sv(input3), input_from_sv(input3b)};
     }
     throw input_error{fmt::format("Invalid gate description format: {}", sv)};
 }
