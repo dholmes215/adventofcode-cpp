@@ -31,11 +31,16 @@
 *.out
 *.app
 
-# CMake build directory
-build
+# CMake build directories
+build/
+cmake-build-debug/
+cmake-build-release/
 
 # VSCode settings directory
 .vscode
 
 # Visual Studio settings directory
 .vs/
+
+# CLion settings directory
+.idea/
