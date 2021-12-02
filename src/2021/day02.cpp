@@ -6,6 +6,7 @@
 //
 
 #include <aoc.hpp>
+#include <aoc_enum.hpp>
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
 
@@ -25,12 +26,7 @@ enum class action {
 
 action to_action(std::string_view sv)
 {
-    constexpr std::array<std::string_view, 3> words{"forward", "down", "up"};
-    auto found{r::find(words, sv)};
-    if (found == words.end()) {
-        throw input_error{fmt::format("unrecognized action: {}", sv)};
-    }
-    return static_cast<action>(found - words.begin());
+    return to_enum<action>(std::array{"forward", "down", "up"}, sv);
 }
 
 struct command {
@@ -48,7 +44,7 @@ command to_command(std::string_view line)
 
 vec2<int> position_change(command cmd)
 {
-    std::array<vec2<int>, 3> deltas{
+    std::array deltas{
         vec2<int>{0, cmd.units_},  // forward
         vec2<int>{cmd.units_, 0},  // down
         vec2<int>{-cmd.units_, 0}  // up
