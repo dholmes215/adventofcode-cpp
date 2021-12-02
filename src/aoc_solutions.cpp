@@ -10,8 +10,6 @@
 #include <year2015.hpp>
 #include <year2021.hpp>
 
-#include <fmt/core.h>
-
 #include <vector>
 
 namespace aoc {
