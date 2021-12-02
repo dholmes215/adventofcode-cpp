@@ -10,5 +10,6 @@
 namespace aoc {
 namespace year2021 {
 aoc::solution_result day01(std::string_view);
+aoc::solution_result day02(std::string_view);
 }  // namespace year2021
 }  // namespace aoc
