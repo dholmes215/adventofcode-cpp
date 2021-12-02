@@ -95,7 +95,8 @@ std::string_view trim(std::string_view s) noexcept
 int to_int(std::string_view sv)
 {
     int out{0};
-    const auto result{std::from_chars(&*sv.begin(), &*sv.end(), out)};
+    auto begin{&*sv.begin()};
+    const auto result{std::from_chars(begin, begin + sv.size(), out)};
     if (result.ec != std::errc{}) {
         throw input_error{
             fmt::format("error parsing \"{}\" as int: {}", sv, result.ec)};
