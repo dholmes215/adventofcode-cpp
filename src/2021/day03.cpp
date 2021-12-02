@@ -7,10 +7,15 @@
 
 #include <aoc.hpp>
 
-namespace aoc {
-namespace year2021 {
-aoc::solution_result day01(std::string_view);
-aoc::solution_result day02(std::string_view);
-aoc::solution_result day03(std::string_view);
-}  // namespace year2021
-}  // namespace aoc
+namespace aoc::year2021 {
+
+namespace {
+
+}  // namespace
+
+aoc::solution_result day03(std::string_view /*input*/)
+{
+    return {};
+}
+
+}  // namespace aoc::year2021
