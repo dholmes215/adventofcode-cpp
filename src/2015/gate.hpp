@@ -36,11 +36,7 @@ enum class gate_type {
     rshift,
 };
 
-constexpr std::array<std::string_view, 6> gate_type_sv{
-    "ASSIGN", "AND", "OR", "NOT", "LSHIFT", "RSHIFT",
-};
-
-gate_type gate_type_from_sv(const std::string_view& sv);
+gate_type gate_type_from_sv(std::string_view sv);
 
 std::string_view gate_type_to_sv(gate_type g) noexcept;
 

@@ -7,6 +7,8 @@
 
 #include "gate.hpp"
 
+#include <aoc_enum.hpp>
+
 #include <ctre.hpp>
 
 #include <cstdlib>
@@ -14,18 +16,18 @@
 
 namespace aoc::year2015::gates {
 
-gate_type gate_type_from_sv(const std::string_view& sv)
+constexpr std::array<std::string_view, 6> gate_type_sv{
+    "ASSIGN", "AND", "OR", "NOT", "LSHIFT", "RSHIFT",
+};
+
+gate_type gate_type_from_sv(std::string_view sv)
 {
-    const auto found{r::find(gate_type_sv, sv)};
-    if (found == gate_type_sv.end()) {
-        throw input_error{fmt::format("Unknown gate type: {}", sv)};
-    }
-    return static_cast<gate_type>(found - gate_type_sv.begin());
+    return to_enum<gate_type>(gate_type_sv, sv);
 }
 
 std::string_view gate_type_to_sv(gate_type g) noexcept
 {
-    return gate_type_sv[static_cast<std::size_t>(g)];
+    return enum_name(gate_type_sv, g);
 }
 
 input input_from_sv(std::string_view sv)
