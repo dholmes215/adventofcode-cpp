@@ -16,33 +16,34 @@
 namespace aoc::year2021 {
 
 namespace {
-int binary_to_int(std::string_view s)
+int binary_sv_to_int(std::string_view s)
 {
     return to_int_base(s, 2);
-}
-
-auto bit_range(int i, std::size_t count)
-{
-    auto generator{[=]() mutable { return (i >> --count) & 1; }};
-    return rv::generate_n(generator, count);
 }
 
 using count_type = std::int16_t;
 constexpr std::size_t pos_max{16};
 using count_array = std::array<count_type, pos_max>;
 
+auto bit_range(int i, std::size_t count)
+{
+    auto generator{
+        [=]() mutable { return static_cast<count_type>((i >> --count) & 1); }};
+    return rv::generate_n(generator, count);
+}
+
 count_array add_rows(count_array row1, int in)
 {
     auto bits{bit_range(in, pos_max)};
-    r::copy(rv::zip_with(std::plus{}, row1, bits), row1.begin());
+    r::copy(rv::zip_with(std::plus<count_type>{}, row1, bits), row1.begin());
     return row1;
 }
 }  // namespace
 
 aoc::solution_result day03(std::string_view input)
 {
-    const std::vector<int> ints{sv_lines(input) | rv::transform(binary_to_int) |
-                                r::to<std::vector>};
+    const std::vector<int> ints{
+        sv_lines(input) | rv::transform(binary_sv_to_int) | r::to<std::vector>};
 
     const auto position_count{sv_lines(input).front().size()};
     if (position_count > pos_max) {
@@ -60,7 +61,7 @@ aoc::solution_result day03(std::string_view input)
         counts | rv::transform([=](int i) { return i > (rows_count / 2); })};
 
     const int gamma_rate{bool_range_to_int(most_common_bits)};
-    const int mask{~(-1 << position_count)};
+    const int mask{(1 << position_count) - 1};
     const int epsilon_rate_int{(~gamma_rate) & mask};
     const int power_consumption{gamma_rate * epsilon_rate_int};
 
