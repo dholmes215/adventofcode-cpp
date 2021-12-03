@@ -70,6 +70,13 @@ auto int_lines(auto&& rng) noexcept
     return sv_lines(rng) | rv::transform(to_int);
 }
 
+int bool_range_to_int(auto&& bits)
+{
+    auto append_bit{
+        [](int acc, int bit) { return (acc << 1) | (bit ? 1 : 0); }};
+    return r::accumulate(bits, 0, append_bit);
+}
+
 }  // namespace aoc
 
 #endif  // AOC_RANGE_HPP

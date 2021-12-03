@@ -20,3 +20,10 @@ TEST_CASE("convert lines to ints", "[to_int]")
     std::vector<int> expected{199,203,200};
     CHECK(int_vec == expected);
 }
+
+TEST_CASE("convert bool ranges to ints", "[bool_range_to_int]")
+{
+    std::array a26986{false, true, true, false, true, false, false, true,
+                      false, true, true, false, true, false, true,  false};
+    CHECK(bool_range_to_int(a26986) == 26986);
+}

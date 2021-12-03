@@ -15,16 +15,7 @@
 
 namespace aoc::year2021 {
 
-int binary_range_to_int(auto&& r)
-{
-    int result{0};
-    for (bool b : r) {
-        const int i{b ? 1 : 0};
-        result = (result << 1) | i;
-    }
-    return result;
-}
-
+namespace {
 int binary_to_int(std::string_view s)
 {
     return to_int_base(s, 2);
@@ -36,49 +27,45 @@ auto bit_range(int i, std::size_t count)
     return rv::generate_n(generator, count);
 }
 
-std::vector<int> add_rows(std::vector<int>& row1,
-                          decltype(bit_range(0, 12)) row2)
-{
-    r::copy(rv::zip_with(std::plus<int>(), row1, row2), row1.begin());
-    return std::vector(std::move(row1));
-}
+using count_type = std::int16_t;
+constexpr std::size_t pos_max{16};
+using count_array = std::array<count_type, pos_max>;
 
-// std::vector<int> count_bits(auto&& r)
-// {
-//     std::vector<int> counts(r.front().size(), 0);
-//     for (auto&& inner : r) {
-//         std::size_t i{0};
-//         for (int bit : inner) {
-//             counts[i++] += bit;
-//         }
-//     }
-//     return counts;
-// }
+count_array add_rows(count_array row1, int in)
+{
+    auto bits{bit_range(in, pos_max)};
+    r::copy(rv::zip_with(std::plus{}, row1, bits), row1.begin());
+    return row1;
+}
+}  // namespace
 
 aoc::solution_result day03(std::string_view input)
 {
-    const auto position_count{sv_lines(input).front().size()};
     const std::vector<int> ints{sv_lines(input) | rv::transform(binary_to_int) |
                                 r::to<std::vector>};
-    const auto bit_ranges{ints | rv::transform([=](int i) {
-                              return bit_range(i, position_count);
-                          })};
-    const int rows_count{static_cast<int>(ints.size())};
 
-    const std::vector<int> zeroes(position_count, 0);
-    const auto counts{r::accumulate(bit_ranges, zeroes, add_rows)};
-    // const auto counts{count_bits(bit_ranges)};
+    const auto position_count{sv_lines(input).front().size()};
+    if (position_count > pos_max) {
+        throw input_error("Too many bits in input lines");
+    }
+
+    const int rows_count{static_cast<int>(ints.size())};
+    if (rows_count > std::numeric_limits<count_type>::max()) {
+        throw input_error("Too many input rows");
+    }
+
+    const count_array counts{r::accumulate(ints, count_array{0}, add_rows)};
 
     const auto most_common_bits{
         counts | rv::transform([=](int i) { return i > (rows_count / 2); })};
 
-    const int gamma_rate{binary_range_to_int(most_common_bits)};
+    const int gamma_rate{bool_range_to_int(most_common_bits)};
     const int mask{~(-1 << position_count)};
     const int epsilon_rate_int{(~gamma_rate) & mask};
     const int power_consumption{gamma_rate * epsilon_rate_int};
 
     using bit_criteria_func = int (*)(int zero_count, int one_count);
-    auto system_rating{[&](bit_criteria_func bit_criteria) {
+    auto compute_system_rating{[&](bit_criteria_func bit_criteria) {
         auto system_ints{ints};
         for (std::size_t i{0}; i < position_count; i++) {
             auto system_rows_count{system_ints.size()};
@@ -98,16 +85,14 @@ aoc::solution_result day03(std::string_view input)
         return system_ints[0];
     }};
 
-    auto most_common{[](int zero_count, int one_count) {
-        return zero_count <= one_count ? 0 : 1;
-    }};
+    auto most_common{
+        [](int zeroes, int ones) { return zeroes <= ones ? 0 : 1; }};
 
-    auto least_common{[](int zero_count, int one_count) {
-        return zero_count > one_count ? 0 : 1;
-    }};
+    auto least_common{
+        [](int zeroes, int ones) { return zeroes > ones ? 0 : 1; }};
 
-    const int oxygen_generator_rating{system_rating(most_common)};
-    const int co2_scrubber_rating{system_rating(least_common)};
+    const int oxygen_generator_rating{compute_system_rating(most_common)};
+    const int co2_scrubber_rating{compute_system_rating(least_common)};
     const int life_support_rating{oxygen_generator_rating *
                                   co2_scrubber_rating};
 
