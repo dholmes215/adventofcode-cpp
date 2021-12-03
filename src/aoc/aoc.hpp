@@ -68,6 +68,7 @@ bool is_letter(char c);
 
 std::string_view trim(std::string_view s) noexcept;
 
+int to_int_base(std::string_view sv, int base);
 int to_int(std::string_view sv);
 int to_int_unchecked(std::string_view sv) noexcept;
 

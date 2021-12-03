@@ -15,26 +15,6 @@
 
 namespace aoc::year2021 {
 
-namespace {
-
-int digit_to_int(char c)
-{
-    return c - '0';
-}
-
-std::vector<int> sv_to_ints(std::string_view sv)
-{
-    return sv | rv::transform(digit_to_int) | r::to<std::vector>;
-}
-
-std::vector<int> add_rows(const std::vector<int>& row1,
-                          const std::vector<int>& row2)
-{
-    std::vector<int> result{rv::zip_with(std::plus<int>(), row1, row2) |
-                            r::to<std::vector>};
-    return result;
-}
-
 int binary_range_to_int(auto&& r)
 {
     int result{0};
@@ -45,101 +25,89 @@ int binary_range_to_int(auto&& r)
     return result;
 }
 
-std::string binary_range_to_string(auto&& r)
+int binary_to_int(std::string_view s)
 {
-    std::string result;
-    for (bool b : r) {
-        const char c{b ? '1' : '0'};
-        result += c;
-    }
-    return result;
+    return to_int_base(s, 2);
 }
 
-}  // namespace
+auto bit_range(int i, std::size_t count)
+{
+    auto generator{[=]() mutable { return (i >> --count) & 1; }};
+    return rv::generate_n(generator, count);
+}
+
+std::vector<int> add_rows(std::vector<int>& row1,
+                          decltype(bit_range(0, 12)) row2)
+{
+    r::copy(rv::zip_with(std::plus<int>(), row1, row2), row1.begin());
+    return std::vector(std::move(row1));
+}
+
+// std::vector<int> count_bits(auto&& r)
+// {
+//     std::vector<int> counts(r.front().size(), 0);
+//     for (auto&& inner : r) {
+//         std::size_t i{0};
+//         for (int bit : inner) {
+//             counts[i++] += bit;
+//         }
+//     }
+//     return counts;
+// }
 
 aoc::solution_result day03(std::string_view input)
 {
-    const auto rows{sv_lines(input) | rv::transform(sv_to_ints) |
-                    r::to<std::vector>};
-    const auto position_count{rows[0].size()};
-    const int rows_count{static_cast<int>(rows.size())};
+    const auto position_count{sv_lines(input).front().size()};
+    const std::vector<int> ints{sv_lines(input) | rv::transform(binary_to_int) |
+                                r::to<std::vector>};
+    const auto bit_ranges{ints | rv::transform([=](int i) {
+                              return bit_range(i, position_count);
+                          })};
+    const int rows_count{static_cast<int>(ints.size())};
 
     const std::vector<int> zeroes(position_count, 0);
-    const auto counts{r::accumulate(rows, zeroes, add_rows)};
+    const auto counts{r::accumulate(bit_ranges, zeroes, add_rows)};
+    // const auto counts{count_bits(bit_ranges)};
+
     const auto most_common_bits{
         counts | rv::transform([=](int i) { return i > (rows_count / 2); })};
-    const int gamma_rate{binary_range_to_int(most_common_bits)};
-    // const auto gamma_rate_string{binary_range_to_string(gamma_rate)};
 
+    const int gamma_rate{binary_range_to_int(most_common_bits)};
     const int mask{~(-1 << position_count)};
     const int epsilon_rate_int{(~gamma_rate) & mask};
-
     const int power_consumption{gamma_rate * epsilon_rate_int};
 
-    fmt::print("gamma rate: {} {}\n", gamma_rate, epsilon_rate_int);
-
-    // Part B
-
-    int oxygen_generator_rating{};
-    {
-        std::vector<std::vector<int>> rows_oxygen{rows.begin(), rows.end()};
+    using bit_criteria_func = int (*)(int zero_count, int one_count);
+    auto system_rating{[&](bit_criteria_func bit_criteria) {
+        auto system_ints{ints};
         for (std::size_t i{0}; i < position_count; i++) {
-            auto rows_oxygen_count{rows_oxygen.size()};
-            auto count_ones{r::accumulate(
-                rows_oxygen | rv::transform([=](const std::vector<int>& r) {
-                    return r[i];
-                }),
-                0)};
-            int count_zeroes{static_cast<int>(rows_oxygen_count) - count_ones};
-            int most_common{count_ones >= count_zeroes ? 1 : 0};
-            std::vector<std::vector<int>> filtered{
-                rows_oxygen |
-                rv::filter([=](auto&& r) { return r[i] == most_common; }) |
-                r::to<std::vector>};
-            std::swap(rows_oxygen, filtered);
-            fmt::print("{}: filtered down to {} rows\n", i, rows_oxygen.size());
-            if (rows_oxygen.size() == 1) {
+            auto system_rows_count{system_ints.size()};
+            auto bit_pos{position_count - i - 1};
+            auto get_bit{[=](int in) { return in >> bit_pos & 1; }};
+            auto count_ones{
+                r::accumulate(system_ints | rv::transform(get_bit), 0)};
+            int count_zeroes{static_cast<int>(system_rows_count) - count_ones};
+            int met_criteria{bit_criteria(count_zeroes, count_ones)};
+            std::erase_if(system_ints,
+                          [=](int in) { return get_bit(in) != met_criteria; });
+            if (system_ints.size() == 1) {
                 break;
             }
         }
 
-        auto selected = rows_oxygen[0];
-        oxygen_generator_rating = binary_range_to_int(
-            selected | rv::transform([](int i) { return i == 1; }));
+        return system_ints[0];
+    }};
 
-        fmt::print("oxygen generator: {}\n", oxygen_generator_rating);
-    }
+    auto most_common{[](int zero_count, int one_count) {
+        return zero_count <= one_count ? 0 : 1;
+    }};
 
-    int co2_scrubber_rating{};
-    {
-        std::vector<std::vector<int>> rows_oxygen{rows.begin(), rows.end()};
-        for (std::size_t i{0}; i < position_count; i++) {
-            auto rows_oxygen_count{rows_oxygen.size()};
-            auto count_ones{r::accumulate(
-                rows_oxygen | rv::transform([=](const std::vector<int>& r) {
-                    return r[i];
-                }),
-                0)};
-            int count_zeroes{static_cast<int>(rows_oxygen_count) - count_ones};
-            int least_common{count_ones < count_zeroes ? 1 : 0};
-            std::vector<std::vector<int>> filtered{
-                rows_oxygen |
-                rv::filter([=](auto&& r) { return r[i] == least_common; }) |
-                r::to<std::vector>};
-            std::swap(rows_oxygen, filtered);
-            fmt::print("{}: filtered down to {} rows\n", i, rows_oxygen.size());
-            if (rows_oxygen.size() == 1) {
-                break;
-            }
-        }
+    auto least_common{[](int zero_count, int one_count) {
+        return zero_count > one_count ? 0 : 1;
+    }};
 
-        auto selected = rows_oxygen[0];
-        co2_scrubber_rating = binary_range_to_int(
-            selected | rv::transform([](int i) { return i == 1; }));
-
-        fmt::print("co2 scrubber: {}\n", co2_scrubber_rating);
-    }
-
+    const int oxygen_generator_rating{system_rating(most_common)};
+    const int co2_scrubber_rating{system_rating(least_common)};
     const int life_support_rating{oxygen_generator_rating *
                                   co2_scrubber_rating};
 
