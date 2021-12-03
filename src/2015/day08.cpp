@@ -105,8 +105,10 @@ int encoded_string_length(std::string_view s)
 aoc::solution_result day08(std::string_view input)
 {
     const auto lines{sv_lines(input) | r::to<std::vector>};
-    const auto unparsed_count{r::accumulate(
-        lines | rv::transform([](std::string_view s) { return s.size(); }), 0)};
+    const auto line_size{
+        [](std::string_view s) { return static_cast<int>(s.size()); }};
+    const auto unparsed_count{
+        r::accumulate(lines | rv::transform(line_size), 0)};
 
     const auto decoded_char_count{
         r::accumulate(lines | rv::transform(decoded_string_length), 0)};
