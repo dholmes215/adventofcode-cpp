@@ -114,13 +114,12 @@ game_results play_game(std::vector<bingo_board>& boards,
 aoc::solution_result day04(std::string_view input)
 {
     const auto lines{sv_lines(input)};
+
     const auto called_numbers{sv_split_range(lines.front(), ',') |
                               rv::transform(to_int) | r::to<std::vector>};
 
     const auto input_rest{input | rv::drop(lines.front().size())};
-    const auto ints{input_rest | rv::split_when(is_whitespace) |
-                    rv::transform([&](auto&& r) { return sv(r); }) |
-                    rv::remove("") | rv::transform(to_int) |
+    const auto ints{sv_words(input_rest) | rv::transform(to_int) |
                     r::to<std::vector>};
 
     const auto board_number_vectors{

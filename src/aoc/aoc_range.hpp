@@ -64,6 +64,13 @@ auto sv_lines(auto&& rng) noexcept
     return sv_split_range(rng, '\n');
 }
 
+auto sv_words(auto&& rng) noexcept
+{
+    return rng | rv::split_when(is_whitespace) |
+                    rv::transform([](auto&& r) { return sv(r); }) |
+                    rv::remove("");
+}
+
 // Split a range of characters into a range of ints by line
 auto int_lines(auto&& rng) noexcept
 {
