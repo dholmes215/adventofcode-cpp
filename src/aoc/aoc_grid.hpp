@@ -93,14 +93,14 @@ class subgrid_view {
 template <typename Range, int width>
 class grid_adapter {
    public:
-    grid_adapter(Range& range) noexcept : range_(range) {}
+    grid_adapter(Range& range) noexcept : range_(&range) {}
 
-    auto row(int y) const noexcept { return grid_row(range_, width, y); }
-    auto rows() const noexcept { return grid_rows(range_, width); }
-    auto col(int x) const noexcept { return grid_col(range_, width, x); }
-    auto cols() const noexcept { return grid_col(range_, width); }
+    auto row(int y) const noexcept { return grid_row(*range_, width, y); }
+    auto rows() const noexcept { return grid_rows(*range_, width); }
+    auto col(int x) const noexcept { return grid_col(*range_, width, x); }
+    auto cols() const noexcept { return grid_cols(*range_, width); }
 
-    auto data() const noexcept { return rv::all(range_); }
+    auto data() noexcept { return rv::all(*range_); }
 
     auto& operator[](vec2<int> index) const noexcept
     {
@@ -113,7 +113,7 @@ class grid_adapter {
     }
 
    private:
-    Range& range_;
+    Range* range_;
 };
 
 template <typename Value, int width, int height>
@@ -158,6 +158,7 @@ class heap_grid : public grid_adapter<heap_data<Value, width * height>, width> {
         : grid_adapter<heap_data<Value, width * height>, width>{data_}, data_{}
     {
     }
+
     heap_data<Value, width * height> data_;
 };
 
