@@ -69,13 +69,14 @@ aoc::solution_result day03(std::string_view input)
     auto compute_system_rating{[&](bit_criteria_func bit_criteria) {
         auto system_ints{ints};
         for (std::size_t i{0}; i < position_count; i++) {
-            auto system_rows_count{system_ints.size()};
-            auto bit_pos{position_count - i - 1};
+            const auto system_rows_count{system_ints.size()};
+            const auto bit_pos{position_count - i - 1};
             auto get_bit{[=](int in) { return in >> bit_pos & 1; }};
-            auto count_ones{
+            const auto count_ones{
                 r::accumulate(system_ints | rv::transform(get_bit), 0)};
-            int count_zeroes{static_cast<int>(system_rows_count) - count_ones};
-            int met_criteria{bit_criteria(count_zeroes, count_ones)};
+            const int count_zeroes{static_cast<int>(system_rows_count) -
+                                   count_ones};
+            const int met_criteria{bit_criteria(count_zeroes, count_ones)};
             std::erase_if(system_ints,
                           [=](int in) { return get_bit(in) != met_criteria; });
             if (system_ints.size() == 1) {
