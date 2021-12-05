@@ -12,17 +12,17 @@
 
 #include <ctre.hpp>
 
-static_assert(__cplusplus >= 201703L);
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4242)
-#pragma warning(disable : 4244)
-#pragma warning(disable : 4324)
-#endif
-#include <absl/container/btree_map.h>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+// static_assert(__cplusplus >= 201703L);
+// #ifdef _MSC_VER
+// #pragma warning(push)
+// #pragma warning(disable : 4242)
+// #pragma warning(disable : 4244)
+// #pragma warning(disable : 4324)
+// #endif
+// #include <absl/container/btree_map.h>
+// #ifdef _MSC_VER
+// #pragma warning(pop)
+// #endif
 
 #include <map>
 #include <string_view>
@@ -111,7 +111,8 @@ std::vector<vent_line> parse_lines(std::string_view input)
 
 auto solve(const auto& lines)
 {
-    absl::btree_map<point, int> point_counts;
+    // absl::btree_map<point, int> point_counts;
+    std::map<point, int> point_counts;
     for (const auto& vl : lines) {
         for (const auto p : line_points_b(vl)) {
             point_counts[p]++;

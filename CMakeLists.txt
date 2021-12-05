@@ -15,7 +15,7 @@ project(aoc VERSION 0.0.1
             LANGUAGES C CXX)
 
 # Find dependencies.
-find_package(absl REQUIRED)
+# find_package(absl REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(ctre CONFIG REQUIRED)
 find_package(cxxopts REQUIRED)
