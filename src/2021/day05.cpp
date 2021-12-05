@@ -22,8 +22,6 @@ namespace aoc::year2021 {
 
 namespace {
 
-}  // namespace
-
 using scalar = std::int16_t;
 using point = vec2<scalar>;
 using count_type = std::int8_t;
@@ -67,8 +65,7 @@ bool line_is_horiz_or_vert(const vent_line& line)
 std::size_t line_length(const vent_line& line)
 {
     const point delta{line.b - line.a};
-    return static_cast<std::size_t>(
-        std::max(std::abs(delta.x), std::abs(delta.y)) + 1);
+    return static_cast<std::size_t>(std::max(abs(delta.x), abs(delta.y)) + 1);
 }
 
 // Returns the delta between each point in the line
@@ -77,10 +74,10 @@ point line_step(const vent_line& line)
     point step{line.b - line.a};
 
     if (step.x != 0) {
-        step.x /= std::abs(step.x);
+        step.x /= abs(step.x);
     }
     if (step.y != 0) {
-        step.y /= std::abs(step.y);
+        step.y /= abs(step.y);
     }
     return step;
 }
@@ -113,16 +110,6 @@ auto solve_map(auto&& lines)
     return r::count_if(point_counts | rv::values, [](int i) { return i > 1; });
 }
 
-aoc::solution_result day05map(std::string_view input)
-{
-    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
-
-    const auto count_a{
-        solve_map(all_vent_lines | rv::filter(line_is_horiz_or_vert))};
-    const auto count_b{solve_map(all_vent_lines)};
-    return {count_a, count_b};
-}
-
 auto solve_hash(auto&& lines)
 {
     std::unordered_map<point, int> point_counts;
@@ -130,16 +117,6 @@ auto solve_hash(auto&& lines)
         point_counts[p]++;
     }
     return r::count_if(point_counts | rv::values, [](int i) { return i > 1; });
-}
-
-aoc::solution_result day05hash(std::string_view input)
-{
-    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
-
-    const auto count_a{
-        solve_hash(all_vent_lines | rv::filter(line_is_horiz_or_vert))};
-    const auto count_b{solve_hash(all_vent_lines)};
-    return {count_a, count_b};
 }
 
 auto solve_sorted_points(auto&& lines)
@@ -158,6 +135,37 @@ auto solve_sorted_points(auto&& lines)
     return repeats;
 }
 
+auto solve_grid(auto&& lines)
+{
+    heap_grid<count_type, 1000, 1000> point_counts;
+    for (const auto p : all_line_points(lines)) {
+        point_counts[{p.x, p.y}]++;
+    }
+    return r::count_if(point_counts.data(), [](int i) { return i > 1; });
+}
+
+}  // namespace
+
+aoc::solution_result day05map(std::string_view input)
+{
+    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
+
+    const auto count_a{
+        solve_map(all_vent_lines | rv::filter(line_is_horiz_or_vert))};
+    const auto count_b{solve_map(all_vent_lines)};
+    return {count_a, count_b};
+}
+
+aoc::solution_result day05hash(std::string_view input)
+{
+    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
+
+    const auto count_a{
+        solve_hash(all_vent_lines | rv::filter(line_is_horiz_or_vert))};
+    const auto count_b{solve_hash(all_vent_lines)};
+    return {count_a, count_b};
+}
+
 aoc::solution_result day05sortvec(std::string_view input)
 {
     const std::vector<vent_line> all_vent_lines{parse_lines(input)};
@@ -166,15 +174,6 @@ aoc::solution_result day05sortvec(std::string_view input)
                                            rv::filter(line_is_horiz_or_vert))};
     const auto count_b{solve_sorted_points(all_vent_lines)};
     return {count_a, count_b};
-}
-
-auto solve_grid(auto&& lines)
-{
-    heap_grid<count_type, 1000, 1000> point_counts;
-    for (const auto p : all_line_points(lines)) {
-        point_counts[{p.x, p.y}]++;
-    }
-    return r::count_if(point_counts.data(), [](int i) { return i > 1; });
 }
 
 aoc::solution_result day05grid(std::string_view input)

@@ -92,6 +92,11 @@ int to_int_base(std::string_view sv, int base);
 int to_int(std::string_view sv);
 int to_int_unchecked(std::string_view sv) noexcept;
 
+auto abs(auto i) noexcept
+{
+    return static_cast<decltype(i)>(i < 0 ? -i : i);
+}
+
 }  // namespace aoc
 
 // Custom formatter for aoc::solution_id
