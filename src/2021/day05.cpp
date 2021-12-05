@@ -10,9 +10,9 @@
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
 
-// #include <ctre.hpp>
+#include <ctre.hpp>
 
-#include <regex>
+#include <absl/container/btree_map.h>
 
 #include <map>
 #include <string_view>
@@ -33,30 +33,12 @@ struct vent_line {
 
 vent_line parse_line(std::string_view line)
 {
-    // vent_line out;
-    // auto vent_matcher{ctre::match<"(\\d+),(\\d+) -> (\\d+),(\\d+)">};
-    // using namespace ctre::literals;
-    // auto [whole, x1, y1, x2, y2] = vent_matcher(sv);
-    // if ( whole) {
-    //     return vent_line{
-    //         vec2<int>{to_int(x1.to_view()), to_int(x2.to_view())},
-    //         vec2<int>{to_int(y1.to_view()), to_int(y1.to_view())}};
-    // }
-    // throw input_error{fmt::format("failed to parse line: {}", line)};
-
-    const std::regex vent_regex{"(\\d+),(\\d+) -> (\\d+),(\\d+)"};
-    std::smatch m;
-
-    const std::string str{line};
-    if (!std::regex_match(str, m, vent_regex)) {
-        throw input_error{fmt::format("failed to parse line: {}", line)};
+    constexpr auto vent_matcher{ctre::match<"(\\d+),(\\d+) -> (\\d+),(\\d+)">};
+    if (auto [whole, x1, y1, x2, y2] = vent_matcher(line); whole) {
+        return vent_line{vec2<int>{to_int(x1.to_view()), to_int(y1.to_view())},
+                         vec2<int>{to_int(x2.to_view()), to_int(y2.to_view())}};
     }
-    auto x1{std::stoi(m[1].str())};
-    auto y1{std::stoi(m[2].str())};
-    auto x2{std::stoi(m[3].str())};
-    auto y2{std::stoi(m[4].str())};
-
-    return vent_line{{x1, y1}, {x2, y2}};
+    throw input_error{fmt::format("failed to parse line: {}", line)};
 }
 
 rect<int> line_rect(const vent_line& line)
@@ -117,21 +99,9 @@ std::vector<vent_line> parse_lines(std::string_view input)
     return out;
 }
 
-void print_grid(heap_grid<int, 1000, 1000>& grid)
-{
-    for (int y{0}; y < 10; y++) {
-        for (int x{0}; x < 10; x++) {
-            int i{grid[{x, y}]};
-            char c{(i == 0) ? '.' : static_cast<char>('0' + i)};
-            fmt::print("{}", c);
-        }
-        fmt::print("\n");
-    }
-}
-
 auto solve(const auto& lines)
 {
-    std::map<point, int> point_counts;
+    absl::btree_map<point, int> point_counts;
     for (const auto& vl : lines) {
         for (const auto p : line_points_b(vl)) {
             point_counts[p]++;
