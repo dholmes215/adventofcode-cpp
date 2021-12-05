@@ -12,7 +12,17 @@
 
 #include <ctre.hpp>
 
+static_assert(__cplusplus >= 201703L);
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4242)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4324)
+#endif
 #include <absl/container/btree_map.h>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include <map>
 #include <string_view>

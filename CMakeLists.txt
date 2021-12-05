@@ -10,8 +10,8 @@ include(cmake/ConfigureVcpkg.cmake)
 configure_vcpkg("${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 project(aoc VERSION 0.0.1
-            DESCRIPTION "Application to print \"Hello World!\""
-            HOMEPAGE_URL https://github.com/dholmes215/cpp-template-2
+            DESCRIPTION " David's C++ Solutions to Advent of Code "
+            HOMEPAGE_URL https://github.com/dholmes215/adventofcode-cpp
             LANGUAGES C CXX)
 
 # Find dependencies.
@@ -27,6 +27,17 @@ find_package(tl-expected REQUIRED)
 # Targets can "link" this "library" to inherit project options.
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_20) # Require _at least_ C++20.
+
+# /Zc:__cplusplus is required to make __cplusplus accurate
+# /Zc:__cplusplus is available starting with Visual Studio 2017 version 15.7
+# (according to https://docs.microsoft.com/en-us/cpp/build/reference/zc-cplusplus)
+# That version is equivalent to _MSC_VER==1914
+# (according to https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019)
+# CMake's ${MSVC_VERSION} is equivalent to _MSC_VER
+# (according to https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html#variable:MSVC_VERSION)
+if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
+	target_compile_options(project_options INTERFACE "/Zc:__cplusplus")
+endif()
 
 # Targets can "link" this "library" to inherit the warnings specified in CompilerWarnings.cmake.
 add_library(project_warnings INTERFACE)
