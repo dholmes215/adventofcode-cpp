@@ -51,45 +51,22 @@ vent_line parse_line(std::string_view line)
     throw input_error{fmt::format("failed to parse line: {}", line)};
 }
 
-rect<int> line_rect(const vent_line& line)
-{
-    std::array<point, 2> points{line.a, line.b};
-    r::sort(points);
-    point dimensions{points[1] - points[0] + point{1, 1}};
-
-    // TODO: deal with bad rect input
-    return rect<int>{points[0], dimensions};
-}
-
 bool line_is_horiz_or_vert(const vent_line& line)
 {
     return line.a.x == line.b.x || line.a.y == line.b.y;
 }
 
-std::vector<point> line_points_a(const vent_line& line)
+std::vector<point> line_points(const vent_line& line)
 {
-    return line_rect(line).all_points() | r::to<std::vector>;
-}
-
-std::vector<point> line_points_b(const vent_line& line)
-{
-    if (line_is_horiz_or_vert(line)) {
-        return line_points_a(line);
-    }
-
-    // is it a 45 degree angle?
-    point diff{line.b - line.a};
-    diff.x = std::abs(diff.x);
-    diff.y = std::abs(diff.y);
-    if (diff.x != diff.y) {
-        throw input_error{"not a 45 degree angle"};
-    }
-
     std::vector<point> out;
 
     point step{line.b - line.a};
-    step.x /= diff.x;
-    step.y /= diff.y;
+    if (step.x != 0) {
+        step.x /= std::abs(step.x);
+    }
+    if (step.y != 0) {
+        step.y /= std::abs(step.y);
+    }
 
     point p{line.a};
     out.push_back(p);
@@ -114,7 +91,7 @@ auto solve(const auto& lines)
     // absl::btree_map<point, int> point_counts;
     std::map<point, int> point_counts;
     for (const auto& vl : lines) {
-        for (const auto p : line_points_b(vl)) {
+        for (const auto p : line_points(vl)) {
             point_counts[p]++;
         }
     }
