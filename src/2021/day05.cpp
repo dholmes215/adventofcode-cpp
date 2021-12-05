@@ -138,10 +138,13 @@ auto solve_sorted_points(auto&& lines)
 auto solve_grid(auto&& lines)
 {
     heap_grid<count_type, 1000, 1000> point_counts;
+    int count{0};
     for (const auto p : all_line_points(lines)) {
-        point_counts[{p.x, p.y}]++;
+        if (++point_counts[{p.x, p.y}] == 2) {
+            count++;
+        }
     }
-    return r::count_if(point_counts.data(), [](int i) { return i > 1; });
+    return count;
 }
 
 }  // namespace
