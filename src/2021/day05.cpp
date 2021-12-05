@@ -64,8 +64,7 @@ rect<int> line_rect(const vent_line& line)
     std::array<point, 2> points{line.a, line.b};
     r::sort(points);
     point dimensions{points[1] - points[0] + point{1, 1}};
-    // fmt::print("{},{} {},{} {},{}\n", points[0].x, points[0].y, points[1].x,
-    //            points[1].y, dimensions.x, dimensions.y);
+
     // TODO: deal with bad rect input
     return rect<int>{points[0], dimensions};
 }
@@ -130,64 +129,27 @@ void print_grid(heap_grid<int, 1000, 1000>& grid)
     }
 }
 
+auto solve(const auto& lines)
+{
+    std::map<point, int> point_counts;
+    for (const auto& vl : lines) {
+        for (const auto p : line_points_b(vl)) {
+            point_counts[p]++;
+        }
+    }
+
+    return r::count_if(point_counts | rv::values, [](int i) { return i > 1; });
+};
+
 aoc::solution_result day05(std::string_view input)
 {
-    const std::vector<vent_line> vent_lines{parse_lines(input)};
-    const auto horiz_vert_vent_lines{
-        vent_lines | rv::filter(line_is_horiz_or_vert) | r::to<std::vector>};
+    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
+    const auto horiz_vert_vent_lines{all_vent_lines |
+                                     rv::filter(line_is_horiz_or_vert) |
+                                     r::to<std::vector>};
 
-    const int count_a{[&]() {
-        heap_grid<int, 1000, 1000> grid{};
-
-        std::map<point, int> point_counts;
-        for (const auto& vl : horiz_vert_vent_lines) {
-            for (const auto p : line_points_a(vl)) {
-                grid[p]++;
-                point_counts[p]++;
-            }
-        }
-
-        auto values{point_counts | rv::values};
-        auto values_above_1{values | rv::filter([](int i) { return i > 1; })};
-
-        const int count{static_cast<int>(r::distance(values_above_1))};
-
-        // const int count{0};
-
-        // for (const auto vl : horiz_vert_vent_lines) {
-        //     fmt::print("{},{} -> {},{}\n", vl.a.x, vl.a.y, vl.b.x,
-        //     vl.b.y);
-        // }
-        return count;
-    }()};
-
-    const int count_b{[&]() {
-        heap_grid<int, 1000, 1000> grid{};
-
-        std::map<point, int> point_counts;
-        for (const auto& vl : vent_lines) {
-            for (const auto p : line_points_b(vl)) {
-                grid[p]++;
-                point_counts[p]++;
-            }
-        }
-
-        print_grid(grid);
-
-        auto values{point_counts | rv::values};
-        auto values_above_1{values | rv::filter([](int i) { return i > 1; })};
-
-        const int count{static_cast<int>(r::distance(values_above_1))};
-
-        // const int count{0};
-
-        // for (const auto vl : horiz_vert_vent_lines) {
-        //     fmt::print("{},{} -> {},{}\n", vl.a.x, vl.a.y, vl.b.x,
-        //     vl.b.y);
-        // }
-        return count;
-    }()};
-
+    const auto count_a{solve(horiz_vert_vent_lines)};
+    const auto count_b{solve(all_vent_lines)};
     return {count_a, count_b};
 }
 
