@@ -47,6 +47,36 @@ auto all_points() noexcept
 //     fmt::print("\n");
 // }
 
+struct bingo_game {
+    std::vector<int> called_numbers;
+    std::vector<bingo_board> boards;
+};
+
+bingo_game parse_input(std::string_view input)
+{
+    bingo_game output;
+
+    const std::string_view first_line{sv_lines(input).front()};
+    output.called_numbers = sv_split_range(first_line, ',') |
+                            rv::transform(to_int) | r::to<std::vector>;
+
+    const auto input_rest{input | rv::drop(first_line.size())};
+    const auto ints{sv_words(input_rest) | rv::transform(to_int) |
+                    r::to<std::vector>};
+
+    const auto board_numbers{ints | rv::chunk(25)};
+    output.boards.resize(board_numbers.size());
+
+    // TODO: Make grids regular types so I don't have to do all this
+    std::size_t i{0};
+    for (auto board_in : board_numbers) {
+        r::copy(board_in, output.boards[i].numbers_.data().begin());
+        i++;
+    }
+
+    return output;
+}
+
 struct game_results{
     int first_winner_score{0};
     int last_winner_score{0};
@@ -113,30 +143,8 @@ game_results play_game(std::vector<bingo_board>& boards,
 
 aoc::solution_result day04(std::string_view input)
 {
-    const auto lines{sv_lines(input)};
-
-    const auto called_numbers{sv_split_range(lines.front(), ',') |
-                              rv::transform(to_int) | r::to<std::vector>};
-
-    const auto input_rest{input | rv::drop(lines.front().size())};
-    const auto ints{sv_words(input_rest) | rv::transform(to_int) |
-                    r::to<std::vector>};
-
-    const auto board_number_vectors{
-        ints | rv::chunk(25) |
-        rv::transform([](auto&& rng) { return rng | r::to<std::vector>; }) |
-        r::to<std::vector>};
-
-    std::vector<bingo_board> boards(board_number_vectors.size());
-
-    // TODO: Make grids regular types so I don't have to do all this
-    std::size_t i{0};
-    for (const std::vector<int>& board_in : board_number_vectors) {
-        r::copy(board_in, boards[i].numbers_.data().begin());
-        i++;
-    }
-
-    const game_results result{play_game(boards, called_numbers)};
+    bingo_game game{parse_input(input)};
+    const game_results result{play_game(game.boards, game.called_numbers)};
 
     return {result.first_winner_score, result.last_winner_score};
 }
