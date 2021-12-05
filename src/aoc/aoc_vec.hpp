@@ -9,6 +9,7 @@
 #define AOC_VEC_HPP
 
 #include <compare>
+#include <functional>
 
 namespace aoc {
 
@@ -66,5 +67,15 @@ struct rect {
 };
 
 }  // namespace aoc
+
+template <typename Scalar>
+struct std::hash<aoc::vec2<Scalar>> {
+    std::size_t operator()(const aoc::vec2<Scalar>& v) const noexcept
+    {
+        std::size_t h1 = std::hash<Scalar>{}(v.x);
+        std::size_t h2 = std::hash<Scalar>{}(v.y);
+        return h1 ^ (h2 << 1);
+    }
+};
 
 #endif  // AOC_VEC_HPP

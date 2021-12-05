@@ -12,21 +12,10 @@
 
 #include <ctre.hpp>
 
-// static_assert(__cplusplus >= 201703L);
-// #ifdef _MSC_VER
-// #pragma warning(push)
-// #pragma warning(disable : 4242)
-// #pragma warning(disable : 4244)
-// #pragma warning(disable : 4324)
-// #endif
-// #include <absl/container/btree_map.h>
-// #ifdef _MSC_VER
-// #pragma warning(pop)
-// #endif
-
 #include <cstdint>
 #include <map>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace aoc::year2021 {
@@ -37,6 +26,7 @@ namespace {
 
 using scalar = std::int16_t;
 using point = vec2<scalar>;
+using count_type = std::int8_t;
 
 scalar to_scalar(std::string_view s)
 {
@@ -133,6 +123,25 @@ aoc::solution_result day05map(std::string_view input)
     return {count_a, count_b};
 }
 
+auto solve_hash(auto&& lines)
+{
+    std::unordered_map<point, int> point_counts;
+    for (const auto p : all_line_points(lines)) {
+        point_counts[p]++;
+    }
+    return r::count_if(point_counts | rv::values, [](int i) { return i > 1; });
+}
+
+aoc::solution_result day05hash(std::string_view input)
+{
+    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
+
+    const auto count_a{
+        solve_hash(all_vent_lines | rv::filter(line_is_horiz_or_vert))};
+    const auto count_b{solve_hash(all_vent_lines)};
+    return {count_a, count_b};
+}
+
 auto solve_sorted_points(auto&& lines)
 {
     std::vector<point> points;
@@ -149,13 +158,32 @@ auto solve_sorted_points(auto&& lines)
     return repeats;
 }
 
-aoc::solution_result day05sort_vec(std::string_view input)
+aoc::solution_result day05sortvec(std::string_view input)
 {
     const std::vector<vent_line> all_vent_lines{parse_lines(input)};
 
     const auto count_a{solve_sorted_points(all_vent_lines |
                                            rv::filter(line_is_horiz_or_vert))};
     const auto count_b{solve_sorted_points(all_vent_lines)};
+    return {count_a, count_b};
+}
+
+auto solve_grid(auto&& lines)
+{
+    heap_grid<count_type, 1000, 1000> point_counts;
+    for (const auto p : all_line_points(lines)) {
+        point_counts[{p.x, p.y}]++;
+    }
+    return r::count_if(point_counts.data(), [](int i) { return i > 1; });
+}
+
+aoc::solution_result day05grid(std::string_view input)
+{
+    const std::vector<vent_line> all_vent_lines{parse_lines(input)};
+
+    const auto count_a{
+        solve_grid(all_vent_lines | rv::filter(line_is_horiz_or_vert))};
+    const auto count_b{solve_grid(all_vent_lines)};
     return {count_a, count_b};
 }
 

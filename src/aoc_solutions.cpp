@@ -33,8 +33,12 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2021, 3}, {{aoc::year2021::day03, ""}}},
         {{2021, 4}, {{aoc::year2021::day04, ""}}},
         {{2021, 5},
-         {{aoc::year2021::day05map, "map"},
-          {aoc::year2021::day05sort_vec, "sort_vec"}}}};
+         {
+             {aoc::year2021::day05map, "map"},
+             {aoc::year2021::day05hash, "hash"},
+             {aoc::year2021::day05sortvec, "sortvec"},
+             {aoc::year2021::day05grid, "grid"},
+         }}};
     return solutions;
 }
 

@@ -14,6 +14,8 @@ aoc::solution_result day02(std::string_view);
 aoc::solution_result day03(std::string_view);
 aoc::solution_result day04(std::string_view);
 aoc::solution_result day05map(std::string_view);
-aoc::solution_result day05sort_vec(std::string_view);
+aoc::solution_result day05hash(std::string_view);
+aoc::solution_result day05sortvec(std::string_view);
+aoc::solution_result day05grid(std::string_view);
 }  // namespace year2021
 }  // namespace aoc
