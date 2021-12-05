@@ -95,14 +95,7 @@ std::string_view trim(std::string_view s) noexcept
 
 int to_int_base(std::string_view sv, int base)
 {
-    int out{0};
-    auto begin{&*sv.begin()};
-    const auto result{std::from_chars(begin, begin + sv.size(), out, base)};
-    if (result.ec != std::errc{}) {
-        throw input_error{
-            fmt::format("error parsing \"{}\" as int: {}", sv, result.ec)};
-    }
-    return out;
+    return to_num_base<int>(sv, base);
 }
 
 int to_int(std::string_view sv)

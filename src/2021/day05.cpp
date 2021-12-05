@@ -24,6 +24,7 @@
 // #pragma warning(pop)
 // #endif
 
+#include <cstdint>
 #include <map>
 #include <string_view>
 #include <vector>
@@ -34,8 +35,13 @@ namespace {
 
 }  // namespace
 
-using scalar = int;
+using scalar = std::int16_t;
 using point = vec2<scalar>;
+
+scalar to_scalar(std::string_view s)
+{
+    return to_num<scalar>(s);
+}
 
 struct vent_line {
     point a{};
@@ -46,8 +52,9 @@ vent_line parse_line(std::string_view line)
 {
     constexpr auto vent_matcher{ctre::match<"(\\d+),(\\d+) -> (\\d+),(\\d+)">};
     if (auto [whole, x1, y1, x2, y2] = vent_matcher(line); whole) {
-        return vent_line{point{to_int(x1.to_view()), to_int(y1.to_view())},
-                         point{to_int(x2.to_view()), to_int(y2.to_view())}};
+        return vent_line{
+            point{to_scalar(x1.to_view()), to_scalar(y1.to_view())},
+            point{to_scalar(x2.to_view()), to_scalar(y2.to_view())}};
     }
     throw input_error{fmt::format("failed to parse line: {}", line)};
 }
@@ -128,7 +135,9 @@ aoc::solution_result day05map(std::string_view input)
 
 auto solve_sorted_points(auto&& lines)
 {
-    std::vector<point> points{all_line_points(lines) | r::to<std::vector>};
+    std::vector<point> points;
+    points.reserve(500000);
+    r::copy(all_line_points(lines), r::back_inserter(points));
 
     r::sort(points);
 

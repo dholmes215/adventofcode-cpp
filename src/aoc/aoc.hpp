@@ -12,6 +12,7 @@
 #include <fmt/format.h>
 #include <tl/expected.hpp>
 
+#include <charconv>
 #include <filesystem>
 #include <iostream>
 #include <map>
@@ -67,6 +68,25 @@ bool is_digit(char c);
 bool is_letter(char c);
 
 std::string_view trim(std::string_view s) noexcept;
+
+template <typename Number>
+Number to_num_base(std::string_view sv, int base)
+{
+    Number out{0};
+    auto begin{&*sv.begin()};
+    const auto result{std::from_chars(begin, begin + sv.size(), out, base)};
+    if (result.ec != std::errc{}) {
+        throw input_error{
+            fmt::format("error parsing \"{}\" as int: {}", sv, result.ec)};
+    }
+    return out;
+}
+
+template <typename Number>
+Number to_num(std::string_view sv)
+{
+    return to_num_base<Number>(sv, 10);
+}
 
 int to_int_base(std::string_view sv, int base);
 int to_int(std::string_view sv);
