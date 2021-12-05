@@ -36,6 +36,9 @@ build/
 cmake-build-debug/
 cmake-build-release/
 
+# CMake user presets
+CMakeUserPresets.json
+
 # VSCode settings directory
 .vscode
 
