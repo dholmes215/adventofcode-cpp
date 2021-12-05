@@ -109,7 +109,7 @@ auto solve(const auto& lines)
     }
 
     return r::count_if(point_counts | rv::values, [](int i) { return i > 1; });
-};
+}
 
 aoc::solution_result day05(std::string_view input)
 {
