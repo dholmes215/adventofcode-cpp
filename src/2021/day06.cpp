@@ -34,6 +34,8 @@ std::vector<count_type> populate_initial_counts(
 void run_day(std::vector<count_type>& counts) noexcept
 {
     r::rotate(counts, counts.begin() + 1);
+    // The number we rotated into the last position will represent the newborns;
+    // the parent fish restart their cycle at position 6.
     counts[cycle_length - 1] += counts[initial_length - 1];
 }
 
