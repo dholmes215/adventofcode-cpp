@@ -30,11 +30,10 @@ void run_days(std::vector<count_type>& counts, int days) noexcept
 
 aoc::solution_result day06(std::string_view input)
 {
-    auto fish{numbers<timer>(input)};
-    const auto vec{fish | r::to<std::vector>};
+    const auto fish{numbers<timer>(input) | r::to<std::vector>};
 
     std::vector<count_type> counts_by_timer(initial_length, 0);
-    for (timer number : vec) {
+    for (timer number : fish) {
         counts_by_timer[static_cast<std::size_t>(number)]++;
     }
 
