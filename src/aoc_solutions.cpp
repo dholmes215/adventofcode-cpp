@@ -38,7 +38,8 @@ const std::map<date, std::vector<solution>>& solutions()
              {aoc::year2021::day05hash, "hash"},
              {aoc::year2021::day05sortvec, "sortvec"},
              {aoc::year2021::day05grid, "grid"},
-         }}};
+         }},
+        {{2021, 6}, {{aoc::year2021::day06, ""}}}};
     return solutions;
 }
 
