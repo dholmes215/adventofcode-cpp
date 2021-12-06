@@ -8,6 +8,8 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 
+#include <cstdint>
+#include <string_view>
 #include <vector>
 
 namespace aoc::year2021 {
