@@ -71,7 +71,7 @@ aoc::solution_result day07fast(std::string_view input)
     auto crab_positions{numbers<crab_int>(input) | r::to<std::vector>};
 
     const auto sum{r::accumulate(crab_positions, crab_int{0})};
-    const auto mean{sum / static_cast<float>(crab_positions.size())};
+    const auto mean{static_cast<float>(sum) / static_cast<float>(crab_positions.size())};
 
     const auto floor_fuel{
         candidate_fuel(crab_positions, fuel_func_b, static_cast<crab_int>(std::floor(mean)))};
