@@ -45,26 +45,25 @@ crab_int candidate_fuel(auto&& crabs,
     return r::accumulate(crabs | rv::transform(calc_fuel), crab_int{0});
 }
 
+crab_int calc_fuel(auto&& crab_positions, auto fuel_func)
+{
+    const auto [min_pos, max_pos] = r::minmax(crab_positions);
+    const crab_int total_distance{max_pos - min_pos + 1};
+    const auto candidate_positions{rv::iota(min_pos, total_distance)};
+
+    auto fuel_for_position{[=](crab_int pos) {
+        return candidate_fuel(crab_positions, fuel_func, pos);
+    }};
+    return r::min(candidate_positions | rv::transform(fuel_for_position));
+}
+
 }  // namespace
 
 aoc::solution_result day07(std::string_view input)
 {
     const auto crab_positions{numbers<crab_int>(input) | r::to<std::vector>};
-    const auto [min_pos, max_pos] = r::minmax(crab_positions);
-    const crab_int total_distance{max_pos - min_pos + 1};
-    const auto candidate_positions{rv::iota(min_pos, total_distance)};
-    auto fuel_for_candidate_a{[=](crab_int pos) {
-        return candidate_fuel(crab_positions, fuel_func_a, pos);
-    }};
-    auto fuel_for_candidate_b{[=](crab_int pos) {
-        return candidate_fuel(crab_positions, fuel_func_b, pos);
-    }};
-    const crab_int min_fuel_a{
-        r::min(candidate_positions | rv::transform(fuel_for_candidate_a))};
-    const crab_int min_fuel_b{
-        r::min(candidate_positions | rv::transform(fuel_for_candidate_b))};
-
-    return {min_fuel_a, min_fuel_b};
+    return {calc_fuel(crab_positions, fuel_func_a),
+            calc_fuel(crab_positions, fuel_func_b)};
 }
 
 }  // namespace aoc::year2021
