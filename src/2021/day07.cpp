@@ -47,7 +47,7 @@ crab_int candidate_fuel(auto&& crabs,
 
 crab_int calc_fuel(auto&& crab_positions, auto fuel_func)
 {
-    const auto [min_pos, max_pos] = r::minmax(crab_positions);
+    const auto [min_pos, max_pos]{r::minmax(crab_positions)};
     const crab_int total_distance{max_pos - min_pos + 1};
     const auto candidate_positions{rv::iota(min_pos, total_distance)};
 
@@ -59,11 +59,31 @@ crab_int calc_fuel(auto&& crab_positions, auto fuel_func)
 
 }  // namespace
 
-aoc::solution_result day07(std::string_view input)
+aoc::solution_result day07naive(std::string_view input)
 {
     const auto crab_positions{numbers<crab_int>(input) | r::to<std::vector>};
     return {calc_fuel(crab_positions, fuel_func_a),
             calc_fuel(crab_positions, fuel_func_b)};
+}
+
+aoc::solution_result day07fast(std::string_view input)
+{
+    auto crab_positions{numbers<crab_int>(input) | r::to<std::vector>};
+
+    const auto sum{r::accumulate(crab_positions, crab_int{0})};
+    const auto mean{sum / static_cast<float>(crab_positions.size())};
+
+    const auto floor_fuel{
+        candidate_fuel(crab_positions, fuel_func_b, static_cast<crab_int>(std::floor(mean)))};
+    const auto ceil_fuel{
+        candidate_fuel(crab_positions, fuel_func_b, static_cast<crab_int>(std::ceil(mean)))};
+    const crab_int fuel_b{std::min(floor_fuel, ceil_fuel)};
+
+    r::sort(crab_positions);
+    const auto median{crab_positions[crab_positions.size() / 2]};
+    const crab_int fuel_a{candidate_fuel(crab_positions, fuel_func_a, median)};
+
+    return {fuel_a, fuel_b};
 }
 
 }  // namespace aoc::year2021
