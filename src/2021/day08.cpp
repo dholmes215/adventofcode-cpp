@@ -166,7 +166,7 @@ aoc::solution_result day08(std::string_view input)
         r::sort(four_plus_a);
         
         std::string nine;
-        char g;
+        char g{'\0'};
         for (const auto& x : unidentified_signals) {
             for (char y : std::string_view{"abcdefg"}) {
                 auto nine_candidate{four_plus_a + y};
@@ -240,7 +240,7 @@ aoc::solution_result day08(std::string_view input)
         // we know a, c, e
 
         // 0 = 8 - d, and it's the only one that'd 8 - a char
-        char d;
+        char d{'\0'};
         std::string zero;
         for (const auto& x : unidentified_signals) {
             for (char y : std::string_view{"abcdefg"}) {
@@ -287,6 +287,7 @@ aoc::solution_result day08(std::string_view input)
         }
 
         assert(g == g2);
+        (void)g2;
 
         if (two.empty()) {
             throw new std::runtime_error("Could not find two and g");
