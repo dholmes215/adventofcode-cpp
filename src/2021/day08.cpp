@@ -39,12 +39,70 @@ namespace {
 
 */
 
-std::string to_sorted_string(std::string_view sv) noexcept
+// Exception thrown when a string is not a valid signal set
+class not_signal_error : public std::domain_error {
+   public:
+    not_signal_error(std::string msg) : std::domain_error{std::move(msg)} {}
+};
+
+constexpr std::string to_signal_string(std::string_view sv)
 {
     std::string s(sv);
-    r::sort(s);
+    // r::sort(s);
+    std::sort(s.begin(), s.end());
+
+    // Must contain no duplicates
+    // r::unique(s);
+    if (std::unique(s.begin(), s.end()) != s.end()) {
+        throw new not_signal_error(fmt::format("{} contains duplicates", sv));
+    }
+
     return s;
 }
+
+constexpr std::string sorted_unique(std::string_view sv)
+{
+    std::string s(sv);
+    std::sort(s.begin(), s.end());
+    s.erase(std::unique(s.begin(), s.end()), s.end());
+    return s;
+}
+
+constexpr bool valid_char(char c) noexcept
+{
+    return c >= 'a' && c <= 'g';
+}
+
+class signal_set {
+    public: 
+    constexpr signal_set(std::string_view sv) 
+        : chars_(sorted_unique(sv))
+    {
+        // Must contain only letters from a to g
+        if (!r::all_of(sv, valid_char)) {
+            throw new not_signal_error(fmt::format("{} contains invalid characters", sv));
+        }
+    }
+    constexpr signal_set(char c) 
+        : signal_set(std::string{c})
+    {
+        if (!valid_char(c)) {
+            throw new not_signal_error(fmt::format("{} is an invalid character", c));
+        }
+    }
+
+    constexpr friend signal_set operator+(const signal_set& lhs, const signal_set& rhs)
+    {
+        return signal_set(lhs.chars_ + rhs.chars_);
+    }
+
+    constexpr std::string_view chars() const noexcept { return chars_; }
+
+private:
+    std::string chars_;
+};
+
+
 
 dh::color color;
 
@@ -67,10 +125,10 @@ aoc::solution_result day08(std::string_view input)
     for (auto line : lines) {
         auto parts{sv_split_range(line, '|') | r::to<std::vector>};
         auto scrambled_digit_words{sv_words(r::front(parts)) |
-                                   rv::transform(to_sorted_string) |
+                                   rv::transform(to_signal_string) |
                                    r::to<std::vector>};
         auto displayed_digit_words{sv_words(r::front(parts | rv::drop(1))) |
-                                   rv::transform(to_sorted_string) |
+                                   rv::transform(to_signal_string) |
                                    r::to<std::vector>};
 
         std::map<std::string, int> signals_to_digit;

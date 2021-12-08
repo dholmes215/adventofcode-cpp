@@ -22,7 +22,7 @@
 
 namespace aoc {
 
-// Exception thrown by solutions on unexpected input.
+// Exception thrown by solutions on unexpected puzzle input.
 class input_error : public std::runtime_error {
    public:
     input_error(std::string msg) : runtime_error{std::move(msg)} {}
