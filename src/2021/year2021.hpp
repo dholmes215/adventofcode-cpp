@@ -20,5 +20,6 @@ aoc::solution_result day05grid(std::string_view);
 aoc::solution_result day06(std::string_view);
 aoc::solution_result day07naive(std::string_view);
 aoc::solution_result day07fast(std::string_view);
+aoc::solution_result day08(std::string_view);
 }  // namespace year2021
 }  // namespace aoc
