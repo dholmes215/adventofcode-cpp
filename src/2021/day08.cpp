@@ -227,7 +227,7 @@ aoc::solution_result day08(std::string_view input)
         acde.push_back(c);
         acde.push_back(d);
         acde.push_back(e);
-        char g2;
+        char g2{'\0'};
         std::string two;
         for (const auto& x : unidentified_signals) {
             for (char y : std::string_view{"abcdefg"}) {
