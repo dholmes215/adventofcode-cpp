@@ -39,26 +39,6 @@ namespace {
 
 */
 
-// using signals = std::set<char>;  // Set of the characters "abcdefg"
-
-// struct display {
-//     std::array<signals, 10> scrambled_digits;
-//     std::array<signals, 4> displayed_digits;
-// };
-
-// const std::map<std::string, int> correct_signals_to_digit {
-//     {"abcefg", 0},
-//     {"cf", 1},
-//     {"acdeg", 2},
-//     {"acdfg", 3},
-//     {"bcdf", 4},
-//     {"abdfg", 5},
-//     {"abdefg", 6},
-//     {"acf", 7},
-//     {"abcdefg", 8},
-//     {"abcdfg", 9},
-// };
-
 std::string to_sorted_string(std::string_view sv) noexcept
 {
     std::string s(sv);
@@ -93,11 +73,6 @@ aoc::solution_result day08(std::string_view input)
                                    rv::transform(to_sorted_string) |
                                    r::to<std::vector>};
 
-        // for (auto word : scrambled_digit_words) {
-        //     fmt::print("{} ", word);
-        // }
-        // fmt::print("| ");
-
         std::map<std::string, int> signals_to_digit;
         std::map<int, std::string> digit_to_signals;
 
@@ -130,13 +105,9 @@ aoc::solution_result day08(std::string_view input)
         for (auto signals : displayed_digit_words) {
             if (signals_to_digit.contains(signals)) {
                 part_a_sum++;
-                // fmt::print("{0:yellow}{1}{0:reset} ", color, signals);
-            } else {
-                // fmt::print("{} ", signals);
             }
             
         }
-        // fmt::print("\n");
         
         // Determine the individual segment translation
         // a = 7 - 1
@@ -150,15 +121,12 @@ aoc::solution_result day08(std::string_view input)
         
         const char a = seven_minus_one[0];
         
-        fmt::print("a is {}\n", a);
-
 
         std::set<std::string> unidentified_signals{scrambled_digit_words.begin(), scrambled_digit_words.end()};
         unidentified_signals.erase(unidentified_signals.find(one));
         unidentified_signals.erase(unidentified_signals.find(four));
         unidentified_signals.erase(unidentified_signals.find(seven));
         unidentified_signals.erase(unidentified_signals.find(eight));
-        print_set(unidentified_signals);
 
         // 9 = 4 + a + g
         // We don't know g but there will only be one match
@@ -185,19 +153,13 @@ aoc::solution_result day08(std::string_view input)
 
         signals_to_digit[nine] = 9;
         digit_to_signals[9] = nine;
-        fmt::print("8 is {}\n", eight);
-        fmt::print("9 is {}\n", nine);
-        fmt::print("g is {}\n", g);
         
         unidentified_signals.erase(unidentified_signals.find(nine));
-        print_set(unidentified_signals);
 
         // e = 8 - 9
         std::vector<char> eight_minus_nine{eight | r::to<std::vector>};
         std::erase_if(eight_minus_nine, [&](char c) { return nine.find(c) != std::string::npos; });
-        fmt::print("eight minus eight is {}\n", std::string_view{eight_minus_nine.begin(), eight_minus_nine.end()});
         const char e = eight_minus_nine[0];
-        fmt::print("e is {}\n", a);
         (void)e;
 
         // 5 and 6 are the pair that you can add e to and get the other
@@ -224,9 +186,7 @@ aoc::solution_result day08(std::string_view input)
         signals_to_digit[six] = 6;
         digit_to_signals[6] = six;
         unidentified_signals.erase(unidentified_signals.find(five));
-        print_set(unidentified_signals);
         unidentified_signals.erase(unidentified_signals.find(six));
-        print_set(unidentified_signals);
 
         // 0, 2 and 3 are left
         // we know a and e
@@ -235,7 +195,6 @@ aoc::solution_result day08(std::string_view input)
         std::vector<char> nine_minus_five{nine | r::to<std::vector>};
         std::erase_if(nine_minus_five, [&](char c) { return five.find(c) != std::string::npos; });
         const char c = nine_minus_five[0];
-        fmt::print("c is {}\n", c);
 
         // we know a, c, e
 
@@ -259,9 +218,6 @@ aoc::solution_result day08(std::string_view input)
         signals_to_digit[zero] = 0;
         digit_to_signals[0] = zero;
         unidentified_signals.erase(unidentified_signals.find(zero));
-        fmt::print("zero is {}\n", zero);
-        fmt::print("d is {}\n", d);
-        print_set(unidentified_signals);
 
         // 2 and 3 are left
         // we know a, c, d, e
@@ -295,9 +251,6 @@ aoc::solution_result day08(std::string_view input)
         signals_to_digit[two] = 2;
         digit_to_signals[2] = two;
         unidentified_signals.erase(unidentified_signals.find(two));
-        fmt::print("two is {}\n", two);
-        fmt::print("g is {}\n", g2);
-        print_set(unidentified_signals);
 
         // 3 is left
         // we know a, c, d, e, g
@@ -312,7 +265,6 @@ aoc::solution_result day08(std::string_view input)
         for (const auto& x : unidentified_signals) {
             for (char y : std::string_view{"abcdefg"}) {
                 auto three_candidate{acdg};
-                fmt::print("candidate is {}+{}\n", three_candidate, y);
                 three_candidate.push_back(y);
                 r::sort(three_candidate);
                 if (three_candidate == x) {
@@ -329,7 +281,6 @@ aoc::solution_result day08(std::string_view input)
         signals_to_digit[three] = 3;
         digit_to_signals[3] = three;
         unidentified_signals.erase(unidentified_signals.find(three));
-        print_set(unidentified_signals);
 
         if (!unidentified_signals.empty()) {
             throw new std::runtime_error("We should have identified all signals but we didn't");
