@@ -105,8 +105,9 @@ point_t discover_basin_low_point(const grid_t& grid, point_t p)
     }
 
     auto points_with_heights{rv::zip(
-        discovered_basin,
-        discovered_basin | rv::transform([&](point_t p) { return grid[p]; }))};
+        discovered_basin, discovered_basin | rv::transform([&](point_t p2) {
+                              return grid[p2];
+                          }))};
     auto lowest_pair{r::min(points_with_heights, [](auto lhs, auto rhs) {
         return std::get<1>(lhs) < std::get<1>(rhs);
     })};
