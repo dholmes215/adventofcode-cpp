@@ -139,7 +139,9 @@ aoc::solution_result day09(std::string_view input)
 
     std::vector<height_t> data;
     data.resize(col_count * row_count);
-    r::copy(lines | rv::join | rv::transform([](char c) { return c - '0'; }),
+    r::copy(lines | rv::join | rv::transform([](char c) {
+                return static_cast<height_t>(c - '0');
+            }),
             data.begin());
     // TODO: validate input better
 
