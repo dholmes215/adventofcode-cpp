@@ -24,41 +24,19 @@ namespace {
 
 }  // namespace
 
-/*
-
-0   6
-1   2 *
-2   5
-3   5
-4   4 *
-5   5
-6   6
-7   3 *
-8   7 *
-9   6
-
-*/
-
 // Exception thrown when a string is not a valid signal set
 class not_signal_error : public std::domain_error {
    public:
     not_signal_error(std::string msg) : std::domain_error{std::move(msg)} {}
 };
 
-constexpr std::string to_signal_string(std::string_view sv)
-{
-    std::string s(sv);
-    // r::sort(s);
-    std::sort(s.begin(), s.end());
-
-    // Must contain no duplicates
-    // r::unique(s);
-    if (std::unique(s.begin(), s.end()) != s.end()) {
-        throw new not_signal_error(fmt::format("{} contains duplicates", sv));
+// Exception thrown when multiple signals are assumed to be just oen
+class multiple_signal_error : public std::domain_error {
+   public:
+    multiple_signal_error(std::string msg) : std::domain_error{std::move(msg)}
+    {
     }
-
-    return s;
-}
+};
 
 constexpr std::string sorted_unique(std::string_view sv)
 {
@@ -74,45 +52,211 @@ constexpr bool valid_char(char c) noexcept
 }
 
 class signal_set {
-    public: 
-    constexpr signal_set(std::string_view sv) 
-        : chars_(sorted_unique(sv))
+   public:
+    constexpr signal_set() = default;
+
+    constexpr signal_set(std::string_view sv) : chars_(sorted_unique(sv))
     {
         // Must contain only letters from a to g
-        if (!r::all_of(sv, valid_char)) {
-            throw new not_signal_error(fmt::format("{} contains invalid characters", sv));
+        // if (!r::all_of(sv, valid_char)) {
+        if (!std::all_of(sv.begin(), sv.end(), valid_char)) {
+            throw new not_signal_error(
+                fmt::format("{} contains invalid characters", sv));
         }
     }
-    constexpr signal_set(char c) 
-        : signal_set(std::string{c})
+    constexpr signal_set(char c) : signal_set(std::string{c})
     {
         if (!valid_char(c)) {
-            throw new not_signal_error(fmt::format("{} is an invalid character", c));
+            throw new not_signal_error(
+                fmt::format("{} is an invalid character", c));
         }
     }
+    constexpr signal_set(const signal_set& rhs) : chars_(rhs.chars_){};
+    constexpr signal_set& operator=(const signal_set& rhs)
+    {
+        chars_ = rhs.chars_;
+        return *this;
+    }
 
-    constexpr friend signal_set operator+(const signal_set& lhs, const signal_set& rhs)
+    char to_signal() const
+    {
+        if (chars_.size() > 1) {
+            throw new multiple_signal_error(
+                fmt::format("{} is not a single character", chars_));
+        }
+        return chars_[0];
+    }
+
+    constexpr auto cbegin() const noexcept { return chars_.cbegin(); }
+    constexpr auto cend() const noexcept { return chars_.cend(); }
+    constexpr auto begin() const noexcept { return cbegin(); }
+    constexpr auto end() const noexcept { return cend(); }
+
+    constexpr auto size() const noexcept { return chars_.size(); }
+
+    constexpr friend signal_set operator+(const signal_set& lhs,
+                                          const signal_set& rhs)
     {
         return signal_set(lhs.chars_ + rhs.chars_);
     }
 
+    constexpr friend signal_set operator+(const signal_set& lhs, char rhs)
+    {
+        return signal_set(lhs + signal_set{rhs});
+    }
+
+    constexpr friend signal_set operator+(char lhs, const signal_set& rhs)
+    {
+        return signal_set(signal_set{lhs} + rhs);
+    }
+
+    constexpr friend signal_set operator-(const signal_set& lhs,
+                                          const signal_set& rhs)
+    {
+        std::string s(lhs.chars_);
+        for (char c : rhs.chars_) {
+            s.erase(std::remove(s.begin(), s.end(), c), s.end());
+        }
+        return {s};
+    }
+
+    friend auto operator<=>(const signal_set& lhs,
+                            const signal_set& rhs) noexcept = default;
+
     constexpr std::string_view chars() const noexcept { return chars_; }
 
-private:
+   private:
     std::string chars_;
 };
 
+const signal_set all_signals{std::string_view("abcdefg")};
 
+constexpr signal_set to_signal_set(std::string_view sv)
+{
+    return {sv};
+}
 
 dh::color color;
 
-
-void print_set(const std::set<std::string>& remaining) {
+void print_set(const std::set<std::string>& remaining)
+{
     fmt::print("unidentified: ");
     for (const auto& s : remaining) {
         fmt::print("{} ", s);
     }
     fmt::print("\n");
+}
+
+void print_set(const std::set<signal_set>& remaining)
+{
+    fmt::print("unidentified: ");
+    for (const auto& s : remaining) {
+        fmt::print("{} ", s.chars());
+    }
+    fmt::print("\n");
+}
+
+struct nine_and_g {
+    signal_set nine;
+    char g;
+};
+
+nine_and_g determine_nine_and_g(std::set<signal_set>& unidentified_signals,
+                                signal_set four,
+                                char a)
+{
+    // 9 = 4 + a + g
+    // We don't know g but there will only be one match
+    for (const auto& nine_candidate : unidentified_signals) {
+        for (char y : all_signals) {
+            if (nine_candidate == four + a + y) {
+                nine_and_g out{nine_candidate, y};
+                unidentified_signals.erase(out.nine);
+                return out;
+            }
+        }
+    }
+
+    throw new std::runtime_error("Could not find nine and g");
+}
+
+struct five_and_six {
+    signal_set five;
+    signal_set six;
+};
+
+five_and_six determine_five_and_six(std::set<signal_set>& unidentified_signals,
+                                    char e)
+{
+    // 5 and 6 are the pair that you can add e to and get the other
+    for (const auto& five_candidate : unidentified_signals) {
+        for (const auto& six_candidate : unidentified_signals) {
+            if (five_candidate == five_candidate + e) {
+                continue;
+            }
+            if (five_candidate + e == six_candidate) {
+                five_and_six out{five_candidate, six_candidate};
+                unidentified_signals.erase(out.five);
+                unidentified_signals.erase(out.six);
+                return out;
+            }
+        }
+    }
+
+    throw new std::runtime_error("Could not find five and six");
+}
+
+struct zero_and_d {
+    signal_set zero;
+    char d;
+};
+
+zero_and_d determine_zero_and_d(std::set<signal_set>& unidentified_signals,
+                                signal_set eight_signals)
+{
+    for (const auto& zero_candidate : unidentified_signals) {
+        for (char y : all_signals) {
+            if (zero_candidate == eight_signals - y) {
+                zero_and_d out{zero_candidate, y};
+                unidentified_signals.erase(out.zero);
+                return out;
+            }
+        }
+    }
+
+    throw new std::runtime_error("Could not find zero and d");
+}
+
+signal_set determine_two(std::set<signal_set>& unidentified_signals,
+                         signal_set acde)
+{
+    for (const auto& two_candidate : unidentified_signals) {
+        for (char y : all_signals) {
+            if (two_candidate == acde + y) {
+                auto out{two_candidate};
+                unidentified_signals.erase(out);
+                return out;
+            }
+        }
+    }
+
+    throw new std::runtime_error("Could not find two");
+}
+
+signal_set determine_three(std::set<signal_set>& unidentified_signals,
+                           signal_set acdg)
+{
+    for (const auto& three_candidate : unidentified_signals) {
+        for (char y : all_signals) {
+            if (three_candidate == acdg + y) {
+                auto out{three_candidate};
+                unidentified_signals.erase(out);
+                return out;
+            }
+        }
+    }
+
+    throw new std::runtime_error("Could not find three");
 }
 
 aoc::solution_result day08(std::string_view input)
@@ -124,242 +268,103 @@ aoc::solution_result day08(std::string_view input)
 
     for (auto line : lines) {
         auto parts{sv_split_range(line, '|') | r::to<std::vector>};
-        auto scrambled_digit_words{sv_words(r::front(parts)) |
-                                   rv::transform(to_signal_string) |
-                                   r::to<std::vector>};
-        auto displayed_digit_words{sv_words(r::front(parts | rv::drop(1))) |
-                                   rv::transform(to_signal_string) |
-                                   r::to<std::vector>};
+        auto scrambled_digit_signals{sv_words(r::front(parts)) |
+                                     rv::transform(to_signal_set) |
+                                     r::to<std::vector>};
+        auto displayed_digit_signals{sv_words(r::front(parts | rv::drop(1))) |
+                                     rv::transform(to_signal_set) |
+                                     r::to<std::vector>};
 
-        std::map<std::string, int> signals_to_digit;
-        std::map<int, std::string> digit_to_signals;
+        std::map<int, signal_set> digit_to_signals;
+        std::map<signal_set, int> digits;
 
-        // std::map<char, char> unscrambled_segments;
-
-        for (auto signals : scrambled_digit_words) {
+        for (auto signals : scrambled_digit_signals) {
             switch (signals.size()) {
                 case 2:
-                    signals_to_digit[signals] = 1;
+                    digits[signals] = 1;
                     digit_to_signals[1] = signals;
                     break;
                 case 4:
-                    signals_to_digit[signals] = 4;
+                    digits[signals] = 4;
                     digit_to_signals[4] = signals;
                     break;
                 case 3:
-                    signals_to_digit[signals] = 7;
+                    digits[signals] = 7;
                     digit_to_signals[7] = signals;
                     break;
                 case 7:
-                    signals_to_digit[signals] = 8;
+                    digits[signals] = 8;
                     digit_to_signals[8] = signals;
                     break;
                 default:
                     // shrug
                     break;
-            } 
+            }
         }
 
-        for (auto signals : displayed_digit_words) {
-            if (signals_to_digit.contains(signals)) {
+        for (auto signals : displayed_digit_signals) {
+            if (digits.contains(signals)) {
                 part_a_sum++;
             }
-            
         }
-        
+
         // Determine the individual segment translation
         // a = 7 - 1
-        const std::string one{digit_to_signals[1]};
-        const std::string four{digit_to_signals[4]};
-        const std::string seven{digit_to_signals[7]};
-        const std::string eight{digit_to_signals[8]};
-        std::vector<char> seven_minus_one{seven | r::to<std::vector>};
-        std::erase(seven_minus_one, one[0]);
-        std::erase(seven_minus_one, one[1]);
-        
-        const char a = seven_minus_one[0];
-        
+        const signal_set one_signals{digit_to_signals[1]};
+        const signal_set four_signals{digit_to_signals[4]};
+        const signal_set seven_signals{digit_to_signals[7]};
+        const signal_set eight_signals{digit_to_signals[8]};
 
-        std::set<std::string> unidentified_signals{scrambled_digit_words.begin(), scrambled_digit_words.end()};
-        unidentified_signals.erase(unidentified_signals.find(one));
-        unidentified_signals.erase(unidentified_signals.find(four));
-        unidentified_signals.erase(unidentified_signals.find(seven));
-        unidentified_signals.erase(unidentified_signals.find(eight));
+        const char a{(seven_signals - one_signals).to_signal()};
 
-        // 9 = 4 + a + g
-        // We don't know g but there will only be one match
-        std::string four_plus_a{four + a};
-        r::sort(four_plus_a);
-        
-        std::string nine;
-        char g{'\0'};
-        for (const auto& x : unidentified_signals) {
-            for (char y : std::string_view{"abcdefg"}) {
-                auto nine_candidate{four_plus_a + y};
-                r::sort(nine_candidate);
-                if (x == nine_candidate) {
-                    nine = nine_candidate;
-                    g = y;
-                    break;
-                }
-            }
-        }
-        
-        if (nine.empty()) {
-            throw new std::runtime_error("Could not find nine and g");
-        }
+        std::set<signal_set> unidentified_signals{
+            scrambled_digit_signals.begin(), scrambled_digit_signals.end()};
+        unidentified_signals.erase(one_signals);
+        unidentified_signals.erase(four_signals);
+        unidentified_signals.erase(seven_signals);
+        unidentified_signals.erase(eight_signals);
 
-        signals_to_digit[nine] = 9;
-        digit_to_signals[9] = nine;
-        
-        unidentified_signals.erase(unidentified_signals.find(nine));
+        const auto [nine_signals, g]{
+            determine_nine_and_g(unidentified_signals, four_signals, a)};
 
         // e = 8 - 9
-        std::vector<char> eight_minus_nine{eight | r::to<std::vector>};
-        std::erase_if(eight_minus_nine, [&](char c) { return nine.find(c) != std::string::npos; });
-        const char e = eight_minus_nine[0];
-        (void)e;
+        const char e = signal_set{eight_signals - nine_signals}.to_signal();
 
-        // 5 and 6 are the pair that you can add e to and get the other
-        std::string five;
-        std::string six;
-        for (const auto& x : unidentified_signals) {
-            for (const auto& y : unidentified_signals) {
-                auto five_candidate{x};
-                auto six_candidate{y};
-                five_candidate.push_back(e);
-                r::sort(five_candidate);
-                if (five_candidate == six_candidate) {
-                    five = x;
-                    six = y;
-                    break;
-                }
-            }
-        }
-        if (five.empty() || six.empty()) {
-            throw new std::runtime_error("Could not find the pair of signals that add e to the other");
-        }
-        signals_to_digit[five] = 5;
-        digit_to_signals[5] = five;
-        signals_to_digit[six] = 6;
-        digit_to_signals[6] = six;
-        unidentified_signals.erase(unidentified_signals.find(five));
-        unidentified_signals.erase(unidentified_signals.find(six));
-
-        // 0, 2 and 3 are left
-        // we know a and e
+        const auto [five_signals, six_signals]{
+            determine_five_and_six(unidentified_signals, e)};
 
         // c = 9 - 5
-        std::vector<char> nine_minus_five{nine | r::to<std::vector>};
-        std::erase_if(nine_minus_five, [&](char c) { return five.find(c) != std::string::npos; });
-        const char c = nine_minus_five[0];
+        const char c = signal_set{nine_signals - five_signals}.to_signal();
 
-        // we know a, c, e
+        const auto [zero_signals, d]{
+            determine_zero_and_d(unidentified_signals, eight_signals)};
 
-        // 0 = 8 - d, and it's the only one that'd 8 - a char
-        char d{'\0'};
-        std::string zero;
-        for (const auto& x : unidentified_signals) {
-            for (char y : std::string_view{"abcdefg"}) {
-                std::vector<char> zero_candidate{eight.begin(), eight.end()};
-                std::erase(zero_candidate, y);
-                if (x == std::string_view{zero_candidate.begin(), zero_candidate.end()}) {
-                    d = y;
-                    zero = x;
-                    break;
-                }
-            }
-        }
-        if (zero.empty()) {
-            throw new std::runtime_error("Could not find zero and d");
-        }
-        signals_to_digit[zero] = 0;
-        digit_to_signals[0] = zero;
-        unidentified_signals.erase(unidentified_signals.find(zero));
+        const signal_set acde{signal_set{a} + c + d + e};
+        const signal_set two_signals{determine_two(unidentified_signals, acde)};
 
-        // 2 and 3 are left
-        // we know a, c, d, e
-
-        std::string acde;
-        acde.push_back(a);
-        acde.push_back(c);
-        acde.push_back(d);
-        acde.push_back(e);
-        char g2{'\0'};
-        std::string two;
-        for (const auto& x : unidentified_signals) {
-            for (char y : std::string_view{"abcdefg"}) {
-                auto two_candidate{acde};
-                two_candidate.push_back(y);
-                r::sort(two_candidate);
-                if (two_candidate == x) {
-                    two = two_candidate;
-                    g2 = y;
-                    break;
-                }
-            }
-        }
-
-        assert(g == g2);
-        (void)g2;
-
-        if (two.empty()) {
-            throw new std::runtime_error("Could not find two and g");
-        }
-        signals_to_digit[two] = 2;
-        digit_to_signals[2] = two;
-        unidentified_signals.erase(unidentified_signals.find(two));
-
-        // 3 is left
-        // we know a, c, d, e, g
-
-        std::string acdg;
-        acdg.push_back(a);
-        acdg.push_back(c);
-        acdg.push_back(d);
-        acdg.push_back(g);
-        char f;
-        std::string three;
-        for (const auto& x : unidentified_signals) {
-            for (char y : std::string_view{"abcdefg"}) {
-                auto three_candidate{acdg};
-                three_candidate.push_back(y);
-                r::sort(three_candidate);
-                if (three_candidate == x) {
-                    three = three_candidate;
-                    f = y;
-                    break;
-                }
-            }
-        }
-
-        if (three.empty()) {
-            throw new std::runtime_error("Could not find three and f");
-        }
-        signals_to_digit[three] = 3;
-        digit_to_signals[3] = three;
-        unidentified_signals.erase(unidentified_signals.find(three));
+        const signal_set acdg{signal_set{a} + c + d + g};
+        const signal_set three_signals{
+            determine_three(unidentified_signals, acdg)};
 
         if (!unidentified_signals.empty()) {
-            throw new std::runtime_error("We should have identified all signals but we didn't");
+            throw new std::runtime_error(
+                "We should have identified all signals but we didn't");
         }
-        // we know a, c, d, e, f, g
 
-
-        (void)f;
-
-
-        // f = 3 - 2
-
+        digits[zero_signals] = 0;
+        digits[two_signals] = 2;
+        digits[three_signals] = 3;
+        digits[five_signals] = 5;
+        digits[six_signals] = 6;
+        digits[nine_signals] = 9;
 
         int output_value{0};
 
-        for (auto signals : displayed_digit_words) {
+        for (auto signals : displayed_digit_signals) {
             output_value *= 10;
-            output_value += signals_to_digit[signals];
+            output_value += digits.at(signals);
         }
         part_b_sum += output_value;
-
     }
     return {part_a_sum, part_b_sum};
 }
