@@ -107,7 +107,7 @@ class signal_set {
         for (char c : rhs.chars_) {
             s.erase(std::remove(s.begin(), s.end(), c), s.end());
         }
-        return {s};
+        return {std::string_view{s}};
     }
 
     friend auto operator<=>(const signal_set& lhs,
