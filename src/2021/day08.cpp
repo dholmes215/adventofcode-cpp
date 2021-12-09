@@ -8,8 +8,6 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 
-#include <term.hpp>
-
 #include <fmt/format.h>
 
 #include <array>
@@ -134,26 +132,6 @@ const signal_set all_signals{std::string_view("abcdefg")};
 constexpr signal_set to_signal_set(std::string_view sv)
 {
     return {sv};
-}
-
-dh::color color;
-
-void print_set(const std::set<std::string>& remaining)
-{
-    fmt::print("unidentified: ");
-    for (const auto& s : remaining) {
-        fmt::print("{} ", s);
-    }
-    fmt::print("\n");
-}
-
-void print_set(const std::set<signal_set>& remaining)
-{
-    fmt::print("unidentified: ");
-    for (const auto& s : remaining) {
-        fmt::print("{} ", s.chars());
-    }
-    fmt::print("\n");
 }
 
 struct nine_and_g {
