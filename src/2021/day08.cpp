@@ -69,12 +69,6 @@ class signal_set {
                 fmt::format("{} is an invalid character", c));
         }
     }
-    signal_set(const signal_set& rhs) : chars_(rhs.chars_){};
-    signal_set& operator=(const signal_set& rhs)
-    {
-        chars_ = rhs.chars_;
-        return *this;
-    }
 
     char to_signal() const
     {
