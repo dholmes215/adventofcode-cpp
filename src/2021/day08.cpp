@@ -36,7 +36,7 @@ class multiple_signal_error : public std::domain_error {
     }
 };
 
-constexpr std::string sorted_unique(std::string_view sv)
+std::string sorted_unique(std::string_view sv)
 {
     std::string s(sv);
     std::sort(s.begin(), s.end());
@@ -51,9 +51,9 @@ constexpr bool valid_char(char c) noexcept
 
 class signal_set {
    public:
-    constexpr signal_set() = default;
+    signal_set() = default;
 
-    constexpr signal_set(std::string_view sv) : chars_(sorted_unique(sv))
+    signal_set(std::string_view sv) : chars_(sorted_unique(sv))
     {
         // Must contain only letters from a to g
         // if (!r::all_of(sv, valid_char)) {
@@ -62,15 +62,15 @@ class signal_set {
                 fmt::format("{} contains invalid characters", sv));
         }
     }
-    constexpr signal_set(char c) : signal_set(std::string{c})
+    signal_set(char c) : signal_set(std::string{c})
     {
         if (!valid_char(c)) {
             throw new not_signal_error(
                 fmt::format("{} is an invalid character", c));
         }
     }
-    constexpr signal_set(const signal_set& rhs) : chars_(rhs.chars_){};
-    constexpr signal_set& operator=(const signal_set& rhs)
+    signal_set(const signal_set& rhs) : chars_(rhs.chars_){};
+    signal_set& operator=(const signal_set& rhs)
     {
         chars_ = rhs.chars_;
         return *this;
@@ -85,31 +85,29 @@ class signal_set {
         return chars_[0];
     }
 
-    constexpr auto cbegin() const noexcept { return chars_.cbegin(); }
-    constexpr auto cend() const noexcept { return chars_.cend(); }
-    constexpr auto begin() const noexcept { return cbegin(); }
-    constexpr auto end() const noexcept { return cend(); }
+    auto cbegin() const noexcept { return chars_.cbegin(); }
+    auto cend() const noexcept { return chars_.cend(); }
+    auto begin() const noexcept { return cbegin(); }
+    auto end() const noexcept { return cend(); }
 
-    constexpr auto size() const noexcept { return chars_.size(); }
+    auto size() const noexcept { return chars_.size(); }
 
-    constexpr friend signal_set operator+(const signal_set& lhs,
-                                          const signal_set& rhs)
+    friend signal_set operator+(const signal_set& lhs, const signal_set& rhs)
     {
         return signal_set(lhs.chars_ + rhs.chars_);
     }
 
-    constexpr friend signal_set operator+(const signal_set& lhs, char rhs)
+    friend signal_set operator+(const signal_set& lhs, char rhs)
     {
         return signal_set(lhs + signal_set{rhs});
     }
 
-    constexpr friend signal_set operator+(char lhs, const signal_set& rhs)
+    friend signal_set operator+(char lhs, const signal_set& rhs)
     {
         return signal_set(signal_set{lhs} + rhs);
     }
 
-    constexpr friend signal_set operator-(const signal_set& lhs,
-                                          const signal_set& rhs)
+    friend signal_set operator-(const signal_set& lhs, const signal_set& rhs)
     {
         std::string s(lhs.chars_);
         for (char c : rhs.chars_) {
@@ -121,7 +119,7 @@ class signal_set {
     friend auto operator<=>(const signal_set& lhs,
                             const signal_set& rhs) noexcept = default;
 
-    constexpr std::string_view chars() const noexcept { return chars_; }
+    std::string_view chars() const noexcept { return chars_; }
 
    private:
     std::string chars_;
@@ -129,7 +127,7 @@ class signal_set {
 
 const signal_set all_signals{std::string_view("abcdefg")};
 
-constexpr signal_set to_signal_set(std::string_view sv)
+signal_set to_signal_set(std::string_view sv)
 {
     return {sv};
 }
