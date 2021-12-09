@@ -21,6 +21,7 @@ find_package(ctre CONFIG REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(dh-term REQUIRED)
 find_package(fmt REQUIRED)
+find_package(mdspan REQUIRED)
 find_package(range-v3 REQUIRED)
 find_package(tl-expected REQUIRED)
 

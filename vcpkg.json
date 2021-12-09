@@ -8,6 +8,7 @@
         "cxxopts",
         "dh-term",
         "fmt",
+        "mdspan",
         "range-v3",
         "tl-expected"
     ]

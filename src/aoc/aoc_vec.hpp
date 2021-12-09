@@ -59,7 +59,7 @@ struct rect {
                });
     }
 
-    bool contains(vec2<int> const& point)
+    bool contains(vec2<int> const& point) const noexcept
     {
         return point.x >= top_left.x && point.x < top_left.x + dimensions.x &&
                point.y >= top_left.y && point.y < top_left.y + dimensions.y;

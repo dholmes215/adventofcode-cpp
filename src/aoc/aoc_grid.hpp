@@ -116,6 +116,42 @@ class grid_adapter {
     Range* range_;
 };
 
+template <typename Range>
+class dynamic_grid_adapter {
+   public:
+    dynamic_grid_adapter(Range& range, int width) noexcept
+        : range_(&range),
+          width_(width),
+          height_(static_cast<int>(r::distance(range)) / width)
+    {
+    }
+
+    auto row(int y) const noexcept { return grid_row(*range_, width_, y); }
+    auto rows() const noexcept { return grid_rows(*range_, width_); }
+    auto col(int x) const noexcept { return grid_col(*range_, width_, x); }
+    auto cols() const noexcept { return grid_cols(*range_, width_); }
+
+    int width() const noexcept { return width_; }
+    int height() const noexcept { return height_; }
+
+    auto data() noexcept { return rv::all(*range_); }
+
+    auto& operator[](vec2<int> index) const noexcept
+    {
+        return rows()[index.y][index.x];
+    }
+
+    // subgrid_view<grid_adapter> subgrid(rect<int> r) noexcept
+    // {
+    //     return {*this, r.top_left, r.dimensions};
+    // }
+
+   private:
+    Range* range_;
+    int width_;
+    int height_;
+};
+
 template <typename Value, int width, int height>
 class static_grid
     : public grid_adapter<
