@@ -22,23 +22,9 @@ namespace aoc::year2021 {
 
 namespace {
 
-}  // namespace
-
 using height_t = std::int8_t;
 using point_t = vec2<int>;
 using grid_t = dynamic_grid_adapter<std::vector<height_t>>;
-
-// void print_grid(const grid_t& grid)
-// {
-//     int row_count{grid.height()};
-//     int col_count{grid.width()};
-//     for (int y{0}; y < row_count; y++) {
-//         for (int x{0}; x < col_count; x++) {
-//             fmt::print("{}", grid[{x, y}]);
-//         }
-//         fmt::print("\n");
-//     }
-// }
 
 std::array<vec2<int>, 4> get_neighbors(vec2<int> p)
 {
@@ -114,20 +100,25 @@ point_t discover_basin_low_point(const grid_t& grid, point_t p)
     return std::get<0>(lowest_pair);
 }
 
+}  // namespace
+
 void print_grid(const grid_t& grid)
 {
     const auto low_points{get_low_points(grid)};
     auto rows{grid.rows() | r::to<std::vector>};
     for (int y{0}; y < grid.height(); y++) {
+        std::string line;
         for (int x{0}; x < grid.width(); x++) {
+            std::string formatted;
             if (low_points.count({x, y})) {
-                fmt::print("\x1B[33m{:1}\x1B[0m", grid[{x, y}]);
+                formatted = fmt::format("\x1B[33m{:1}\x1B[0m", grid[{x, y}]);
             }
             else {
-                fmt::print("{:1}", grid[{x, y}]);
+                formatted = fmt::format("{:1}", grid[{x, y}]);
             }
+            line += formatted;
         }
-        fmt::print("\n");
+        fmt::print("{}\n", line);
     }
 }
 
@@ -147,12 +138,8 @@ aoc::solution_result day09(std::string_view input)
 
     dynamic_grid_adapter grid{data, static_cast<int>(col_count)};
 
-    // fmt::print("Cols: {}  Rows: {}\n", col_count, row_count);
-    // print_grid(grid);
-
     int part_a_sum{0};
     for (auto p : get_low_points(grid)) {
-        // fmt::print("{},{} is low\n", p.x, p.y);
         part_a_sum += grid[p] + 1;
     }
 
@@ -165,14 +152,7 @@ aoc::solution_result day09(std::string_view input)
             continue;
         }
         point_t low_point{discover_basin_low_point(grid, p)};
-        // fmt::print("{},{} low point is {},{}\n", p.x, p.y, low_point.x,
-        //            low_point.y);
         all_basins[low_point].insert(p);
-    }
-
-    for (const auto& [low_point, basin] : all_basins) {
-        fmt::print("Basin at {},{} size {}\n", low_point.x, low_point.y,
-                   basin.size());
     }
 
     auto set_size{[](const std::set<point_t>& s) { return s.size(); }};
@@ -182,6 +162,8 @@ aoc::solution_result day09(std::string_view input)
     r::sort(sizes, std::greater<>{});
 
     auto part_b_product{sizes[0] * sizes[1] * sizes[2]};
+
+    // print_grid(grid);
 
     return {part_a_sum, part_b_product};
 }
