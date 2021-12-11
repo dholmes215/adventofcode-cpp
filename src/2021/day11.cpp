@@ -26,7 +26,7 @@ using grid_t = static_grid<energy_t, grid_size, grid_size>;
 using point_t = vec2<int>;  // TODO: member of grid
 using flashcount_t = int;
 
-std::int8_t digit_to_number(char c)
+std::int8_t digit_to_number(char c) noexcept
 {
     return c - '0';
 }
@@ -51,17 +51,17 @@ std::int8_t digit_to_number(char c)
 
 }  // namespace
 
-void increment_grid(grid_t& grid)
+void increment_grid(grid_t& grid) noexcept
 {
     for (auto& oct : grid.data()) {
         oct++;
     }
 }
 
-constexpr std::array<point_t, 9> directions{
+constexpr std::array<point_t, 8> directions{
     {{-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}}};
 
-auto get_neighbors(point_t p)
+auto get_neighbors(point_t p) noexcept
 {
     return directions | rv::transform([p](auto p2) { return p + p2; }) |
            rv::filter([](point_t p2) { return grid_t::area.contains(p2); });
