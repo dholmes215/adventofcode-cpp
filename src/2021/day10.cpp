@@ -11,7 +11,6 @@
 #include <fmt/format.h>
 
 #include <cstdint>
-#include <map>
 #include <string>
 #include <string_view>
 
@@ -19,50 +18,40 @@ namespace aoc::year2021 {
 
 namespace {
 
-const std::map<char, int> syntax_points{{')', 3},
-                                        {']', 57},
-                                        {'}', 1197},
-                                        {'>', 25137}};
-
-// const std::map<char, std::uint64_t> autocomplete_points{{')', 1ULL},
-//                                                         {']', 2ULL},
-//                                                         {'}', 3ULL},
-//                                                         {'>', 4ULL}};
-
-std::uint64_t autocomplete_points_fn(char c)
+// clang-format off
+int syntax_points(char c) noexcept
 {
     switch (c) {
-        case ')':
-            return 1;
-        case ']':
-            return 2;
-        case '}':
-            return 3;
-        case '>':
-            return 4;
+        case ')': return 3;
+        case ']': return 57;
+        case '}': return 1197;
+        case '>': return 25137;
     }
     return 0;
 }
 
-// const std::map<char, char> left_to_right{{'(', ')'},
-//                                          {'[', ']'},
-//                                          {'{', '}'},
-//                                          {'<', '>'}};
-
-char left_to_right_fn(char c)
+std::uint64_t autocomplete_points(char c) noexcept
 {
     switch (c) {
-        case '(':
-            return ')';
-        case '[':
-            return ']';
-        case '{':
-            return '}';
-        case '<':
-            return '>';
+        case ')': return 1;
+        case ']': return 2;
+        case '}': return 3;
+        case '>': return 4;
+    }
+    return 0ULL;
+}
+
+char left_to_right(char c) noexcept
+{
+    switch (c) {
+        case '(': return ')';
+        case '[': return ']';
+        case '{': return '}';
+        case '<': return '>';
     }
     return '\0';
 }
+// clang-format on
 
 struct line_scores {
     int syntax_error_score_{0};
@@ -82,18 +71,18 @@ std::uint64_t to_autocomplete_score(const line_scores& scores)
 int line_syntax_points(std::string& stack, std::string_view line)
 {
     for (auto c : line) {
-        if (left_to_right_fn(c)) {
+        if (left_to_right(c)) {
             stack.push_back(c);
         }
         else if (stack.empty()) {
-            return syntax_points.at(c);
+            return syntax_points(c);
         }
         else {
-            if (left_to_right_fn(stack.back()) == c) {
+            if (left_to_right(stack.back()) == c) {
                 stack.pop_back();
             }
             else {
-                return syntax_points.at(c);
+                return syntax_points(c);
             }
         }
     }
@@ -106,10 +95,10 @@ int line_syntax_points(std::string& stack, std::string_view line)
 std::uint64_t line_autocomplete_points(std::string& stack)
 {
     auto accumulate_points{[](std::uint64_t points, char c) {
-        return points * 5 + autocomplete_points_fn(c);
+        return points * 5 + autocomplete_points(c);
     }};
-    return r::accumulate(stack | rv::reverse | rv::transform(left_to_right_fn),
-                         0ULL, accumulate_points);
+    return r::accumulate(stack | rv::reverse | rv::transform(left_to_right),
+                         0ULL, accumulate_points);  //
 }
 
 line_scores line_points(std::string_view line)
