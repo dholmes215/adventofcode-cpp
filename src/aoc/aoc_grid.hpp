@@ -162,6 +162,7 @@ class static_grid
     static constexpr auto allowed_size{static_cast<std::size_t>(size)};
 
    public:
+    static constexpr rect<int> area{{0, 0}, {width, height}};
     static_grid() noexcept
         : grid_adapter<std::array<Value, allowed_size>, width>{data_}, data_{0}
     {
@@ -190,6 +191,7 @@ class heap_data {
 template <typename Value, int width, int height>
 class heap_grid : public grid_adapter<heap_data<Value, width * height>, width> {
    public:
+    static constexpr rect<int> area{{0, 0}, {width, height}};
     heap_grid() noexcept
         : grid_adapter<heap_data<Value, width * height>, width>{data_}, data_{}
     {
