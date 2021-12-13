@@ -6,7 +6,11 @@
 //
 
 #include <aoc.hpp>
+#include <aoc_grid.hpp>
 #include <aoc_range.hpp>
+#include <aoc_vec.hpp>
+
+#include <fmt/format.h>
 
 #include <string_view>
 
@@ -16,10 +20,94 @@ namespace {
 
 }  // namespace
 
+using int_t = int;
+using coord_t = vec2<int_t>;
+using rect_t = rect<int_t>;
+using dot_t = char;
+constexpr int_t grid_size{2048};
+using grid_t = heap_grid<dot_t, grid_size, grid_size>;
+
+struct fold_t {
+    char axis;
+    int_t pos;
+};
+
+fold_t to_fold(std::string_view s)
+{
+    const std::string_view last{s.substr(s.find_last_of('=') - 1)};
+    return {last[0], to_num<int_t>(last.substr(2))};
+}
+
+void print_grid(const auto& grid)
+{
+    for (const auto row : grid.rows()) {
+        for (dot_t d : row) {
+            fmt::print("{}", d);
+        }
+        fmt::print("\n");
+    }
+}
+
 aoc::solution_result day13(std::string_view input)
 {
-    (void)input;
-    return {};
+    const auto divide{input.find('f')};
+    const auto coords{
+        numbers<int_t>(input.substr(0, divide)) | rv::chunk(2) |
+        rv::transform([](auto&& x) {
+            return coord_t{r::front(x), r::front(x | rv::drop(1))};
+        }) |
+        r::to<std::vector>};
+
+    rect_t current_area{
+        coord_t{0, 0},
+        coord_t{1, 1} +
+            r::accumulate(coords, coord_t{0, 0}, [](coord_t lhs, coord_t rhs) {
+                return coord_t{std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y)};
+            })};
+
+    grid_t grid;
+    r::fill(grid.data(), '.');
+    for (const auto& c : coords) {
+        grid[c] = '#';
+    }
+
+    // print_grid(grid.subgrid(current_area));
+
+    const auto folds{sv_lines(input.substr(divide)) | rv::transform(to_fold) |
+                     r::to<std::vector>};
+
+    for (const auto& fold : folds) {
+        if (fold.axis == 'x') {
+            auto new_width{fold.pos};
+            current_area = {{0, 0}, {new_width, current_area.dimensions.x}};
+            for (auto p : current_area.all_points()) {
+                coord_t flip_point{new_width * 2 - p.x, p.y};
+                if (grid[flip_point] == '#') {
+                    grid[p] = '#';
+                }
+            }
+        }
+        else {
+            auto new_height{fold.pos};
+            current_area = {{0, 0}, {current_area.dimensions.x, new_height}};
+            for (auto p : current_area.all_points()) {
+                coord_t flip_point{p.x, new_height * 2 - p.y};
+                if (grid[flip_point] == '#') {
+                    grid[p] = '#';
+                }
+            }
+        }
+
+        if (current_area.dimensions.x < 200 && current_area.dimensions.y < 200) {
+        fmt::print("After fold: \n");
+            print_grid(grid.subgrid(current_area));
+        }
+
+    }
+
+    // auto dots{r::count(grid.subgrid(current_area).data(), '#')};
+
+    return {0, 0};
 }
 
 }  // namespace aoc::year2021
