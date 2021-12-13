@@ -20,7 +20,6 @@ namespace {
 
 using cave_t = std::string_view;
 using path_map_t = std::map<cave_t, std::set<cave_t>>;
-using path_t = std::vector<cave_t>;
 
 bool is_small(cave_t cave)
 {
@@ -28,69 +27,34 @@ bool is_small(cave_t cave)
            r::all_of(cave, [](char c) { return c >= 'a' && c <= 'z'; });
 }
 
-std::vector<path_t> find_all_paths_a(const path_map_t& graph,
-                                     cave_t start = "start",
-                                     cave_t end = "end",
-                                     std::set<cave_t> visited_small_caves = {})
+int count_all_paths(const path_map_t& graph,
+                    bool cave_revisit_available = false,
+                    cave_t start = "start",
+                    cave_t end = "end",
+                    std::set<cave_t> visited_small_caves = {})
 {
     if (start == end) {
-        return {path_t{start}};
+        return 1;
     }
 
     if (is_small(start)) {
+        if (visited_small_caves.contains(start)) {
+            cave_revisit_available = false;
+        }
         visited_small_caves.insert(start);
     }
 
-    std::vector<path_t> paths_out;
+    int paths_out{0};
 
     const auto& adjacent_vertexes{graph.at(start)};
     for (const cave_t& v : adjacent_vertexes) {
-        if (is_small(v) && visited_small_caves.contains(v)) {
+        if (is_small(v) && visited_small_caves.contains(v) &&
+            !cave_revisit_available) {
             continue;
         }
 
-        for (path_t path :
-             find_all_paths_a(graph, v, end, visited_small_caves)) {
-            path.push_back(start);
-            paths_out.push_back(std::move(path));
-        }
-    }
-
-    return paths_out;
-}
-
-std::vector<path_t> find_all_paths_b(
-    const path_map_t& graph,
-    cave_t start = "start",
-    cave_t end = "end",
-    std::map<cave_t, int> small_cave_visits = {},
-    bool single_small_cave_visited_twice = false)
-{
-    if (start == end) {
-        return {path_t{start}};
-    }
-
-    if (is_small(start)) {
-        small_cave_visits[start]++;
-        if (small_cave_visits[start] == 2) {
-            single_small_cave_visited_twice = true;
-        }
-    }
-
-    std::vector<path_t> paths_out;
-
-    const auto& adjacent_vertexes{graph.at(start)};
-    for (const cave_t& v : adjacent_vertexes) {
-        if (is_small(v) && small_cave_visits.contains(v) &&
-            (small_cave_visits.at(v) >= 2 || single_small_cave_visited_twice)) {
-            continue;
-        }
-
-        for (path_t path : find_all_paths_b(graph, v, end, small_cave_visits,
-                                            single_small_cave_visited_twice)) {
-            path.push_back(start);
-            paths_out.push_back(std::move(path));
-        }
+        paths_out += count_all_paths(graph, cave_revisit_available, v, end,
+                                     visited_small_caves);
     }
 
     return paths_out;
@@ -133,8 +97,7 @@ path_map_t build_graph(std::string_view input)
 aoc::solution_result day12(std::string_view input)
 {
     const path_map_t edge_map{build_graph(input)};
-    return {find_all_paths_a(edge_map).size(),
-            find_all_paths_b(edge_map).size()};
+    return {count_all_paths(edge_map, false), count_all_paths(edge_map, true)};
 }
 
 }  // namespace aoc::year2021
