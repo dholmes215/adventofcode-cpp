@@ -6,6 +6,7 @@
 //
 
 #include <aoc.hpp>
+#include <aoc_font.hpp>
 #include <aoc_grid.hpp>
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
@@ -17,8 +18,6 @@
 namespace aoc::year2021 {
 
 namespace {
-
-}  // namespace
 
 using int_t = int;
 using coord_t = vec2<int_t>;
@@ -38,15 +37,17 @@ fold_t to_fold(std::string_view s)
     return {last[0], to_num<int_t>(last.substr(2))};
 }
 
-void print_grid(const auto& grid)
-{
-    for (const auto row : grid.rows()) {
-        for (dot_t d : row) {
-            fmt::print("{}", d);
-        }
-        fmt::print("\n");
-    }
-}
+// void print_grid(const auto& grid)
+// {
+//     for (const auto row : grid.rows()) {
+//         for (dot_t d : row) {
+//             fmt::print("{}", d);
+//         }
+//         fmt::print("\n");
+//     }
+// }
+
+}  // namespace
 
 aoc::solution_result day13(std::string_view input)
 {
@@ -71,11 +72,10 @@ aoc::solution_result day13(std::string_view input)
         grid[c] = '#';
     }
 
-    // print_grid(grid.subgrid(current_area));
-
     const auto folds{sv_lines(input.substr(divide)) | rv::transform(to_fold) |
                      r::to<std::vector>};
 
+    std::optional<int> dots_after_first_fold{};
     for (const auto& fold : folds) {
         if (fold.axis == 'x') {
             auto new_width{fold.pos};
@@ -98,16 +98,27 @@ aoc::solution_result day13(std::string_view input)
             }
         }
 
-        if (current_area.dimensions.x < 200 && current_area.dimensions.y < 200) {
-        fmt::print("After fold: \n");
-            print_grid(grid.subgrid(current_area));
+        // if (current_area.dimensions.x < 200 && current_area.dimensions.y < 200) {
+        // fmt::print("After fold: \n");
+        //     print_grid(grid.subgrid(current_area));
+        // }
+        if (!dots_after_first_fold) {
+            dots_after_first_fold =
+                r::count(grid.subgrid(current_area).data(), '#');
         }
-
     }
 
-    // auto dots{r::count(grid.subgrid(current_area).data(), '#')};
+    std::string activation_code;
+    for (int i{0}; i < 8; i++) {
+        // fmt::print("---------\n");
+        // print_grid(grid.subgrid({{i * 5, 0}, {4, 6}}));
 
-    return {0, 0};
+        std::array<dot_t, 24> char_array;
+        r::copy(grid.subgrid({{i * 5, 0}, {4, 6}}).data(), char_array.begin());
+        activation_code += recognize_char(char_array);
+    }
+
+    return {*dots_after_first_fold, activation_code};
 }
 
 }  // namespace aoc::year2021
