@@ -10,7 +10,6 @@
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <map>
@@ -18,6 +17,8 @@
 #include <string>
 
 namespace aoc::year2021 {
+
+namespace {
 
 using count_t = std::uint64_t;
 using count_map_t = std::map<char, count_t>;
@@ -48,21 +49,6 @@ std::pair<pair_t, char> parse_rule(std::string_view s)
     return {{s[0], s[1]}, s[6]};
 }
 
-std::string run_step(const rules_t& rules, std::string_view s)
-{
-    std::string transformed;
-    transformed.reserve(s.size() * 2);
-    transformed.push_back(s[0]);
-    for (const auto p : s | rv::sliding(2)) {
-        const pair_t a{p[0], p[1]};
-        if (rules.contains(a)) {
-            transformed += rules.at(a);
-        }
-        transformed.push_back(p[1]);
-    }
-    return transformed;
-}
-
 count_map_t count_occurrences(std::string_view s)
 {
     count_map_t counts;
@@ -77,7 +63,7 @@ auto count_min_max(const std::map<char, count_t>& counts)
     auto without_const{[](std::pair<char, count_t> p) {
         return std::pair<char, count_t>{p.first, p.second};
     }};
-    return std::ranges::minmax(
+    return r::minmax(
         counts | rv::transform(without_const),
         [](const auto& a, const auto& b) { return a.second < b.second; });
 }
@@ -127,8 +113,6 @@ count_t solve(std::string_view polymer, const rules_t& rules, int iterations)
     const auto difference{max.second - min.second};
     return difference;
 }
-
-namespace {
 
 }  // namespace
 
