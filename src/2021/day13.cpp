@@ -75,7 +75,7 @@ aoc::solution_result day13(std::string_view input)
     const auto folds{sv_lines(input.substr(divide)) | rv::transform(to_fold) |
                      r::to<std::vector>};
 
-    std::optional<int> dots_after_first_fold{};
+    std::optional<std::size_t> dots_after_first_fold{};
     for (const auto& fold : folds) {
         if (fold.axis == 'x') {
             auto new_width{fold.pos};
