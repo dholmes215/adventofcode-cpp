@@ -100,17 +100,19 @@ dijkstra_out dijkstra(const risk_grid_t& grid, point_t start)
     dist_grid[start] = risk_level_t{0};
 
     queue_t q;
-    for (point_t p : grid.area().all_points()) {
-        q.push({p, dist_grid[p]});
+    for (point_t point : grid.area().all_points()) {
+        q.push({point, dist_grid[point]});
     }
+
     while (!q.empty()) {
         queue_entry e{q.top()};
         q.pop();
-        if (e.dist == infinity) {
+        const auto u{e.vert};  // best vertex
+        if (e.dist != dist_grid[u]) {
+            // We re-added and already processed this vertex
             continue;
         }
 
-        const auto u{e.vert};
         for (point_t neighbor_v : neighbors(grid.area(), u)) {
             const auto alt{dist_grid[u] + grid[neighbor_v]};
             if (alt < dist_grid[neighbor_v]) {
