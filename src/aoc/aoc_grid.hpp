@@ -133,6 +133,7 @@ class dynamic_grid_adapter {
 
     int width() const noexcept { return width_; }
     int height() const noexcept { return height_; }
+    rect<int> area() const noexcept { return {{0, 0}, {width_, height_}}; }
 
     auto data() noexcept { return rv::all(*range_); }
 
