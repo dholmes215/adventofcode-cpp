@@ -21,7 +21,7 @@ namespace aoc {
 
 using codepoint_t = std::uint32_t;
 
-std::uint8_t pack_bools(std::span<const bool, 8> bools);
+codepoint_t pack_bools(std::span<const bool, 8> bools);
 
 codepoint_t to_braille(std::span<const bool, 4> bit_col_1,
                        std::span<const bool, 4> bit_col_2);

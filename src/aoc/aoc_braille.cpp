@@ -9,12 +9,12 @@
 
 namespace aoc {
 
-std::uint8_t pack_bools(std::span<const bool, 8> bools)
+codepoint_t pack_bools(std::span<const bool, 8> bools)
 {
-    std::uint8_t result{0};
+    codepoint_t result{0};
     for (std::size_t i{0}; i < 8; ++i) {
         if (bools[i]) {
-            result |= 1 << i;
+            result |= codepoint_t{1} << static_cast<codepoint_t>(i);
         }
     }
     return result;
@@ -32,8 +32,8 @@ codepoint_t to_braille(std::span<const bool, 4> bit_col_1,
     bools[5] = bit_col_2[2];
     bools[6] = bit_col_1[3];
     bools[7] = bit_col_2[3];
-    constexpr codepoint_t braile_start{0x2800};
-    return braile_start + pack_bools(bools);
+    constexpr codepoint_t braille_start{0x2800};
+    return braille_start + pack_bools(bools);
 }
 
 std::string to_braille_utf8(std::span<const bool, 4> bit_col_1,
