@@ -8,6 +8,8 @@
 #ifndef AOC_VEC_HPP
 #define AOC_VEC_HPP
 
+#include "aoc_range.hpp"
+
 #include <compare>
 #include <functional>
 
