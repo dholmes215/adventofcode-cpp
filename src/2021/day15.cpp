@@ -10,7 +10,9 @@
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
 
-#include <fmt/format.h>
+// #include <term.hpp>
+
+// #include <fmt/format.h>
 
 #include <limits>
 #include <queue>
@@ -21,8 +23,6 @@
 namespace aoc::year2021 {
 
 namespace {
-
-}  // namespace
 
 using risk_level_t = int;
 using risk_grid_t = dynamic_grid_adapter<std::vector<risk_level_t>>;
@@ -43,16 +43,35 @@ struct queue_entry {
 
 using queue_t = std::priority_queue<queue_entry>;
 
-void print_grid(const risk_grid_t& grid)
-{
-    for (const auto y : rv::iota(0, grid.height())) {
-        for (const auto x : rv::iota(0, grid.width())) {
-            point_t p{x, y};
-            fmt::print("{:1}", grid[p]);
-        }
-        fmt::print("\n");
-    }
-}
+// void print_grid(const risk_grid_t& grid)
+// {
+//     for (const auto y : rv::iota(0, grid.height())) {
+//         for (const auto x : rv::iota(0, grid.width())) {
+//             point_t p{x, y};
+//             fmt::print("{:1}", grid[p]);
+//         }
+//         fmt::print("\n");
+//     }
+// }
+
+// void print_grid_highlighted(const risk_grid_t& grid,
+//                             const std::vector<point_t>& path)
+// {
+//     dh::color color;
+//     std::set<point_t> path_set(path.begin(), path.end());
+//     for (const auto y : rv::iota(0, grid.height())) {
+//         for (const auto x : rv::iota(0, grid.width())) {
+//             point_t p{x, y};
+//             if (path_set.contains(p)) {
+//                 fmt::print("{0:yellow}{1:1}{0:reset}", color, grid[p]);
+//             }
+//             else {
+//                 fmt::print("{0:blue}{1:1}{0:reset}", color, grid[p]);
+//             }
+//         }
+//         fmt::print("{0:reset}\n", color);
+//     }
+// }
 
 struct dijkstra_out {
     std::vector<risk_level_t> dist;
@@ -71,10 +90,10 @@ auto neighbors(rect<int> area, point_t p)
 dijkstra_out dijkstra(const risk_grid_t& grid, point_t start)
 {
     dijkstra_out out;
-    out.dist.resize(static_cast<std::size_t>(grid.width() * grid.height()),
-                    infinity);
-    out.prev.resize(static_cast<std::size_t>(grid.width() * grid.height()),
-                    undefined);
+    const auto data_size{
+        static_cast<std::size_t>(grid.width() * grid.height())};
+    out.dist.resize(data_size, infinity);
+    out.prev.resize(data_size, undefined);
 
     risk_grid_t dist_grid(out.dist, grid.width());
     point_grid_t prev_grid(out.prev, grid.width());
@@ -105,18 +124,52 @@ dijkstra_out dijkstra(const risk_grid_t& grid, point_t start)
     return out;
 }
 
-std::vector<point_t> make_path(const point_grid_t& dijkstra_prev,
-                               const point_t source,
-                               const point_t dest)
+// std::vector<point_t> make_path(const point_grid_t& dijkstra_prev,
+//                                const point_t source,
+//                                const point_t dest)
+// {
+//     std::vector<point_t> path;
+//     point_t p{dest};
+//     while (p != source) {
+//         path.push_back(p);
+//         p = dijkstra_prev[p];
+//     }
+//     return path;
+// }
+
+std::vector<risk_level_t> expand_grid(const risk_grid_t& grid)
 {
-    std::vector<point_t> path;
-    point_t p{dest};
-    while (p != source) {
-        path.push_back(p);
-        p = dijkstra_prev[p];
+    std::vector<risk_level_t> expanded_data;
+    const int grid_size{grid.width()};
+    expanded_data.resize(static_cast<std::size_t>(grid_size * grid_size * 25));
+    risk_grid_t expanded_grid{expanded_data, grid_size * 5};
+    for (point_t new_point : expanded_grid.area().all_points()) {
+        point_t old_point{new_point.x % grid_size, new_point.y % grid_size};
+        risk_level_t x_repeat{new_point.x / grid_size};
+        risk_level_t y_repeat{new_point.y / grid_size};
+        risk_level_t increase{x_repeat + y_repeat};
+        expanded_grid[new_point] = grid[old_point] + increase;
+        if (expanded_grid[new_point] > 9) {
+            expanded_grid[new_point] -= 9;
+        }
     }
-    return path;
+    return expanded_data;
 }
+
+risk_level_t calculate_total_risk(const risk_grid_t& grid)
+{
+    const point_t source{0, 0};
+    const point_t dest{grid.width() - 1, grid.height() - 1};
+
+    auto [dist, prev]{dijkstra(grid, source)};
+
+    // FIXME: adapter doesn't work for `const` vector
+    risk_grid_t dist_grid{dist, grid.width()};
+
+    return dist_grid[dest];
+}
+
+}  // namespace
 
 aoc::solution_result day15(std::string_view input)
 {
@@ -129,51 +182,13 @@ aoc::solution_result day15(std::string_view input)
             data.begin());
     risk_grid_t grid{data, grid_size};
 
-    const point_t source{0, 0};
-    const point_t dest{grid.width() - 1, grid.height() - 1};
+    const risk_level_t total_risk{calculate_total_risk(grid)};
 
-    auto [dist, prev]{dijkstra(grid, source)};
+    std::vector<risk_level_t> expanded_data{expand_grid(grid)};
+    risk_grid_t expanded_grid{expanded_data, grid_size * 5};
+    const risk_level_t total_risk_expanded{calculate_total_risk(expanded_grid)};
 
-    // FIXME: adapter doesn't work for `const` vector
-    risk_grid_t dist_grid{dist, grid.width()};
-    point_grid_t prev_grid{prev, grid.width()};
-
-    const auto path{make_path(prev_grid, source, dest)};
-    risk_level_t total_risk{0};
-    for (const auto p : path) {
-        total_risk += grid[p];
-    }
-
-    // Part 2
-
-    std::vector<risk_level_t> data_b;
-    data_b.resize(data.size() * 25);
-    risk_grid_t grid_b{data_b, grid_size * 5};
-    for (point_t p : grid_b.area().all_points()) {
-        point_t p_a{p.x % grid_size, p.y % grid_size};
-        risk_level_t x_repeat{p.x / grid_size};
-        risk_level_t y_repeat{p.y / grid_size};
-        risk_level_t increase{x_repeat + y_repeat};
-        grid_b[p] = grid[p_a] + increase;
-        if (grid_b[p] > 9) {
-            grid_b[p] -= 9;
-        }
-    }
-    // print_grid(grid_b);
-
-    // TODO: implement operator* for vec2
-    const point_t dest_b{grid.width() * 5 - 1, grid.height() * 5 - 1};
-
-    auto [dist_b, prev_b]{dijkstra(grid_b, source)};
-    risk_grid_t dist_grid_b{dist_b, grid_b.width()};
-    point_grid_t prev_grid_b{prev_b, grid_b.width()};
-
-    const auto path_b{make_path(prev_grid_b, source, dest_b)};
-    risk_level_t total_risk_b{0};
-    for (const auto p : path_b) {
-        total_risk_b += grid_b[p];
-    }
-    return {total_risk, total_risk_b};
+    return {total_risk, total_risk_expanded};
 }
 
 }  // namespace aoc::year2021
