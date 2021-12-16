@@ -102,6 +102,8 @@ std::string to_string(packet_type_id id)
         case packet_type_id::equal_to:
             return "equal to";
     }
+    throw input_error(
+        fmt::format("Invalid packet type: {}", static_cast<int>(id)));
 }
 
 packet_type_id read_packet_type_id(bit_iter_t& iter)
