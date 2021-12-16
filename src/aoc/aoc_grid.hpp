@@ -11,7 +11,10 @@
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
 
+#include <array>
 #include <compare>
+#include <memory>
+#include <span>
 
 namespace aoc {
 
@@ -130,6 +133,11 @@ class dynamic_grid_adapter {
     {
     }
 
+    dynamic_grid_adapter(Range& range, int width, int height) noexcept
+        : range_(&range), width_(width), height_(height)
+    {
+    }
+
     auto row(int y) const noexcept { return grid_row(*range_, width_, y); }
     auto rows() const noexcept { return grid_rows(*range_, width_); }
     auto col(int x) const noexcept { return grid_col(*range_, width_, x); }
@@ -181,8 +189,7 @@ class heap_data {
     static constexpr auto allowed_size{static_cast<std::size_t>(size)};
 
    public:
-    heap_data() noexcept
-        : data_{std::make_unique<std::array<Value, allowed_size>>()}
+    heap_data() : data_{std::make_unique<std::array<Value, allowed_size>>()}
     {
         r::fill(*data_, Value{});
     }
@@ -198,11 +205,43 @@ class heap_grid : public grid_adapter<heap_data<Value, width * height>, width> {
    public:
     static constexpr rect<int> area{{0, 0}, {width, height}};
     heap_grid() noexcept
+        // FIXME: passign `data_` by reference before it's initialized is
+        // undefined behavior
         : grid_adapter<heap_data<Value, width * height>, width>{data_}, data_{}
     {
     }
 
     heap_data<Value, width * height> data_;
+};
+
+template <typename Value>
+class dynamic_heap_data {
+   public:
+    dynamic_heap_data(std::size_t size)
+        : data_{std::make_unique<Value[]>(size)}, size_{size}
+    {
+        r::fill(std::span{data_.get(), size_}, Value{});
+    }
+    auto begin() noexcept { return data_.get(); }
+    auto end() noexcept { return begin() + size_; }
+
+   private:
+    std::unique_ptr<Value[]> data_;
+    std::size_t size_;
+};
+
+template <typename Value>
+class dynamic_grid : public dynamic_grid_adapter<dynamic_heap_data<Value>> {
+   public:
+    dynamic_grid(int width, int height) noexcept
+        // FIXME: passign `data_` by reference before it's initialized is
+        // undefined behavior
+        : dynamic_grid_adapter<dynamic_heap_data<Value>>{data_, width, height},
+          data_{static_cast<std::size_t>(width * height)}
+    {
+    }
+
+    dynamic_heap_data<Value> data_;
 };
 
 }  // namespace aoc
