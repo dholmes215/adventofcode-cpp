@@ -50,6 +50,16 @@ struct rect {
     friend auto operator<=>(const rect& lhs,
                             const rect& rhs) noexcept = default;
 
+    friend rect operator+(const rect& lhs, const vec2<Scalar>& rhs)
+    {
+        return {lhs.top_left + rhs, lhs.dimensions};
+    }
+
+    friend rect& operator+=(rect& lhs, const vec2<Scalar>& rhs)
+    {
+        return lhs = lhs + rhs;
+    }
+
     auto all_points() const noexcept
     {
         static_assert(std::is_integral_v<Scalar>);
@@ -61,7 +71,7 @@ struct rect {
                });
     }
 
-    bool contains(vec2<int> const& point) const noexcept
+    bool contains(vec2<Scalar> const& point) const noexcept
     {
         return point.x >= top_left.x && point.x < top_left.x + dimensions.x &&
                point.y >= top_left.y && point.y < top_left.y + dimensions.y;

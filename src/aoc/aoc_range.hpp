@@ -79,6 +79,7 @@ auto int_lines(auto&& rng) noexcept
 
 // Split a range of characters into a range of ints separated by any non-digit
 // characters
+// FIXME: include '-' before digits as allowed
 template <typename Number>
 auto numbers(auto&& rng)
 {
