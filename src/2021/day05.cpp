@@ -50,7 +50,7 @@ vent_line parse_line(std::string_view line)
 std::vector<vent_line> parse_lines(std::string_view input)
 {
     std::vector<vent_line> out;
-    out.resize(500);
+    out.reserve(500);
     r::copy(sv_lines(input) | rv::transform(parse_line),
             r::back_inserter(out));
     return out;
