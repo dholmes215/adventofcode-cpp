@@ -10,6 +10,8 @@
 
 #include <catch2/catch.hpp>
 
+#include <fmt/format.h>
+
 #include <vector>
 
 using namespace aoc;
@@ -28,4 +30,10 @@ TEST_CASE("rect::all_points()", "[vec]")
                               {1, 1},   {-1, 2}, {0, 2},  {1, 2}};
     std::vector<vec2<int>> a2{r2.all_points() | r::to<std::vector>};
     CHECK(a2 == v2);
+}
+
+TEST_CASE("vec formatter", "[vec]")
+{
+    vec2<int> v1{1, 2};
+    CHECK(fmt::format("{}", v1) == "1,2");
 }

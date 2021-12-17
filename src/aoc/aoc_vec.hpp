@@ -10,6 +10,8 @@
 
 #include "aoc_range.hpp"
 
+#include <fmt/format.h>
+
 #include <compare>
 #include <functional>
 
@@ -87,6 +89,26 @@ struct std::hash<aoc::vec2<Scalar>> {
         std::size_t h1 = std::hash<Scalar>{}(v.x);
         std::size_t h2 = std::hash<Scalar>{}(v.y);
         return h1 ^ (h2 << 1);
+    }
+};
+
+template <typename Scalar>
+struct fmt::formatter<aoc::vec2<Scalar>> {
+    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    {
+        // No formatting options for this type.
+        const auto it{ctx.begin()};
+        if (it != ctx.end() && *it != '}') {
+            throw format_error("invalid format");
+        }
+        return it;
+    }
+
+    template <typename FormatContext>
+    auto format(const aoc::vec2<Scalar>& p, FormatContext& ctx)
+        -> decltype(ctx.out())
+    {
+        return format_to(ctx.out(), "{},{}", p.x, p.y);
     }
 };
 
