@@ -47,15 +47,13 @@ struct drone_t {
 
 bool has_failed(const drone_t& drone, const target_area_t& target_area) noexcept
 {
-    const auto target_x_end =
-        target_area.top_left.x + target_area.dimensions.x - 1;
+    const auto target_x_end = target_area.base.x + target_area.dimensions.x - 1;
     if (drone.pos.x > target_x_end) {
         // We've passed the target area and there's no moving back.
         return true;
     }
 
-    // FIXME: rename "top_left" to not wrongly assume y axis grows "up"
-    const auto target_y_bottom = target_area.top_left.y;
+    const auto target_y_bottom = target_area.base.y;
     if (drone.pos.y < target_y_bottom && drone.vel.y <= 0) {
         // We've fallen below the target area and can't get back up.
         return true;
@@ -105,13 +103,12 @@ target_area_t parse_input(std::string_view line)
     constexpr auto matcher{ctre::match<
         R"(target area: x=(-?\d+)\.\.(-?\d+), y=(-?\d+)\.\.(-?\d+))">};
     if (auto [whole, x1, x2, y1, y2] = matcher(line); whole) {
-        const pos_t top_left{to_num<int_t>(x1.to_view()),
-                             to_num<int_t>(y1.to_view())};
-        const pos_t bottom_right{to_num<int_t>(x2.to_view()),
-                                 to_num<int_t>(y2.to_view())};
-        // TODO: "rectangle from points" helper
+        const pos_t corner1{to_num<int_t>(x1.to_view()),
+                            to_num<int_t>(y1.to_view())};
+        const pos_t corner2{to_num<int_t>(x2.to_view()),
+                            to_num<int_t>(y2.to_view())};
         // TODO: "point from whatever x1/y1 actually are" helper
-        return {top_left, bottom_right - top_left + pos_t{1, 1}};
+        return {rect_from_corners(corner1, corner2)};
     }
     throw input_error{fmt::format("failed to parse input: {}", line)};
 }
@@ -122,8 +119,8 @@ aoc::solution_result day17(std::string_view input)
 {
     const target_area_t target_area{parse_input(input)};
 
-    const int_t max_x{target_area.top_left.x + target_area.dimensions.x};
-    const int_t min_y{target_area.top_left.y};
+    const int_t max_x{target_area.base.x + target_area.dimensions.x};
+    const int_t min_y{target_area.base.y};
     const int_t max_y{std::abs(min_y) + 1};
 
     int_t greatest_max_elevation{0};

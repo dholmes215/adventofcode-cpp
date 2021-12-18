@@ -46,14 +46,14 @@ auto grid_cols(Range& r, int width) noexcept
 template <typename Base>
 class subgrid_view {
    public:
-    subgrid_view(Base& base, vec2<int> top_left, vec2<int> dimensions) noexcept
-        : base_{base}, r_{top_left, dimensions}
+    subgrid_view(Base& base, vec2<int> rect_base, vec2<int> dimensions) noexcept
+        : base_{base}, r_{rect_base, dimensions}
     {
     }
 
     auto row(int y) const noexcept
     {
-        return base_.row(r_.top_left.y + y) | rv::drop(r_.top_left.x) |
+        return base_.row(r_.base.y + y) | rv::drop(r_.base.x) |
                rv::take(r_.dimensions.x);
     }
 
@@ -65,7 +65,7 @@ class subgrid_view {
 
     auto col(int x) const noexcept
     {
-        return base_.col(r_.top_left.x + x) | rv::drop(r_.top_left.y) |
+        return base_.col(r_.base.x + x) | rv::drop(r_.base.y) |
                rv::take(r_.dimensions.y);
     }
 
@@ -89,7 +89,7 @@ class subgrid_view {
 
     auto& operator[](vec2<int> index) const noexcept
     {
-        return base_[index + r_.top_left];
+        return base_[index + r_.base];
     }
 
    private:
@@ -116,7 +116,7 @@ class grid_adapter {
 
     subgrid_view<grid_adapter> subgrid(rect<int> r) noexcept
     {
-        return {*this, r.top_left, r.dimensions};
+        return {*this, r.base, r.dimensions};
     }
 
    private:
@@ -156,7 +156,7 @@ class dynamic_grid_adapter {
 
     // subgrid_view<grid_adapter> subgrid(rect<int> r) noexcept
     // {
-    //     return {*this, r.top_left, r.dimensions};
+    //     return {*this, r.base, r.dimensions};
     // }
 
    private:

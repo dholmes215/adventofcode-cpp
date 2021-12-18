@@ -46,7 +46,7 @@ struct vec2 {
 
 template <typename Scalar>
 struct rect {
-    vec2<Scalar> top_left{};
+    vec2<Scalar> base{};
     vec2<Scalar> dimensions{};
 
     friend auto operator<=>(const rect& lhs,
@@ -54,7 +54,7 @@ struct rect {
 
     friend rect operator+(const rect& lhs, const vec2<Scalar>& rhs)
     {
-        return {lhs.top_left + rhs, lhs.dimensions};
+        return {lhs.base + rhs, lhs.dimensions};
     }
 
     friend rect& operator+=(rect& lhs, const vec2<Scalar>& rhs)
@@ -66,8 +66,8 @@ struct rect {
     {
         static_assert(std::is_integral_v<Scalar>);
         return rv::cartesian_product(
-                   rv::iota(top_left.y) | rv::take(dimensions.y),
-                   rv::iota(top_left.x) | rv::take(dimensions.x)) |
+                   rv::iota(base.y) | rv::take(dimensions.y),
+                   rv::iota(base.x) | rv::take(dimensions.x)) |
                rv::transform([](auto p) {
                    return vec2<Scalar>{std::get<1>(p), std::get<0>(p)};
                });
@@ -75,10 +75,21 @@ struct rect {
 
     bool contains(vec2<Scalar> const& point) const noexcept
     {
-        return point.x >= top_left.x && point.x < top_left.x + dimensions.x &&
-               point.y >= top_left.y && point.y < top_left.y + dimensions.y;
+        return point.x >= base.x && point.x < base.x + dimensions.x &&
+               point.y >= base.y && point.y < base.y + dimensions.y;
     }
 };
+
+template <typename Scalar>
+rect<Scalar> rect_from_corners(const vec2<Scalar>& corner1,
+                               const vec2<Scalar>& corner2) noexcept
+{
+    const vec2<Scalar> min{std::min(corner1.x, corner2.x),
+                           std::min(corner1.y, corner2.y)};
+    const vec2<Scalar> max{std::max(corner1.x, corner2.x),
+                           std::max(corner1.y, corner2.y)};
+    return {min, max - min + vec2<Scalar>{1, 1}};
+}
 
 }  // namespace aoc
 
