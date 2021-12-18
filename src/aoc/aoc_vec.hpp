@@ -8,6 +8,7 @@
 #ifndef AOC_VEC_HPP
 #define AOC_VEC_HPP
 
+#include "aoc.hpp"
 #include "aoc_range.hpp"
 
 #include <fmt/format.h>
@@ -43,6 +44,12 @@ struct vec2 {
 
     friend auto operator<=>(const vec2&, const vec2&) = default;
 };
+
+template <typename Scalar>
+vec2<Scalar> vec_from_strings(std::string_view x, std::string_view y) noexcept
+{
+    return {to_num<Scalar>(x), to_num<Scalar>(y)};
+}
 
 template <typename Scalar>
 struct rect {
@@ -89,6 +96,17 @@ rect<Scalar> rect_from_corners(const vec2<Scalar>& corner1,
     const vec2<Scalar> max{std::max(corner1.x, corner2.x),
                            std::max(corner1.y, corner2.y)};
     return {min, max - min + vec2<Scalar>{1, 1}};
+}
+
+template <typename Scalar>
+rect<Scalar> rect_from_corner_strings(
+    std::pair<std::string_view, std::string_view> corner1,
+    std::pair<std::string_view, std::string_view> corner2) noexcept
+{
+    auto sv_to_vec{[](const auto pair) {
+        return vec_from_strings<Scalar>(pair.first, pair.second);
+    }};
+    return rect_from_corners<Scalar>(sv_to_vec(corner1), sv_to_vec(corner2));
 }
 
 }  // namespace aoc

@@ -26,11 +26,6 @@ using scalar = std::int16_t;
 using point = vec2<scalar>;
 using count_type = std::int8_t;
 
-scalar to_scalar(std::string_view s)
-{
-    return to_num<scalar>(s);
-}
-
 struct vent_line {
     point a{};
     point b{};
@@ -40,9 +35,8 @@ vent_line parse_line(std::string_view line)
 {
     constexpr auto vent_matcher{ctre::match<"(\\d+),(\\d+) -> (\\d+),(\\d+)">};
     if (auto [whole, x1, y1, x2, y2] = vent_matcher(line); whole) {
-        return vent_line{
-            point{to_scalar(x1.to_view()), to_scalar(y1.to_view())},
-            point{to_scalar(x2.to_view()), to_scalar(y2.to_view())}};
+        return vent_line{vec_from_strings<scalar>(x1, y1),
+                         vec_from_strings<scalar>(x2, y2)};
     }
     throw input_error{fmt::format("failed to parse line: {}", line)};
 }

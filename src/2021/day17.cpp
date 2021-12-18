@@ -103,12 +103,7 @@ target_area_t parse_input(std::string_view line)
     constexpr auto matcher{ctre::match<
         R"(target area: x=(-?\d+)\.\.(-?\d+), y=(-?\d+)\.\.(-?\d+))">};
     if (auto [whole, x1, x2, y1, y2] = matcher(line); whole) {
-        const pos_t corner1{to_num<int_t>(x1.to_view()),
-                            to_num<int_t>(y1.to_view())};
-        const pos_t corner2{to_num<int_t>(x2.to_view()),
-                            to_num<int_t>(y2.to_view())};
-        // TODO: "point from whatever x1/y1 actually are" helper
-        return {rect_from_corners(corner1, corner2)};
+        return {rect_from_corner_strings<int_t>({x1, y1}, {x2, y2})};
     }
     throw input_error{fmt::format("failed to parse input: {}", line)};
 }
