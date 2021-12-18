@@ -6,6 +6,7 @@
 //
 
 #include <bits.hpp>
+#include <snailfish.hpp>
 
 #include <aoc_range.hpp>
 
@@ -95,4 +96,40 @@ TEST_CASE("2021 BITS read_literal", "[2021-16]")
         read_literal(iter) ==
         0b1111111111111111111111111111111111111111111111111111111111111111ULL);
     CHECK(r::distance(big.begin(), iter) == 80);
+}
+
+TEST_CASE("2021 snailfish operator+", "[2021-18]")
+{
+    snail_num_t onetwo{1, 2};
+    snail_num_t threefour{3, 4};
+    CHECK((onetwo + threefour) == parse_snail("[[1,2],[3,4]]"));
+    snail_num_t oneten{1, 10};  // Not really valid
+    CHECK((oneten + threefour) == parse_snail("[[1,[5,5]],[3,4]]"));
+
+    snail_num_t left{parse_snail("[[[[4,3],4],4],[7,[[8,4],9]]]")};
+    snail_num_t right{parse_snail("[1,1]")};
+    CHECK(fmt::format("{}", (left + right)) ==
+          fmt::format("{}", parse_snail("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]")));
+}
+
+TEST_CASE("2021 snailfish operator==", "[2021-18]")
+{
+    snail_num_t left{1, 2};
+    snail_num_t right{3, 4};
+    CHECK(parse_snail("[[1,2],[3,4]]") == parse_snail("[[1,2],[3,4]]"));
+    CHECK(!(parse_snail("[[1,2],[3,4]]") == parse_snail("[[1,2],[3,2]]")));
+}
+
+TEST_CASE("2021 snailfish operator!=", "[2021-18]")
+{
+    snail_num_t left{1, 2};
+    snail_num_t right{3, 4};
+    CHECK(!(parse_snail("[[1,2],[3,4]]") != parse_snail("[[1,2],[3,4]]")));
+    CHECK(parse_snail("[[1,2],[3,4]]") != parse_snail("[[1,2],[3,2]]"));
+}
+
+TEST_CASE("2021 snailfish magnitude", "[2021-18]")
+{
+    CHECK(parse_snail("[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]")
+              .magnitude() == 3488);
 }
