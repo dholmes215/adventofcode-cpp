@@ -112,8 +112,8 @@ aoc::solution_result day13(std::string_view input)
 
     std::string activation_code;
     for (int i{0}; i < 8; i++) {
-        std::array<dot_t, 24> char_array;
-        r::copy(grid.subgrid({{i * 5, 0}, {4, 6}}).data(), char_array.begin());
+        std::array<dot_t, 30> char_array;
+        r::copy(grid.subgrid({{i * 5, 0}, {5, 6}}).data(), char_array.begin());
         activation_code += recognize_char(char_array);
     }
 

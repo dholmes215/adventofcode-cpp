@@ -13,7 +13,7 @@
 
 namespace aoc {
 
-char recognize_char(std::span<const char, 24> data);
+char recognize_char(std::span<const char, 30> data);
 std::string recognize_string();  // TODO
 
 // Exception thrown when input character data cannot be recognized.

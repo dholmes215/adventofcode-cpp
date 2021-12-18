@@ -17,68 +17,68 @@ namespace aoc {
 namespace {
 
 constexpr std::string_view letter_a = R"(
-.##.
-#..#
-#..#
-####
-#..#
-#..#
+.##..
+#..#.
+#..#.
+####.
+#..#.
+#..#.
 )";
 
 constexpr std::string_view letter_f = R"(
-####
-#...
-###.
-#...
-#...
-#...
+####.
+#....
+###..
+#....
+#....
+#....
 )";
 
 constexpr std::string_view letter_k = R"(
-#..#
-#.#.
-##..
-#.#.
-#.#.
-#..#
+#..#.
+#.#..
+##...
+#.#..
+#.#..
+#..#.
 )";
 
 constexpr std::string_view letter_r = R"(
-###.
-#..#
-#..#
-###.
-#.#.
-#..#
+###..
+#..#.
+#..#.
+###..
+#.#..
+#..#.
 )";
 
 constexpr std::string_view letter_u = R"(
-#..#
-#..#
-#..#
-#..#
-#..#
-.##.
+#..#.
+#..#.
+#..#.
+#..#.
+#..#.
+.##..
 )";
 
 constexpr std::string_view letter_z = R"(
-####
-...#
-..#.
-.#..
-#...
-####
+####.
+...#.
+..#..
+.#...
+#....
+####.
 )";
 
-std::array<char, 24> to_array(std::string_view s)
+std::array<char, 30> to_array(std::string_view s)
 {
-    std::array<char, 24> out;
+    std::array<char, 30> out;
     r::copy(s | rv::filter([](char c) { return c == '.' || c == '#'; }),
             out.begin());
     return out;
 }
 
-const std::map<std::array<char, 24>, char> char_lookup_map{
+const std::map<std::array<char, 30>, char> char_lookup_map{
     {to_array(letter_a), 'A'}, {to_array(letter_f), 'F'},
     {to_array(letter_k), 'K'}, {to_array(letter_r), 'R'},
     {to_array(letter_u), 'U'}, {to_array(letter_z), 'Z'},
@@ -86,9 +86,9 @@ const std::map<std::array<char, 24>, char> char_lookup_map{
 
 } // namespace
 
-char recognize_char(std::span<const char, 24> data)
+char recognize_char(std::span<const char, 30> data)
 {
-    std::array<char, 24> as_array;
+    std::array<char, 30> as_array;
     r::copy(data, as_array.begin());
     return char_lookup_map.at(as_array);
 }
