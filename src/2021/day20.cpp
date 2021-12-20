@@ -6,12 +6,9 @@
 //
 
 #include <aoc.hpp>
-#include <aoc_braille.hpp>
 #include <aoc_grid.hpp>
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
-
-#include <fmt/format.h>
 
 #include <bitset>
 #include <string>
@@ -21,8 +18,6 @@
 namespace aoc::year2021 {
 
 namespace {
-
-}  // namespace
 
 using enhance_alg_t = std::bitset<512>;
 using grid_t = dynamic_grid<bool>;
@@ -69,13 +64,6 @@ grid_t widen(grid_t& grid, int padding, bool new_value)
 grid_t enhance(grid_t& grid, const enhance_alg_t& enhance_alg)
 {
     grid_t widened{widen(grid, 2, grid[{0, 0}])};
-    // TODO: should be able to assign grids to grids with operator= and it
-    // should copy and check that the grid sizes are correct if statically
-    // sized, otherwise just work
-
-    // TODO: braille drawing with border
-
-    // TODO: braille printing clearly isn't working for all 3x3 subgrids
 
     grid_t out{grid.width() + 2, grid.height() + 2};
     for (const auto p : out.area().all_points()) {
@@ -89,13 +77,7 @@ grid_t enhance(grid_t& grid, const enhance_alg_t& enhance_alg)
     return out;
 }
 
-grid_t enhance_n(grid_t grid, const enhance_alg_t& enhance_alg, int n)
-{
-    if (n == 0) {
-        return grid;
-    }
-    return enhance_n(enhance(grid, enhance_alg), enhance_alg, n - 1);
-}
+}  // namespace
 
 aoc::solution_result day20(std::string_view input)
 {
