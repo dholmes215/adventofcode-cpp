@@ -14,6 +14,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <string>
 
@@ -55,6 +56,11 @@ void print_grid_braille(const auto& grid, auto to_bool_func)
         }
         fmt::print("\n");
     }
+}
+
+void print_grid_braille(const auto& grid)
+{
+    print_grid_braille(grid, [](bool b) { return b; });
 }
 
 }  // namespace aoc

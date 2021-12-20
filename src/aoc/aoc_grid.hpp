@@ -11,6 +11,7 @@
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
 
+#include <algorithm>
 #include <array>
 #include <compare>
 #include <memory>
@@ -154,12 +155,13 @@ class dynamic_grid_adapter {
         return rows()[index.y][index.x];
     }
 
-    // subgrid_view<grid_adapter> subgrid(rect<int> r) noexcept
-    // {
-    //     return {*this, r.base, r.dimensions};
-    // }
+    subgrid_view<dynamic_grid_adapter> subgrid(rect<int> r) noexcept
+    {
+        return {*this, r.base, r.dimensions};
+    }
 
-   private:
+   protected:
+    // Protected is a hack to make ill-concieved copy assignment work
     Range* range_;
     int width_;
     int height_;
@@ -220,8 +222,35 @@ class dynamic_heap_data {
     dynamic_heap_data(std::size_t size)
         : data_{std::make_unique<Value[]>(size)}, size_{size}
     {
-        r::fill(std::span{data_.get(), size_}, Value{});
+        r::fill(std::span{data_.get(), size_}, Value{0});
     }
+
+    // dynamic_heap_data(dynamic_heap_data&& other) noexcept
+    //     : data_{std::move(other.data_)}, size_{other.size_}
+    // {
+    // }
+
+    dynamic_heap_data(const dynamic_heap_data& other) noexcept
+        : data_{std::make_unique<Value[]>(other.size_)}, size_{other.size_}
+    {
+        std::copy(other.data_.get(), other.data_.get() + size_, data_.get());
+    }
+
+    // dynamic_heap_data& operator=(dynamic_heap_data&& other) noexcept
+    // {
+    //     data_ = std::move(other.data_);
+    //     size_ = other.size_;
+    //     return *this;
+    // }
+
+    dynamic_heap_data& operator=(const dynamic_heap_data& other) noexcept
+    {
+        data_ = std::make_unique<Value[]>(other.size_);
+        size_ = other.size_;
+        std::copy(other.data_.get(), other.data_.get() + size_, data_.get());
+        return *this;
+    }
+
     auto begin() noexcept { return data_.get(); }
     auto end() noexcept { return begin() + size_; }
 
@@ -240,6 +269,27 @@ class dynamic_grid : public dynamic_grid_adapter<dynamic_heap_data<Value>> {
           data_{static_cast<std::size_t>(width * height)}
     {
     }
+
+    dynamic_grid(const dynamic_grid& other) noexcept
+        : dynamic_grid_adapter<dynamic_heap_data<Value>>{data_, other.width(),
+                                                         other.height()},
+          data_{other.data_}
+    {
+    }
+
+    dynamic_grid& operator=(const dynamic_grid& other) noexcept
+    {
+        data_ = other.data_;
+        this->range_ = &data_;
+        this->width_ = other.width_;
+        this->height_ = other.height_;
+        return *this;
+    }
+
+    // TODO: make movable, untangle adapter mess
+    // TODO: make assignment operators work
+    // adapter should be a member variable and assignment should swap it for a
+    // new one
 
     dynamic_heap_data<Value> data_;
 };
