@@ -266,7 +266,7 @@ std::optional<scanner_delta> compare_scanners(const scanner_data& a,
                     }) |
                     r::to<std::vector>};
 
-                int count{0};
+                std::size_t count{0};
                 for (const position_t& b_pos : b_shifted) {
                     count += a.beacons.count(b_pos);
                 }
