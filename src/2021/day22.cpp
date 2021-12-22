@@ -12,6 +12,7 @@
 #include <fmt/format.h>
 
 #include <array>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string_view>
@@ -104,14 +105,6 @@ aoc::solution_result day22(std::string_view input)
     const auto instructions =
         sv_lines(input) | rv::transform(parse_instruction) | r::to<std::vector>;
 
-    for (const auto& instruction : instructions) {
-        fmt::print("{} x={}..{},y={}..{},z={}..{}\n",
-                   instruction.on ? "on" : "off", instruction.min_point[0],
-                   instruction.max_point[0], instruction.min_point[1],
-                   instruction.max_point[1], instruction.min_point[2],
-                   instruction.max_point[2]);
-    }
-
     std::unique_ptr<grid3_a_t> grid_a_ptr = std::make_unique<grid3_a_t>();
     grid3_a_t& grid_a = *grid_a_ptr;
 
@@ -169,10 +162,6 @@ aoc::solution_result day22(std::string_view input)
     auto z_last{std::unique(z_boundaries.begin(), z_boundaries.end())};
     z_boundaries.erase(z_last, z_boundaries.end());
 
-    fmt::print("x: {}\n", x_boundaries.size());
-    fmt::print("y: {}\n", y_boundaries.size());
-    fmt::print("z: {}\n", z_boundaries.size());
-
     std::unique_ptr<grid3_b_t> grid_b_ptr = std::make_unique<grid3_b_t>();
     grid3_b_t& grid_b = *grid_b_ptr;
 
@@ -181,40 +170,56 @@ aoc::solution_result day22(std::string_view input)
             x_boundaries.begin(), x_boundaries.end(), inst.min_point[0])};
         const auto x_max_it{std::upper_bound(
             x_boundaries.begin(), x_boundaries.end(), inst.max_point[0])};
-        const std::size_t x_min_idx{x_min_it - x_boundaries.begin()};
-        const std::size_t x_max_idx{x_max_it - x_boundaries.begin()};
+        const auto x_min_idx{x_min_it - x_boundaries.begin()};
+        const auto x_max_idx{x_max_it - x_boundaries.begin()};
 
-        for (const auto x{x_min_idx}; x < x_max_idx; x++) {
+        for (auto x{x_min_idx}; x < x_max_idx; x++) {
             const auto y_min_it{std::lower_bound(
                 y_boundaries.begin(), y_boundaries.end(), inst.min_point[1])};
             const auto y_max_it{std::upper_bound(
                 y_boundaries.begin(), y_boundaries.end(), inst.max_point[1])};
-            const std::size_t y_min_idx{y_min_it - y_boundaries.begin()};
-            const std::size_t y_max_idx{y_max_it - y_boundaries.begin()};
+            const auto y_min_idx{y_min_it - y_boundaries.begin()};
+            const auto y_max_idx{y_max_it - y_boundaries.begin()};
 
-            for (const auto y{y_min_idx}; y < y_max_idx; y++) {
+            for (auto y{y_min_idx}; y < y_max_idx; y++) {
                 const auto z_min_it{std::lower_bound(z_boundaries.begin(),
                                                      z_boundaries.end(),
                                                      inst.min_point[2])};
                 const auto z_max_it{std::upper_bound(z_boundaries.begin(),
                                                      z_boundaries.end(),
                                                      inst.max_point[2])};
-                const std::size_t z_min_idx{z_min_it - z_boundaries.begin()};
-                const std::size_t z_max_idx{z_max_it - z_boundaries.begin()};
+                const auto z_min_idx{z_min_it - z_boundaries.begin()};
+                const auto z_max_idx{z_max_it - z_boundaries.begin()};
 
-                for (const auto z{z_min_idx}; z < z_max_idx; z++) {
-                    const vec_t point{x, y, z};
-                    if (inst.contains(point)) {
-                        grid_a[static_cast<std::size_t>(point[0])]
-                              [static_cast<std::size_t>(point[1])]
-                              [static_cast<std::size_t>(point[2])] = inst.on;
-                    }
+                for (auto z{z_min_idx}; z < z_max_idx; z++) {
+                    const vec_t point{static_cast<int>(x), static_cast<int>(y),
+                                      static_cast<int>(z)};
+
+                    grid_b[static_cast<std::size_t>(point[0])]
+                          [static_cast<std::size_t>(point[1])]
+                          [static_cast<std::size_t>(point[2])] = inst.on;
                 }
             }
         }
     }
 
-    auto part2_on{0};
+    std::uint64_t part2_on{0};
+
+    for (std::size_t x{0}; x < x_boundaries.size() - 1; x++) {
+        for (std::size_t y{0}; y < y_boundaries.size() - 1; y++) {
+            for (std::size_t z{0}; z < z_boundaries.size() - 1; z++) {
+                if (grid_b[x][y][z]) {
+                    auto x_dim{static_cast<std::uint64_t>(x_boundaries[x + 1] -
+                                                          x_boundaries[x])};
+                    auto y_dim{static_cast<std::uint64_t>(y_boundaries[y + 1] -
+                                                          y_boundaries[y])};
+                    auto z_dim{static_cast<std::uint64_t>(z_boundaries[z + 1] -
+                                                          z_boundaries[z])};
+                    part2_on += x_dim * y_dim * z_dim;
+                }
+            }
+        }
+    }
 
     return {part1_on, part2_on};
 }
