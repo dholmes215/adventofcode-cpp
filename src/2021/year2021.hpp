@@ -35,5 +35,6 @@ aoc::solution_result day19(std::string_view);
 aoc::solution_result day20(std::string_view);
 aoc::solution_result day21(std::string_view);
 aoc::solution_result day22(std::string_view);
+aoc::solution_result day23(std::string_view);
 }  // namespace year2021
 }  // namespace aoc
