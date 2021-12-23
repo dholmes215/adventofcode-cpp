@@ -76,7 +76,7 @@ class subgrid_view {
                rv::transform([&](int x) { return col(x); });
     }
 
-    auto data() const noexcept
+    auto data() noexcept
     {
         auto at_point{[sub = *this](vec2<int> p) -> decltype(base_[p])& {
             return sub.base_[p];
@@ -120,7 +120,8 @@ class grid_adapter {
         return {*this, r.base, r.dimensions};
     }
 
-   private:
+   protected:
+    // Protected is a hack to make ill-concieved copy assignment work
     Range* range_;
 };
 
@@ -182,6 +183,28 @@ class static_grid
         : grid_adapter<std::array<Value, allowed_size>, width>{data_}, data_{0}
     {
     }
+
+    static_grid(const static_grid& other) noexcept
+        : grid_adapter<std::array<Value, allowed_size>, width>{data_},
+          data_{other.data_}
+    {
+        this->range_ = &data_;
+    }
+
+    static_grid& operator=(const static_grid& other) noexcept
+    {
+        data_ = other.data_;
+        this->range_ = &data_;
+        return *this;
+    }
+
+    friend auto operator<=>(const static_grid& lhs,
+                            const static_grid& rhs) noexcept
+    {
+        return lhs.data_ <=> rhs.data_;
+    }
+
+   private:
     std::array<Value, allowed_size> data_;
 };
 
