@@ -10,25 +10,25 @@
 #include <aoc_range.hpp>
 #include <aoc_vec.hpp>
 
-#include <term.hpp>
+// #include <term.hpp>
 
-#include <fmt/format.h>
+// #include <fmt/format.h>
 
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <map>
 #include <queue>
 #include <stdexcept>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 namespace aoc::year2021 {
 
 namespace {
 
-}  // namespace
-
-constexpr std::string_view end_state_sv{R"(
+constexpr std::string_view end_state_sv_a{R"(
 #############
 #...........#
 ###A#B#C#D###
@@ -36,120 +36,144 @@ constexpr std::string_view end_state_sv{R"(
   #########
 )"};
 
-std::string color_string(char c)
-{
-    dh::color color;
-    switch (c) {
-        case '#':
-            return fmt::format("#{0:reset}", color);
-        case '.':
-            return ".";
-        case ' ':
-            return " ";
-        case 'A':
-            return fmt::format("{0:red}{0:bold}A{0:reset}", color);
-        case 'B':
-            return fmt::format("{0:yellow}{0:bold}B{0:reset}", color);
-        case 'C':
-            return fmt::format("{0:green}{0:bold}C{0:reset}", color);
-        case 'D':
-            return fmt::format("{0:blue}{0:bold}D{0:reset}", color);
-        default:  // unexpected
-            return fmt::format("{0:magenta}{0:bold}{1}{0:reset}", color, c);
-    }
-}
+constexpr std::string_view inserted_line_1{"  #D#C#B#A#  "};
+constexpr std::string_view inserted_line_2{"  #D#B#A#C#  "};
 
-using grid_t = static_grid<char, 13, 5>;
+using grid_a_t = static_grid<char, 13, 5>;
+using grid_b_t = static_grid<char, 13, 7>;
 using vec_t = vec2<int>;
 using cost_t = std::uint64_t;
 
-struct burrow_state {
-    grid_t grid;
-
-    // Once an amphipod starts moving out of a room, it can continue to move
-    // freely only until another amphipod moves.
-    vec_t moving_out{0, 0};
-
-    // Once an amphipod is moving is attempting to move into a room, no other
-    // amphipod can move until it succeeds.
-    vec_t moving_in{0, 0};
-
-    friend auto operator<=>(const burrow_state& lhs,
-                            const burrow_state& rhs) noexcept = default;
-};
-
-burrow_state parse_input(std::string_view input)
+grid_a_t parse_input_a(std::string_view input)
 {
     const auto lines{sv_lines(trim(input)) | r::to<std::vector>};
-    burrow_state out;
-    grid_t& grid{out.grid};
+    grid_a_t grid;
     r::fill(grid.data(), ' ');
     for (int row{0}; row < 5; row++) {
         r::copy(lines[static_cast<std::size_t>(row)], grid.row(row).begin());
     }
+    return grid;
+}
+
+grid_b_t parse_input_b(std::string_view input)
+{
+    const auto lines{sv_lines(trim(input)) | r::to<std::vector>};
+    grid_b_t grid;
+    r::fill(grid.data(), ' ');
+    for (int row{0}; row < 3; row++) {
+        r::copy(lines[static_cast<std::size_t>(row)], grid.row(row).begin());
+    }
+    r::copy(inserted_line_1, grid.row(3).begin());
+    r::copy(inserted_line_2, grid.row(4).begin());
+    for (int row{5}; row < 7; row++) {
+        r::copy(lines[static_cast<std::size_t>(row - 2)],
+                grid.row(row).begin());
+    }
+
+    return grid;
+}
+
+grid_b_t end_grid_b()
+{
+    grid_b_t out{parse_input_b(end_state_sv_a)};
+    r::copy(out.row(5), out.row(3).begin());
+    r::copy(out.row(5), out.row(4).begin());
     return out;
 }
 
-void print_burrow(const burrow_state& burrow)
-{
-    const grid_t& grid{burrow.grid};
-    for (int row{0}; row < 5; row++) {
-        for (int col{0}; col < 13; col++) {
-            fmt::print("{}", color_string(grid[{col, row}]));
-        }
-        fmt::print("\n");
-    }
-}
+// std::string color_string(char c)
+// {
+//     dh::color color;
+//     switch (c) {
+//         case '#':
+//             return fmt::format("#{0:reset}", color);
+//         case '.':
+//             return ".";
+//         case ' ':
+//             return " ";
+//         case 'A':
+//             return fmt::format("{0:red}{0:bold}A{0:reset}", color);
+//         case 'B':
+//             return fmt::format("{0:yellow}{0:bold}B{0:reset}", color);
+//         case 'C':
+//             return fmt::format("{0:green}{0:bold}C{0:reset}", color);
+//         case 'D':
+//             return fmt::format("{0:blue}{0:bold}D{0:reset}", color);
+//         default:  // unexpected
+//             return fmt::format("{0:magenta}{0:bold}{1}{0:reset}", color, c);
+//     }
+// }
 
-void print_pair(const burrow_state& burrow1, const burrow_state& burrow2)
-{
-    static_grid<char, 30, 5> grid;
-    r::fill(grid.data(), ' ');
-    grid[{14, 2}] = '-';
-    grid[{15, 2}] = '>';
-    for (int row{0}; row < 5; row++) {
-        for (int col{0}; col < 13; col++) {
-            grid[{col, row}] = burrow1.grid[{col, row}];
-            grid[{col + 17, row}] = burrow2.grid[{col, row}];
-        }
-    }
-    for (int row{0}; row < 5; row++) {
-        for (int col{0}; col < 30; col++) {
-            fmt::print("{}", color_string(grid[{col, row}]));
-        }
-        fmt::print("\n");
-    }
-}
+// void print_burrow(const auto& grid)
+// {
+//     for (int row{0}; row < grid.height(); row++) {
+//         for (int col{0}; col < grid.width(); col++) {
+//             fmt::print("{}", color_string(grid[{col, row}]));
+//         }
+//         fmt::print("\n");
+//     }
+// }
+
+// void print_pair(const auto& grid1, const auto& grid2)
+// {
+//     dynamic_grid<char> grid{30, grid1.height()};
+//     r::fill(grid.data(), ' ');
+//     grid[{14, grid.height() / 2}] = '-';
+//     grid[{15, grid.height() / 2}] = '>';
+//     for (int row{0}; row < grid1.height(); row++) {
+//         for (int col{0}; col < grid1.width(); col++) {
+//             grid[{col, row}] = grid1[{col, row}];
+//             grid[{col + 17, row}] = grid2[{col, row}];
+//         }
+//     }
+//     for (int row{0}; row < grid.height(); row++) {
+//         for (int col{0}; col < grid.width(); col++) {
+//             fmt::print("{}", color_string(grid[{col, row}]));
+//         }
+//         fmt::print("\n");
+//     }
+// }
 
 bool is_amphipod(char c)
 {
     return c == 'A' || c == 'B' || c == 'C' || c == 'D';
 }
 
-using amphipod_positions_t = std::array<vec_t, 8>;
+using amphipod_positions_a_t = std::array<vec_t, 8>;
+using amphipod_positions_b_t = std::array<vec_t, 16>;
 
-amphipod_positions_t locate_amphipods(const grid_t& grid) noexcept
+template <typename Grid>
+auto locate_amphipods(const Grid& grid) noexcept
 {
-    amphipod_positions_t out;
-    auto iter{out.begin()};
-    for (const vec_t point : grid.area.all_points()) {
-        const auto c{grid[point]};
-        if (is_amphipod(c)) {
-            *iter++ = point;
+    if constexpr (std::is_same_v<Grid, grid_a_t>) {
+        amphipod_positions_a_t out;
+        auto iter{out.begin()};
+        for (const vec_t point : grid.area.all_points()) {
+            const auto c{grid[point]};
+            if (is_amphipod(c)) {
+                *iter++ = point;
+            }
         }
+        assert(iter == out.end());
+        return out;
     }
-    assert(iter == out.end());
-    return out;
+    else {
+        amphipod_positions_b_t out;
+        auto iter{out.begin()};
+        for (const vec_t point : grid.area.all_points()) {
+            const auto c{grid[point]};
+            if (is_amphipod(c)) {
+                *iter++ = point;
+            }
+        }
+        assert(iter == out.end());
+        return out;
+    }
 }
 
 constexpr bool is_hallway(vec_t p) noexcept
 {
     return p.y == 1 && p.x >= 1 && p.x <= 11;
-}
-
-constexpr bool is_immediately_outside_room(vec_t p) noexcept
-{
-    return p.y == 1 && (p.x == 3 || p.x == 5 || p.x == 7 || p.x == 9);
 }
 
 int end_room_col(char c)
@@ -182,23 +206,28 @@ cost_t move_cost(char c)
     throw std::domain_error(fmt::format("'{}' is not an amphipod", c));
 }
 
-// Precondition: p is outside a room
-bool can_enter_room(const grid_t& grid, vec_t p) noexcept
+// Return nullopt of room cannot be entered, or the destination coordinates in
+// the room if it can be
+template <typename Grid>
+std::optional<vec_t> can_enter_room(const Grid& grid, char c) noexcept
 {
-    assert(is_immediately_outside_room(p));
-    if (grid[p + vec_t{0, 1}] != '.') {
-        return false;
+    const auto col{end_room_col(c)};
+    const rect<int> room_rect{{col, 2}, {1, grid.height() - 3}};
+    const auto room_grid{grid.subgrid(room_rect)};
+    auto data{room_grid.data()};
+    auto first_not_empty{r::find_if(data, [](char c2) { return c2 != '.'; })};
+    const bool all_c{r::all_of(first_not_empty, data.end(),
+                               [c](char c2) { return c2 == c; })};
+    if (!all_c) {
+        return std::nullopt;
     }
-    if (p.x != end_room_col(grid[p])) {
-        return false;
+
+    const auto empty_spaces{
+        r::distance(room_grid.data().begin(), first_not_empty)};
+    if (empty_spaces == 0) {
+        return std::nullopt;
     }
-    if (grid[p + vec_t{0, 2}] == '.') {
-        return true;
-    }
-    if (p.x != end_room_col(grid[p + vec_t{0, 2}])) {
-        return false;
-    }
-    return true;
+    return {vec_t{col, static_cast<int>(empty_spaces + 1)}};
 }
 
 constexpr std::array<vec_t, 4> directions{{
@@ -208,88 +237,81 @@ constexpr std::array<vec_t, 4> directions{{
     {0, 1},
 }};
 
+template <typename Grid>
 struct move {
-    burrow_state dest;
+    Grid dest;
     cost_t cost;
 };
 
-std::vector<move> enumerate_possible_moves(const burrow_state& burrow)
+template <typename Grid>
+std::optional<move<Grid>> move_into_room(const Grid& grid, vec_t moving)
 {
-    const grid_t& grid{burrow.grid};
-    std::vector<move> out;
-    if (burrow.moving_out != vec_t{0, 0}) {
-        vec_t moving{burrow.moving_out};
-        // We must do something with this amphipod:
-        // 1: move anywhere outside the room
-        for (const vec_t dir : directions) {
-            const vec_t dest{moving + dir};
-            if (grid[dest] == '.') {
-                if (is_hallway(dest)) {
-                    move m{burrow, move_cost(grid[moving])};
-                    m.dest.grid[dest] = grid[moving];
-                    m.dest.grid[moving] = '.';
-                    m.dest.moving_out = dest;
-                    out.push_back(m);
-                }
+    const auto target{can_enter_room(grid, grid[moving])};
+    if (!target) {
+        return std::nullopt;
+    }
+
+    const vec_t outside_room{target->x, 1};
+    const vec_t adjacent{moving.x + ((target->x > moving.x) ? 1 : -1), 1};
+    const auto hallway_rect{rect_from_corners(outside_room, adjacent)};
+    const auto hallway_grid{grid.subgrid(hallway_rect)};
+    if (!r::all_of(hallway_grid.data(), [](char c) { return c == '.'; })) {
+        return std::nullopt;
+    }
+
+    const auto steps{
+        static_cast<cost_t>(hallway_rect.dimensions.x + target->y - 1)};
+    move<Grid> out{grid, steps * move_cost(grid[moving])};
+    std::swap(out.dest[moving], out.dest[*target]);
+    return out;
+}
+
+template <typename Grid>
+std::vector<move<Grid>> enumerate_possible_moves(const Grid& grid)
+{
+    std::vector<move<Grid>> out;
+
+    (void)directions;
+
+    const auto positions{locate_amphipods(grid)};
+    // XXX We would partition the positions to put hallway amphipods first,
+    // except locate_amphipods happens to return them that way.  TODO: Do that
+    // anyways
+    for (const vec_t moving : positions) {
+        // If in hallway, we can only move into a room
+        if (is_hallway(moving)) {
+            // Can the target room be moved into?
+            const auto maybe_move{move_into_room(grid, moving)};
+            if (maybe_move) {
+                out.push_back(*maybe_move);
+                // If any amphipod can move into a room, then there will be no
+                // path with a better cost than doing so, so don't bother
+                // considering other moves and just return prematurely.
+                return out;
             }
         }
 
-        // 2: if not immediately outside a room, can mark as not moving
-        if (!is_immediately_outside_room(moving)) {
-            move m{burrow, cost_t{0}};
-            m.dest.moving_out = {0, 0};
-            out.push_back(m);
-        }
-    }
-    else if (burrow.moving_in != vec_t{0, 0}) {
-        vec_t moving{burrow.moving_in};
-        // We must do something with this amphipod:
-        // 1: move anywhere except into a disallowed room:
-        for (const vec_t dir : directions) {
-            const vec_t dest{moving + dir};
-            if (grid[dest] == '.') {
-                if (is_hallway(dest) || (is_immediately_outside_room(moving) &&
-                                         can_enter_room(grid, moving))) {
-                    move m{burrow, move_cost(grid[moving])};
-                    m.dest.grid[dest] = grid[moving];
-                    m.dest.grid[moving] = '.';
-                    m.dest.moving_in = dest;
-                    out.push_back(m);
+        // If in a room, we can only move into certain hallway positions, and
+        // can only move if we're on top.
+        const vec_t outside_room{moving.x, 1};
+        const bool on_top{grid[moving + vec_t{0, -1}] == '.'};
+        if (on_top) {
+            constexpr std::array<int, 7> target_cols{1, 2, 4, 6, 8, 10, 11};
+            for (const int col : target_cols) {
+                const vec_t target{col, 1};
+                const auto hallway_rect{
+                    rect_from_corners(outside_room, target)};
+                const auto hallway_grid{grid.subgrid(hallway_rect)};
+
+                if (r::all_of(hallway_grid.data(),
+                              [](char c) { return c == '.'; })) {
+                    // We have a clear path to this target.
+                    const auto steps{static_cast<cost_t>(
+                        hallway_rect.dimensions.x + moving.y - 2)};
+                    move<Grid> new_move{grid, steps * move_cost(grid[moving])};
+                    std::swap(new_move.dest[moving], new_move.dest[target]);
+                    out.push_back(new_move);
                 }
-            }
-        }
-        // 2: If inside a room, can mark as not moving
-        if (!is_hallway(moving)) {
-            move m{burrow, cost_t{0}};
-            m.dest.moving_in = {0, 0};
-            out.push_back(m);
-        }
-    }
-    else {
-        const amphipod_positions_t positions{locate_amphipods(grid)};
-        for (const vec_t moving : positions) {
-            // We can:
-            if (!is_hallway(moving)) {
-                // 1: move anyone within a room
-                for (const vec_t dir : directions) {
-                    const vec_t dest{moving + dir};
-                    if (grid[dest] == '.' && !is_hallway(dest)) {
-                        move m{burrow, move_cost(grid[moving])};
-                        m.dest.grid[dest] = grid[moving];
-                        m.dest.grid[moving] = '.';
-                        out.push_back(m);
-                    }
-                }
-                // 2: select an amphipod to move out of a room
-                move m{burrow, cost_t{0}};
-                m.dest.moving_out = moving;
-                out.push_back(m);
-            }
-            else {
-                // 3: select an amphipod to move into a room
-                move m{burrow, cost_t{0}};
-                m.dest.moving_in = moving;
-                out.push_back(m);
             }
         }
     }
@@ -297,16 +319,15 @@ std::vector<move> enumerate_possible_moves(const burrow_state& burrow)
     return out;
 }
 
-using dist_map_t = std::map<burrow_state, cost_t>;
-using prev_map_t = std::map<burrow_state, burrow_state>;
-
+template <typename Grid>
 struct dijkstra_out {
-    dist_map_t dist;
-    prev_map_t prev;
+    std::map<Grid, cost_t> dist;
+    std::map<Grid, Grid> prev;
 };
 
+template <typename Grid>
 struct queue_entry {
-    burrow_state vert;
+    Grid vert;
     cost_t dist;
     friend auto operator<=>(const queue_entry& lhs,
                             const queue_entry& rhs) noexcept
@@ -315,22 +336,23 @@ struct queue_entry {
     }
 };
 
-using queue_t = std::priority_queue<queue_entry>;
-
-dijkstra_out dijkstra(burrow_state start)
+template <typename Grid>
+dijkstra_out<Grid> dijkstra(Grid start)
 {
-    dijkstra_out out;
+    dijkstra_out<Grid> out;
     out.dist[start] = 0;
 
+    using queue_t = std::priority_queue<queue_entry<Grid>>;
     queue_t q;
     q.push({start, 0});
 
     while (!q.empty()) {
-        queue_entry e{q.top()};
+        queue_entry<Grid> e{q.top()};
         q.pop();
         const auto u{e.vert};  // best vertex
 
-        for (auto neighbor : enumerate_possible_moves(u)) {
+        const auto neighbors{enumerate_possible_moves(u)};
+        for (auto neighbor : neighbors) {
             const auto& v{neighbor.dest};
             const auto alt{e.dist + neighbor.cost};
             if (!out.dist.contains(v) || alt < out.dist.at(v)) {
@@ -339,28 +361,70 @@ dijkstra_out dijkstra(burrow_state start)
                 q.push({v, alt});
             }
         }
-        // fmt::print("Queue size: {}\n", q.size());
     }
 
     return out;
 }
 
+// template <typename Grid>
+// std::optional<std::vector<Grid>> reconstruct_path(
+//     const Grid& start,
+//     const Grid& end,
+//     const std::map<Grid, Grid>& prev)
+// {
+//     std::vector<Grid> out;
+//     Grid cur{end};
+//     while (cur != start) {
+//         out.push_back(cur);
+//         if (!prev.contains(cur)) {
+//             return std::nullopt;
+//         }
+//         cur = prev.at(cur);
+//     }
+//     out.push_back(start);
+//     std::reverse(out.begin(), out.end());
+//     return out;
+// }
+
+}  // namespace
+
 aoc::solution_result day23(std::string_view input)
 {
-    const burrow_state start{parse_input(input)};
-    const burrow_state end{parse_input(end_state_sv)};
+    const grid_a_t start{parse_input_a(input)};
+    const grid_a_t end{parse_input_a(end_state_sv_a)};
 
-    print_pair(start, end);
+    // print_pair(start, end);
 
     auto search_result{dijkstra(start)};
-    // for (const auto& [state, prev] : search_result.prev) {
-    //     print_pair(state, prev);
-    //     fmt::print("---------\n");
-    // }
-    fmt::print("{} nodes\n", search_result.dist.size());
-    fmt::print("{} nodes\n", search_result.prev.size());
+    const auto part_a_energy{search_result.dist.contains(end)
+                                 ? search_result.dist.at(end)
+                                 : cost_t{0}};
 
-    return {search_result.dist.at(end), search_result.dist.at(start)};
+    const grid_b_t start_b{parse_input_b(input)};
+    const grid_b_t end_b{end_grid_b()};
+
+    // print_pair(start_b, end_b);
+
+    auto search_result_b{dijkstra(start_b)};
+    const cost_t part_b_energy{search_result_b.dist.at(end_b)};
+
+    // {
+    //     auto path{reconstruct_path(start_b, end_b, search_result_b.prev)};
+    //     if (!path) {
+    //         fmt::print("No path found!\n");
+    //     }
+    //     else {
+    //         fmt::print("\n\n\n\n\n\n\n\n");
+    //         for (const auto& state : *path) {
+    //             fmt::print("\033[8;A\n");
+    //             print_burrow(state);
+    //             using namespace std::chrono_literals;
+    //             std::this_thread::sleep_for(250ms);
+    //         }
+    //     }
+    // }
+
+    return {part_a_energy, part_b_energy};
 }
 
 }  // namespace aoc::year2021

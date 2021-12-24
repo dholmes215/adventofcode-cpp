@@ -84,6 +84,15 @@ class subgrid_view {
         return r_.all_points() | rv::transform(at_point);
     }  // namespace aoc
 
+    // TODO const-correctness is all wrong
+    auto data() const noexcept
+    {
+        auto at_point{[sub = *this](vec2<int> p) -> decltype(base_[p])& {
+            return sub.base_[p];
+        }};
+        return r_.all_points() | rv::transform(at_point);
+    }  // namespace aoc
+
     auto area() const noexcept { return r_; }
     auto width() const noexcept { return r_.dimensions.x; }
     auto height() const noexcept { return r_.dimensions.y; }
@@ -98,17 +107,18 @@ class subgrid_view {
     rect<int> r_;
 };
 
-template <typename Range, int width>
+template <typename Range, int Width>
 class grid_adapter {
    public:
     grid_adapter(Range& range) noexcept : range_(&range) {}
 
-    auto row(int y) const noexcept { return grid_row(*range_, width, y); }
-    auto rows() const noexcept { return grid_rows(*range_, width); }
-    auto col(int x) const noexcept { return grid_col(*range_, width, x); }
-    auto cols() const noexcept { return grid_cols(*range_, width); }
+    auto row(int y) const noexcept { return grid_row(*range_, Width, y); }
+    auto rows() const noexcept { return grid_rows(*range_, Width); }
+    auto col(int x) const noexcept { return grid_col(*range_, Width, x); }
+    auto cols() const noexcept { return grid_cols(*range_, Width); }
 
     auto data() noexcept { return rv::all(*range_); }
+    auto data() const noexcept { return rv::all(*range_); }
 
     auto& operator[](vec2<int> index) const noexcept
     {
@@ -116,6 +126,11 @@ class grid_adapter {
     }
 
     subgrid_view<grid_adapter> subgrid(rect<int> r) noexcept
+    {
+        return {*this, r.base, r.dimensions};
+    }
+
+    subgrid_view<const grid_adapter> subgrid(rect<int> r) const noexcept
     {
         return {*this, r.base, r.dimensions};
     }
@@ -168,28 +183,31 @@ class dynamic_grid_adapter {
     int height_;
 };
 
-template <typename Value, int width, int height>
+template <typename Value, int width_, int height_>
 class static_grid
     : public grid_adapter<
-          std::array<Value, static_cast<std::size_t>(width* height)>,
-          width> {
-    static constexpr auto size{width * height};
+          std::array<Value, static_cast<std::size_t>(width_* height_)>,
+          width_> {
+    static constexpr auto size{width_ * height_};
     static_assert(size > 0, "size must be greater than 0");
     static constexpr auto allowed_size{static_cast<std::size_t>(size)};
 
    public:
-    static constexpr rect<int> area{{0, 0}, {width, height}};
+    static constexpr rect<int> area{{0, 0}, {width_, height_}};
     static_grid() noexcept
-        : grid_adapter<std::array<Value, allowed_size>, width>{data_}, data_{0}
+        : grid_adapter<std::array<Value, allowed_size>, width_>{data_}, data_{0}
     {
     }
 
     static_grid(const static_grid& other) noexcept
-        : grid_adapter<std::array<Value, allowed_size>, width>{data_},
+        : grid_adapter<std::array<Value, allowed_size>, width_>{data_},
           data_{other.data_}
     {
         this->range_ = &data_;
     }
+
+    int width() const noexcept { return width_; }
+    int height() const noexcept { return height_; }
 
     static_grid& operator=(const static_grid& other) noexcept
     {
@@ -202,6 +220,12 @@ class static_grid
                             const static_grid& rhs) noexcept
     {
         return lhs.data_ <=> rhs.data_;
+    }
+
+    friend bool operator==(const static_grid& lhs,
+                           const static_grid& rhs) noexcept
+    {
+        return lhs.data_ == rhs.data_;
     }
 
    private:
