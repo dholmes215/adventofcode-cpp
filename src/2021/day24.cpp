@@ -10,6 +10,7 @@
 
 #include <fmt/format.h>
 
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -74,7 +75,7 @@ constexpr std::string_view to_string(opcode_t opcode)
         fmt::format("unknown opcode {}", static_cast<int>(opcode)));
 }
 
-using int_t = int;
+using int_t = std::int64_t;
 using register_id_t = char;
 using argument_t = std::variant<int_t, register_id_t, std::nullopt_t>;
 
@@ -97,6 +98,18 @@ struct instruction {
     argument_t b;
 };
 
+// std::string to_string(const instruction& inst)
+// {
+//     std::string b;
+//     if (std::holds_alternative<int_t>(inst.b)) {
+//         b = fmt::format("{}", std::get<int_t>(inst.b));
+//     }
+//     else if (std::holds_alternative<register_id_t>(inst.b)) {
+//         b = fmt::format("{}", std::get<register_id_t>(inst.b));
+//     }  // else nullopt
+//     return fmt::format("{} {} {}", to_string(inst.opcode), inst.a, b);
+// }
+
 instruction parse_instruction(std::string_view line)
 {
     const auto words{sv_words(line) | r::to<std::vector>};
@@ -115,8 +128,15 @@ instruction parse_instruction(std::string_view line)
                 fmt::format("incorrect number of parameters for `{} {} {}`",
                             words[0], words[1], words[2]));
         }
-        argument_t b{is_letter(words[2][0]) ? parse_register(words[2])
-                                            : to_num<int_t>(words[2])};
+
+        argument_t b;
+        if (is_letter(words[2][0])) {
+            b.emplace<register_id_t>(parse_register(words[2]));
+        }
+        else {
+            b.emplace<int_t>(to_num<int_t>(words[2]));
+        }
+
         return instruction{opcode, parse_register(words[1]), b};
     }
 }
@@ -130,16 +150,108 @@ program_t parse_program(std::string_view input)
            r::to<std::vector>;
 }
 
-input_t parse_serial_number(std::string_view input)
+struct step_parameters {
+    int_t denom;  // 26 or 1; 1 always pushes; 26 must be made to only pop
+    int_t a;
+    int_t b;
+};
+
+std::vector<step_parameters> extract_step_parameters(const program_t& program)
 {
-    auto parse_digit{[](char c) {
-        if (c < '1' || c > '9') {
-            throw input_error(fmt::format("invalid digit {}", c));
+    auto steps{program | rv::chunk(18)};
+    std::vector<step_parameters> out;
+    for (auto step : steps) {
+        if (step.size() != 18) {
+            throw input_error(fmt::format(
+                "ran out of instructions ({}/18) in last step", step.size()));
         }
-        return c - '0';
-    }};
-    return input | rv::transform(parse_digit) | r::to<std::vector>;
+
+        step_parameters params;
+        params.denom = std::get<int_t>(step[4].b);
+        params.a = std::get<int_t>(step[5].b);
+        params.b = std::get<int_t>(step[15].b);
+        out.push_back(params);
+    }
+
+    return out;
 }
+
+struct largest_smallest {
+    input_t largest;
+    input_t smallest;
+};
+
+largest_smallest find_largest_and_smallest_sn(
+    const std::vector<step_parameters>& params)
+{
+    std::vector<std::size_t> stack;
+    std::vector<std::pair<std::size_t, std::size_t>> pairs;
+    for (const auto& [i, step] : params | rv::enumerate) {
+        if (step.denom == 1) {
+            stack.push_back(i);
+        }
+        else {
+            const std::size_t left{stack.back()};
+            const std::size_t right{i};
+            pairs.push_back({left, right});
+            stack.pop_back();
+        }
+    }
+
+    std::vector<int_t> largest;
+    largest.resize(params.size());
+    std::vector<int_t> smallest;
+    smallest.resize(params.size());
+    for (const auto& [left_idx, right_idx] : pairs) {
+        int_t delta{params[left_idx].b + params[right_idx].a};
+        auto& largest_left{largest[left_idx]};
+        auto& largest_right{largest[right_idx]};
+        auto& smallest_left{smallest[left_idx]};
+        auto& smallest_right{smallest[right_idx]};
+        if (delta > 0) {
+            largest_left = 9 - delta;
+            largest_right = 9;
+
+            smallest_left = 1;
+            smallest_right = 1 + delta;
+        }
+        else {
+            largest_left = 9;
+            largest_right = 9 + delta;
+
+            smallest_left = 1 - delta;
+            smallest_right = 1;
+        }
+    }
+
+    return {largest, smallest};
+}
+
+// input_t parse_serial_number(std::string_view input)
+// {
+//     auto parse_digit{[](char c) -> int_t {
+//         if (c < '1' || c > '9') {
+//             throw input_error(fmt::format("invalid digit {}", c));
+//         }
+//         return c - '0';
+//     }};
+//     return input | rv::transform(parse_digit) | r::to<std::vector>;
+// }
+
+std::string sn_array_to_string(const input_t& sn_array)
+{
+    auto to_digit{[](int_t i) { return static_cast<char>('0' + i); }};
+    return sn_array | rv::transform(to_digit) | r::to<std::string>;
+}
+
+// void print_stack(int_t stack)
+// {
+//     while (stack > 0) {
+//         fmt::print("{} ", stack % 26);
+//         stack /= 26;
+//     }
+//     fmt::print("\n");
+// }
 
 // Exception thrown when ALU executes something invalid
 class alu_fault : public std::runtime_error {
@@ -165,35 +277,40 @@ struct alu_t {
                     reg(inst.a) = *input_iter++;
                     break;
                 case opcode_t::add:
-                    reg(inst.a) = reg(inst.a) + eval(inst.b);
+                    reg(inst.a) += eval(inst.b);
                     break;
                 case opcode_t::mul:
-                    reg(inst.a) = reg(inst.a) * eval(inst.b);
+                    reg(inst.a) *= eval(inst.b);
                     break;
                 case opcode_t::div: {
                     const auto denom{eval(inst.b)};
                     if (denom == 0) {
                         throw alu_fault("division by zero");
                     }
-                    reg(inst.a) = reg(inst.a) / denom;
+                    reg(inst.a) /= denom;
                     break;
                 }
                 case opcode_t::mod: {
                     const auto denom{eval(inst.b)};
-                    if (denom == 0) {
-                        throw alu_fault("division by zero");
+                    if (reg(inst.a) < 0) {
+                        throw alu_fault("mod with negative numerator");
                     }
-                    reg(inst.a) = reg(inst.a) % denom;
+                    if (denom <= 0) {
+                        throw alu_fault("mod by zero");
+                    }
+                    reg(inst.a) %= denom;
                     break;
                 }
                 case opcode_t::eql:
-                    reg(inst.a) = reg(inst.a) == eval(inst.b) ? 1 : 0;
+                    reg(inst.a) = (reg(inst.a) == eval(inst.b)) ? 1 : 0;
                     break;
             }
+            // fmt::print("{:15} {:10} {:10} {:10} {:20}\n", to_string(inst),
+            //            reg('w'), reg('x'), reg('y'), reg('z'));
         }
-
-        (void)program;
-        //
+        if (input_iter != input.end()) {
+            throw alu_fault(fmt::format("program did not read entire input"));
+        }
     }
 
     int_t eval(argument_t arg) const
@@ -240,105 +357,118 @@ struct alu_t {
     }
 };
 
+// auto declining_serial_numbers()
+// {
+//     std::uint64_t i_start{99999999999999};
+//     std::vector<int_t> vec_start{};
+//     vec_start.resize(14);
+//     auto generator{
+//         [i = i_start, vec = vec_start]() mutable -> std::vector<int_t>& {
+//             // Parse i into vector
+//             auto i2{i};
+//             for (int_t& v : vec | rv::reverse) {
+//                 v = i2 % 10;
+//                 i2 /= 10;
+//             }
+//             i--;
+//             return vec;
+//         }};
+//     return rv::generate(generator) | rv::filter([](const auto& vec) {
+//                return r::none_of(vec, [](int_t v) { return v == 0; });
+//            });
+// }
+
+// constexpr int_t program_step(const int_t z0,
+//                              const int_t input,
+//                              const int_t a,
+//                              const int_t b,
+//                              const int_t c)
+// {
+//     int_t w{0};
+//     int_t x{0};
+//     int_t y{0};
+//     int_t z{z0};
+
+//     w = input;               // 01 inp w
+//     x *= 0;                  // 02 mul x 0
+//     x += z;                  // 03 add x z
+//     x %= 26;                 // 04 mod x 26
+//     z /= a;                  // 05 div z A
+//     x += b;                  // 06 add x B
+//     x = ((x == w) ? 1 : 0);  // 07 eql x w
+//     x = ((x == 0) ? 1 : 0);  // 08 eql x 0
+//     y *= 0;                  // 09 mul y 0
+//     y += 25;                 // 10 add y 25
+//     y *= x;                  // 11 mul y x
+//     y += 1;                  // 12 add y 1
+//     z *= y;                  // 13 mul z y
+//     y *= 0;                  // 14 mul y 0
+//     y += w;                  // 15 add y w
+//     y += c;                  // 16 add y C
+//     y *= x;                  // 17 mul y x
+//     z += y;                  // 18 add z y
+
+//     print_stack(z);
+
+//     return z;
+// }
+
+// bool whole_program(const int_t* input_begin)
+// {
+//     int_t z{0};
+//     z = program_step(z, *input_begin++, 1, 13, 14);    // push 1
+//     z = program_step(z, *input_begin++, 1, 12, 8);     // push 2
+//     z = program_step(z, *input_begin++, 1, 11, 5);     // push 3
+//     z = program_step(z, *input_begin++, 26, 0, 4);     // pop 3: 5
+//     z = program_step(z, *input_begin++, 1, 15, 10);    // push 5
+//     z = program_step(z, *input_begin++, 26, -13, 13);  // pop 5: -3
+//     z = program_step(z, *input_begin++, 1, 10, 16);    // push 7
+//     z = program_step(z, *input_begin++, 26, -9, 5);    // pop 7: 7
+//     z = program_step(z, *input_begin++, 1, 11, 6);     // push 9
+//     z = program_step(z, *input_begin++, 1, 13, 13);    // push 10
+//     z = program_step(z, *input_begin++, 26, -14, 6);   // pop 10: -1
+//     z = program_step(z, *input_begin++, 26, -3, 7);    // pop 9: 3
+//     z = program_step(z, *input_begin++, 26, -2, 13);   // pop 2: 6
+//     z = program_step(z, *input_begin++, 26, -14, 3);   // pop 1: 0
+//     return z == 0;
+// }
+
+// bool test(const program_t& /*program*/, std::string_view sn)
+// {
+//     const input_t input{parse_serial_number(sn)};
+//     // alu_t alu;
+//     // alu.run_program(program, input);
+//     // return alu.reg('z') == 0;
+//     return whole_program(&*(input.begin()));
+// }
+
 }  // namespace
-
-auto declining_serial_numbers()
-{
-    std::uint64_t i_start{99999999999999};
-    std::vector<int_t> vec_start{};
-    vec_start.resize(14);
-    auto generator{
-        [i = i_start, vec = vec_start]() mutable -> std::vector<int_t>& {
-            // Parse i into vector
-            auto i2{i};
-            for (int_t& v : vec | rv::reverse) {
-                v = i2 % 10;
-                i2 /= 10;
-            }
-            i--;
-            return vec;
-        }};
-    return rv::generate(generator) | rv::filter([](const auto& vec) {
-               return r::none_of(vec, [](int_t v) { return v == 0; });
-           });
-}
-
-std::string sn_string(const input_t& sn)
-{
-    return sn |
-           rv::transform([](int_t v) { return static_cast<char>(v + '0'); }) |
-           r::to<std::string>;
-}
-
-int program_step(int z0, int input, int a, int b)
-{
-    int w{0};
-    int x{0};
-    int y{0};
-    int z{z0};
-
-    w = input;               // 01 inp w
-    x *= 0;                  // 02 mul x 0
-    x += z;                  // 03 add x z
-    x %= 26;                 // 04 mod x 26
-    z /= 1;                  // 05 div z 1
-    x += a;                  // 06 add x A
-    x = ((x == w) ? 1 : 0);  // 07 eql x w
-    x = ((x == 0) ? 1 : 0);  // 08 eql x 0
-    y *= 0;                  // 09 mul y 0
-    y += 25;                 // 10 add y 25
-    y *= x;                  // 11 mul y x
-    y += 1;                  // 12 add y 1
-    z *= y;                  // 13 mul z y
-    y *= 0;                  // 14 mul y 0
-    y += w;                  // 15 add y w
-    y += b;                  // 16 add y B
-    y *= x;                  // 17 mul y x
-    z += y;                  // 18 add z y
-
-    return z;
-}
-
-bool whole_program(const int* input_begin)
-{
-    int z{0};
-    z = program_step(z, *input_begin++, 13, 14);
-    z = program_step(z, *input_begin++, 12, 8);
-    z = program_step(z, *input_begin++, 11, 5);
-    z = program_step(z, *input_begin++, 0, 4);
-    z = program_step(z, *input_begin++, 15, 10);
-    z = program_step(z, *input_begin++, -13, 13);
-    z = program_step(z, *input_begin++, 10, 16);
-    z = program_step(z, *input_begin++, -9, 5);
-    z = program_step(z, *input_begin++, 11, 6);
-    z = program_step(z, *input_begin++, 13, 13);
-    z = program_step(z, *input_begin++, -14, 6);
-    z = program_step(z, *input_begin++, -3, 7);
-    z = program_step(z, *input_begin++, -2, 13);
-    z = program_step(z, *input_begin++, -14, 3);
-    return z == 0;
-}
 
 aoc::solution_result day24(std::string_view input)
 {
     const program_t program{parse_program(input)};
-    const input_t sample_serial_number{parse_serial_number("13579246899999")};
+
+    const auto [largest, smallest]{
+        find_largest_and_smallest_sn(extract_step_parameters(program))};
+    const auto largest_string{sn_array_to_string(largest)};
+    const auto smallest_string{sn_array_to_string(smallest)};
 
     alu_t alu;
-    alu.run_program(program, sample_serial_number);
-    // const auto result = alu.reg('z');
-    std::string result;
-
-    for (const auto& serial_number : declining_serial_numbers()) {
-        alu.run_program(program, serial_number);
-        if (alu.reg('z') == 0) {
-            result = sn_string(serial_number);
-            fmt::print("{} -> 0\n", result);
-            break;
-        }
+    alu.run_program(program, largest);
+    if (alu.reg('z') != 0) {
+        throw input_error(fmt::format(
+            "largest serial number {} does not work with input program",
+            largest_string));
     }
 
-    return {result, 0};
+    alu.run_program(program, smallest);
+    if (alu.reg('z') != 0) {
+        throw input_error(fmt::format(
+            "smallest serial number {} does not work with input program",
+            smallest_string));
+    }
+
+    return {largest_string, smallest_string};
 }
 
 }  // namespace aoc::year2021
