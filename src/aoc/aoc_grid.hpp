@@ -16,6 +16,7 @@
 #include <compare>
 #include <memory>
 #include <span>
+#include <tuple>
 
 namespace aoc {
 
@@ -298,8 +299,21 @@ class dynamic_heap_data {
         return *this;
     }
 
-    auto begin() noexcept { return data_.get(); }
-    auto end() noexcept { return begin() + size_; }
+    auto begin() const noexcept { return data_.get(); }
+    auto end() const noexcept { return begin() + size_; }
+
+    friend auto operator<=>(const dynamic_heap_data& lhs,
+                            const dynamic_heap_data& rhs) noexcept
+    {
+        return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                            rhs.end());
+    }
+
+    friend auto operator==(const dynamic_heap_data& lhs,
+                           const dynamic_heap_data& rhs) noexcept
+    {
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
 
    private:
     std::unique_ptr<Value[]> data_;
@@ -331,6 +345,20 @@ class dynamic_grid : public dynamic_grid_adapter<dynamic_heap_data<Value>> {
         this->width_ = other.width_;
         this->height_ = other.height_;
         return *this;
+    }
+
+    friend auto operator<=>(const dynamic_grid& lhs,
+                            const dynamic_grid& rhs) noexcept
+    {
+        return std::tie(lhs.width_, lhs.height_, lhs.data_) <=>
+               std::tie(rhs.width_, rhs.height_, rhs.data_);
+    }
+
+    friend bool operator==(const dynamic_grid& lhs,
+                           const dynamic_grid& rhs) noexcept
+    {
+        return std::tie(lhs.width_, lhs.height_, lhs.data_) ==
+               std::tie(rhs.width_, rhs.height_, rhs.data_);
     }
 
     // TODO: make movable, untangle adapter mess
