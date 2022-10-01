@@ -137,7 +137,7 @@ struct fmt::formatter<aoc::vec2<Scalar>> {
     auto format(const aoc::vec2<Scalar>& p, FormatContext& ctx)
         -> decltype(ctx.out())
     {
-        return format_to(ctx.out(), "{},{}", p.x, p.y);
+        return fmt::format_to(ctx.out(), "{},{}", p.x, p.y);
     }
 };
 

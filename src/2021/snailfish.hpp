@@ -141,11 +141,11 @@ struct fmt::formatter<aoc::year2021::num_t> {
         -> decltype(ctx.out())
     {
         if (std::holds_alternative<aoc::year2021::regular_num_t>(p)) {
-            return format_to(ctx.out(), "{}",
-                             std::get<aoc::year2021::regular_num_t>(p));
+            return fmt::format_to(ctx.out(), "{}",
+                                  std::get<aoc::year2021::regular_num_t>(p));
         }
         else {
-            return format_to(
+            return fmt::format_to(
                 ctx.out(), "{}",
                 *std::get<std::unique_ptr<aoc::year2021::snail_num_t>>(p));
         }
@@ -168,7 +168,7 @@ struct fmt::formatter<aoc::year2021::snail_num_t> {
     auto format(const aoc::year2021::snail_num_t& p, FormatContext& ctx)
         -> decltype(ctx.out())
     {
-        return format_to(ctx.out(), "[{},{}]", p.left_, p.right_);
+        return fmt::format_to(ctx.out(), "[{},{}]", p.left_, p.right_);
     }
 };
 
