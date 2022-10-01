@@ -76,8 +76,8 @@ Number to_num_base(std::string_view sv, int base)
     auto begin{&*sv.begin()};
     const auto result{std::from_chars(begin, begin + sv.size(), out, base)};
     if (result.ec != std::errc{}) {
-        throw input_error{
-            fmt::format("error parsing \"{}\" as int: {}", sv, result.ec)};
+        throw input_error{fmt::format("error parsing \"{}\" as int: {}", sv,
+                                      static_cast<int>(result.ec))};
     }
     return out;
 }
