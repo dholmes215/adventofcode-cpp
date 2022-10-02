@@ -2,7 +2,7 @@
     "registries": [
         {
             "kind": "git",
-            "baseline": "b89985a1bd3224b008cb92dbc438007f9c148e95",
+            "baseline": "34ece6f439e5469cf96a48b62e0ea6457626e917",
             "repository": "https://github.com/dholmes215/vcpkg-registry",
             "packages": [
                 "dh-term"
