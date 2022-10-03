@@ -6,10 +6,14 @@
         "catch2",
         "ctre",
         "cxxopts",
-        "dh-term",
+        {
+            "name": "dh-term",
+            "version>=": "0.0.2"
+        },
         "fmt",
         "mdspan",
         "range-v3",
         "tl-expected"
-    ]
+    ],
+    "builtin-baseline": "2f0a16b5ae24fec6c615924e2fbc8bc43ab73764"
 }
