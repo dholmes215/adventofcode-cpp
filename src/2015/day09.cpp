@@ -45,39 +45,6 @@ location_entry parse_entry(std::string_view line)
 
 }  // namespace
 
-// This function returns a range, iterating which will permute the input and
-// provide a reference to that permuted input.  This version modifies the input
-// in place; an alternative design would be for the range to own a copy of the
-// data (in a vector) and/or return copies.
-auto permutation_generator(std::vector<std::string_view>& input)
-{
-    struct permute_result {
-        std::remove_reference<decltype(input)>::type* in;
-        bool found;
-    };
-
-    bool first{true};
-    auto generator{[&input, first]() mutable -> permute_result {
-        if (first) {
-            // On the first call, return the current state of the input without
-            // modifying it.
-            first = false;
-            return {&input, true};
-        }
-        return {&input, std::next_permutation(input.begin(), input.end())};
-    }};
-
-    auto take_until_done{rv::generate(generator) |
-                         rv::take_while([](const permute_result& result) {
-                             return result.found;
-                         })};
-
-    return take_until_done |
-           rv::transform([](const permute_result& result) -> decltype(input)& {
-               return *(result.in);
-           });
-}
-
 aoc::solution_result day09(std::string_view input)
 {
     const auto lines{sv_lines(input)};

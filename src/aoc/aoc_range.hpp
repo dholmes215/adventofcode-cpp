@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021 David Holmes (dholmes at dholmes dot us)
+// Copyright (c) 2021-2022 David Holmes (dholmes at dholmes dot us)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,6 +24,7 @@
 
 #include <map>
 #include <string_view>
+#include <vector>
 
 namespace aoc {
 
@@ -94,6 +95,39 @@ int bool_range_to_int(auto&& bits)
     auto append_bit{
         [](int acc, int bit) { return (acc << 1) | (bit ? 1 : 0); }};
     return r::accumulate(bits, 0, append_bit);
+}
+
+// This function returns a range, iterating which will permute the input and
+// provide a reference to that permuted input.  This version modifies the input
+// in place; an alternative design would be for the range to own a copy of the
+// data (in a vector) and/or return copies.
+inline auto permutation_generator(std::vector<std::string_view>& input)
+{
+    struct permute_result {
+        std::remove_reference<decltype(input)>::type* in;
+        bool found;
+    };
+
+    bool first{true};
+    auto generator{[&input, first]() mutable -> permute_result {
+        if (first) {
+            // On the first call, return the current state of the input without
+            // modifying it.
+            first = false;
+            return {&input, true};
+        }
+        return {&input, std::next_permutation(input.begin(), input.end())};
+    }};
+
+    auto take_until_done{rv::generate(generator) |
+                         rv::take_while([](const permute_result& result) {
+                             return result.found;
+                         })};
+
+    return take_until_done |
+           rv::transform([](const permute_result& result) -> decltype(input)& {
+               return *(result.in);
+           });
 }
 
 }  // namespace aoc
