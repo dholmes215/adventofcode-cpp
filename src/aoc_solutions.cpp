@@ -33,6 +33,7 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2015, 11}, {{aoc::year2015::day11, ""}}},
         {{2015, 12}, {{aoc::year2015::day12, ""}}},
         {{2015, 13}, {{aoc::year2015::day13, ""}}},
+        {{2015, 14}, {{aoc::year2015::day14, ""}}},
         {{2021, 1}, {{aoc::year2021::day01, ""}}},
         {{2021, 2}, {{aoc::year2021::day02, ""}}},
         {{2021, 3}, {{aoc::year2021::day03, ""}}},
