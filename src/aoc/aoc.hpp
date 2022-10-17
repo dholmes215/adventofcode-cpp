@@ -28,6 +28,12 @@ class input_error : public std::runtime_error {
     input_error(std::string msg) : runtime_error{std::move(msg)} {}
 };
 
+// Exception thrown by solutions when they fail to find an answer.
+class solution_error : public std::runtime_error {
+   public:
+    solution_error(std::string msg) : runtime_error{std::move(msg)} {}
+};
+
 struct date {
     int year;
     int day;

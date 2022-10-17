@@ -26,5 +26,6 @@ aoc::solution_result day12(std::string_view);
 aoc::solution_result day13(std::string_view);
 aoc::solution_result day14(std::string_view);
 aoc::solution_result day15(std::string_view);
+aoc::solution_result day16(std::string_view);
 }  // namespace year2015
 }  // namespace aoc
