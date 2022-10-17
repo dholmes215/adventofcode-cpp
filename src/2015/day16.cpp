@@ -58,7 +58,7 @@ thing_t thing_from_sv(std::string_view str)
 [[maybe_unused]] std::string_view thing_to_sv(thing_t thing)
 {
     const auto id{static_cast<std::size_t>(thing)};
-    if (id >= 0 && id < names.size()) {
+    if (id < names.size()) {
         return names[static_cast<std::size_t>(thing)];
     }
     return "unknown";
