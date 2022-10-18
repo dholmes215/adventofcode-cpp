@@ -9,6 +9,7 @@
 
 #include <year2015.hpp>
 #include <year2021.hpp>
+#include <year2022.hpp>
 
 #include <vector>
 
