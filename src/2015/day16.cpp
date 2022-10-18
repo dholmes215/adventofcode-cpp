@@ -80,10 +80,11 @@ sue_record_t parse_line(std::string_view line)
 }
 
 const std::map<thing_t, count_t> ticker_tape_things{
-    {thing_t::children, 3},    {thing_t::cats, 7},   {thing_t::samoyeds, 2},
-    {thing_t::pomeranians, 3}, {thing_t::akitas, 0}, {thing_t::vizslas, 0},
-    {thing_t::goldfish, 5},    {thing_t::trees, 3},  {thing_t::cars, 2},
-    {thing_t::perfumes, 1}};
+    {thing_t::children, {3}}, {thing_t::cats, {7}},
+    {thing_t::samoyeds, {2}}, {thing_t::pomeranians, {3}},
+    {thing_t::akitas, {0}},   {thing_t::vizslas, {0}},
+    {thing_t::goldfish, {5}}, {thing_t::trees, {3}},
+    {thing_t::cars, {2}},     {thing_t::perfumes, {1}}};
 
 bool check_sue_part1(const sue_record_t& record)
 {
