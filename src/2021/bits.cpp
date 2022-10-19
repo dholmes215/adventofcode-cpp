@@ -21,10 +21,10 @@
 
 namespace aoc::year2021 {
 
-decltype(bit_range(0, 4)) hex_to_bit_range(char hex)
+decltype(bit_range<bit_t>(0, 4)) hex_to_bit_range(char hex)
 {
     const int as_int{to_int_base(std::string_view{&hex, 1}, 16)};
-    return bit_range(as_int, 4);
+    return bit_range<bit_t>(as_int, 4);
 }
 
 std::vector<bit_t> hex_to_bit_vector(std::string_view hex)

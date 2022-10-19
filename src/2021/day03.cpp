@@ -25,16 +25,9 @@ using count_type = std::int16_t;
 constexpr std::size_t pos_max{16};
 using count_array = std::array<count_type, pos_max>;
 
-auto bit_range(int i, std::size_t count)
-{
-    auto generator{
-        [=]() mutable { return static_cast<count_type>((i >> --count) & 1); }};
-    return rv::generate_n(generator, count);
-}
-
 count_array add_rows(count_array row1, int in)
 {
-    auto bits{bit_range(in, pos_max)};
+    auto bits{bit_range<count_type>(in, pos_max)};
     r::copy(rv::zip_with(std::plus<count_type>{}, row1, bits), row1.begin());
     return row1;
 }

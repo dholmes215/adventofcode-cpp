@@ -44,14 +44,7 @@ enum class length_type_id {
     number_of_subpackets = 1,
 };
 
-inline auto bit_range(int i, std::size_t count)
-{
-    auto generator{
-        [=]() mutable { return static_cast<bit_t>((i >> --count) & 1); }};
-    return rv::generate_n(generator, count);
-}
-
-decltype(bit_range(0, 4)) hex_to_bit_range(char hex);
+decltype(bit_range<bit_t>(0, 4)) hex_to_bit_range(char hex);
 
 std::vector<bit_t> hex_to_bit_vector(std::string_view hex);
 

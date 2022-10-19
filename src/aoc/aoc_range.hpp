@@ -97,6 +97,14 @@ int bool_range_to_int(auto&& bits)
     return r::accumulate(bits, 0, append_bit);
 }
 
+template <typename BitType>
+inline auto bit_range(int i, std::size_t count)
+{
+    auto generator{
+        [=]() mutable { return static_cast<BitType>((i >> --count) & 1); }};
+    return rv::generate_n(generator, count);
+}
+
 // This function returns a range, iterating which will permute the input and
 // provide a reference to that permuted input.  This version modifies the input
 // in place; an alternative design would be for the range to own a copy of the
