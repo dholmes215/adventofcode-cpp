@@ -28,13 +28,15 @@ class alignas(8) tiny_vector {
    public:
     using value_type = T;
     using size_type = std::uint8_t;
-    using reference_type = value_type&;
-    using pointer = value_type*;
-    using const_pointer = const value_type*;
-    using iterator = pointer;
-    using const_iterator = const_pointer;
+    using reference = T&;
+    using const_reference = const T&;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using iterator = T*;
+    using const_iterator = const T*;
 
     tiny_vector() noexcept {}
+
     tiny_vector(size_type count, const T& value) : size_(count)
     {
         if (count > capacity()) {
@@ -45,6 +47,7 @@ class alignas(8) tiny_vector {
             std::construct_at(data() + i, value);
         }
     }
+
     explicit tiny_vector(size_type count) : size_(count)
     {
         if (count > capacity()) {
@@ -110,10 +113,39 @@ class alignas(8) tiny_vector {
 
     // Element Access
 
-    reference_type operator[](size_type index) noexcept
+    reference at(size_type index) noexcept
+    {
+        if (index < 0 || index >= size()) {
+            throw std::out_of_range{"index out of bounds"};
+        }
+        return (*this)[index];
+    }
+
+    const_reference at(size_type index) const noexcept
+    {
+        if (index < 0 || index >= size()) {
+            throw std::out_of_range{"index out of bounds"};
+        }
+        return (*this)[index];
+    }
+
+    reference operator[](size_type index) noexcept
     {
         return *(begin() + index);
     }
+
+    const_reference operator[](size_type index) const noexcept
+    {
+        return *(begin() + index);
+    }
+
+    reference front() noexcept { return (*this)[0]; }
+
+    const_reference front() const noexcept { return (*this)[0]; }
+
+    reference back() noexcept { return (*this)[size() - 1]; }
+
+    const_reference back() const noexcept { return (*this)[size() - 1]; }
 
     pointer data() noexcept
     {
@@ -203,6 +235,41 @@ class alignas(8) tiny_vector {
     }
 
     // TODO: resize
+
+    void resize(size_type count)
+    {
+        if (count > capacity()) {
+            throw capacity_error(
+                "Cannot resize tiny_vector to size greater than capacity");
+        }
+        if (count > size()) {
+            for (size_type i{size()}; i < count; i++) {
+                std::construct_at(data() + i);
+            }
+        }
+        else {
+            std::destroy_n(data() + count, size() - count);
+        }
+        size_ = count;
+    }
+
+    void resize(size_type count, const value_type& value)
+    {
+        if (count > capacity()) {
+            throw capacity_error(
+                "Cannot resize tiny_vector to size greater than capacity");
+        }
+        if (count > size()) {
+            for (size_type i{size()}; i < count; i++) {
+                std::construct_at(data() + i, value);
+            }
+        }
+        else {
+            std::destroy_n(data() + count, size() - count);
+        }
+        size_ = count;
+    }
+
     // TODO: swap
 
     // Non-member functions
