@@ -18,6 +18,7 @@
 #include <chrono>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <queue>
 #include <stdexcept>
 #include <string_view>
