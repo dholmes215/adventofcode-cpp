@@ -27,7 +27,7 @@ class alignas(8) tiny_vector {
 
    public:
     using value_type = T;
-    using size_type = std::uint8_t;
+    using size_type = std::size_t;
     using reference = T&;
     using const_reference = const T&;
     using pointer = T*;
@@ -37,7 +37,8 @@ class alignas(8) tiny_vector {
 
     tiny_vector() noexcept {}
 
-    tiny_vector(size_type count, const T& value) : size_(count)
+    tiny_vector(size_type count, const T& value)
+        : size_(static_cast<std::uint8_t>(count))
     {
         if (count > capacity()) {
             throw capacity_error(
@@ -48,7 +49,8 @@ class alignas(8) tiny_vector {
         }
     }
 
-    explicit tiny_vector(size_type count) : size_(count)
+    explicit tiny_vector(size_type count)
+        : size_(static_cast<std::uint8_t>(count))
     {
         if (count > capacity()) {
             throw capacity_error(
@@ -250,7 +252,7 @@ class alignas(8) tiny_vector {
         else {
             std::destroy_n(data() + count, size() - count);
         }
-        size_ = count;
+        size_ = static_cast<std::uint8_t>(count);
     }
 
     void resize(size_type count, const value_type& value)
@@ -294,7 +296,7 @@ class alignas(8) tiny_vector {
    private:
     static constexpr size_type capacity_{7};
     std::array<std::byte, capacity_> storage_;
-    size_type size_{0};
+    std::uint8_t size_{0};
 
     pointer end_pointer_() noexcept { return data() + size(); }
 };
