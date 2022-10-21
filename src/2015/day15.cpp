@@ -7,12 +7,15 @@
 
 #include <aoc.hpp>
 #include <aoc_range.hpp>
+#include <coro_generator.hpp>
+#include <tiny_vector.hpp>
 
 #include <ctre.hpp>
 
 #include <fmt/ranges.h>
 
 #include <array>
+#include <coroutine>
 #include <cstdint>
 #include <functional>
 #include <string_view>
@@ -56,6 +59,35 @@ properties_t operator*(const properties_t& lhs, const teaspoons_t rhs)
 
 }  // namespace
 
+Generator<tiny_vector<teaspoons_t>> iterate_proportions(
+    int ingredients,
+    teaspoons_t total_teaspoons)
+{
+    tiny_vector<teaspoons_t> proportions;
+    teaspoons_t remaining_teaspoons{total_teaspoons};
+
+    while (true) {
+        proportions.resize(
+            static_cast<tiny_vector<teaspoons_t>::size_type>(ingredients - 1));
+        proportions.push_back(remaining_teaspoons);
+        co_yield proportions;
+        proportions.pop_back();
+
+        // Backtrack until we reach a back() that can be iterated
+        while (remaining_teaspoons == 0) {
+            remaining_teaspoons += proportions.back();
+            proportions.pop_back();
+        }
+        if (proportions.empty()) {
+            // We've iterated every possibility.
+            break;
+        }
+
+        proportions.back()++;
+        remaining_teaspoons--;
+    }
+}
+
 aoc::solution_result day15(std::string_view input)
 {
     const auto add_properties{
@@ -75,32 +107,26 @@ aoc::solution_result day15(std::string_view input)
 
     property_t part1_score{0};
     property_t part2_score{0};
-    for (teaspoons_t a{0}; a <= 100; a++) {
-        for (teaspoons_t b{0}; b <= 100 - a; b++) {
-            for (teaspoons_t c{0}; c <= 100 - a - b; c++) {
-                const teaspoons_t d{static_cast<teaspoons_t>(100 - a - b - c)};
-                const std::array<teaspoons_t, 4> proportions{a, b, c, d};
 
-                // Reuse this vector to avoid reallocation
-                for (std::size_t i{0}; i < 4; i++) {
-                    modified_properties[i] =
-                        base_properties[i] * proportions[i];
-                }
+    for (auto proportions : iterate_proportions(4, 100)) {
+        // Reuse this vector to avoid reallocation
+        for (std::size_t i{0}; i < 4; i++) {
+            modified_properties[i] = base_properties[i] * proportions[i];
+        }
 
-                const properties_t combined_ingredients{r::accumulate(
-                    modified_properties, properties_t{}, add_properties)};
-                const auto this_score{r::accumulate(
-                    combined_ingredients | rv::take(4) |
-                        rv::transform(
-                            [](const property_t p) { return std::max(p, 0); }),
-                    property_t{1}, std::multiplies<property_t>{})};
-                part1_score = std::max(part1_score, this_score);
+        const properties_t combined_ingredients{
+            r::accumulate(modified_properties, properties_t{}, add_properties)};
+        const auto this_score{
+            r::accumulate(combined_ingredients | rv::take(4) |
+                              rv::transform([](const property_t p) {
+                                  return std::max(p, 0);
+                              }),
+                          property_t{1}, std::multiplies<property_t>{})};
+        part1_score = std::max(part1_score, this_score);
 
-                // Calories
-                if (combined_ingredients[4] == 500) {
-                    part2_score = std::max(part2_score, this_score);
-                }
-            }
+        // Calories
+        if (combined_ingredients[4] == 500) {
+            part2_score = std::max(part2_score, this_score);
         }
     }
 
