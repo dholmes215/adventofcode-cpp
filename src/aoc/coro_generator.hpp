@@ -32,6 +32,7 @@ class Generator {
         }
         // Disallow co_await in generator coroutines.
         void await_transform() = delete;
+        void return_void() {}
         [[noreturn]] static void unhandled_exception() { throw; }
 
         std::optional<T> current_value;
