@@ -14,6 +14,7 @@
 
 #include <fmt/format.h>
 
+#include <optional>
 #include <string_view>
 
 namespace aoc::year2021 {
