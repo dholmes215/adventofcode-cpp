@@ -40,10 +40,9 @@ class alignas(8) tiny_vector {
     tiny_vector(size_type count, const T& value)
         : size_(static_cast<std::uint8_t>(count))
     {
-        if (count > capacity()) {
-            throw capacity_error(
-                "Cannot construct tiny_vector with size greater than capacity");
-        }
+        check_capacity_(
+            count,
+            "Cannot construct tiny_vector with size greater than capacity");
         for (size_type i{0}; i < count; i++) {
             std::construct_at(data() + i, value);
         }
@@ -52,10 +51,9 @@ class alignas(8) tiny_vector {
     explicit tiny_vector(size_type count)
         : size_(static_cast<std::uint8_t>(count))
     {
-        if (count > capacity()) {
-            throw capacity_error(
-                "Cannot construct tiny_vector with size greater than capacity");
-        }
+        check_capacity_(
+            count,
+            "Cannot construct tiny_vector with size greater than capacity");
         for (size_type i{0}; i < count; i++) {
             std::construct_at(data() + i);
         }
@@ -207,10 +205,8 @@ class alignas(8) tiny_vector {
     // copy push_back
     void push_back(const T& t)
     {
-        if (size() == capacity()) {
-            throw capacity_error(
-                "Cannot push_back because tiny_vector is full");
-        }
+        check_capacity_(size() + 1,
+                        "Cannot push_back because tiny_vector is full");
         std::construct_at(end_pointer_(), t);
         size_++;
     }
@@ -218,10 +214,8 @@ class alignas(8) tiny_vector {
     // move push_back
     void push_back(T&& t)
     {
-        if (size() == capacity()) {
-            throw capacity_error(
-                "Cannot push_back because tiny_vector is full");
-        }
+        check_capacity_(size() + 1,
+                        "Cannot push_back because tiny_vector is full");
         std::construct_at(end_pointer_(), std::move(t));
         size_++;
     }
@@ -240,10 +234,8 @@ class alignas(8) tiny_vector {
 
     void resize(size_type count)
     {
-        if (count > capacity()) {
-            throw capacity_error(
-                "Cannot resize tiny_vector to size greater than capacity");
-        }
+        check_capacity_(
+            count, "Cannot resize tiny_vector to size greater than capacity");
         if (count > size()) {
             for (size_type i{size()}; i < count; i++) {
                 std::construct_at(data() + i);
@@ -257,10 +249,8 @@ class alignas(8) tiny_vector {
 
     void resize(size_type count, const value_type& value)
     {
-        if (count > capacity()) {
-            throw capacity_error(
-                "Cannot resize tiny_vector to size greater than capacity");
-        }
+        check_capacity_(
+            count, "Cannot resize tiny_vector to size greater than capacity");
         if (count > size()) {
             for (size_type i{size()}; i < count; i++) {
                 std::construct_at(data() + i, value);
@@ -288,9 +278,7 @@ class alignas(8) tiny_vector {
 
     class capacity_error : public std::runtime_error {
        public:
-        capacity_error(const std::string& msg) : runtime_error{std::move(msg)}
-        {
-        }
+        capacity_error(const char* msg) : runtime_error{msg} {}
     };
 
    private:
@@ -299,6 +287,14 @@ class alignas(8) tiny_vector {
     std::uint8_t size_{0};
 
     pointer end_pointer_() noexcept { return data() + size(); }
+
+    void check_capacity_(size_type requested_size,
+                         const char* failure_msg) const
+    {
+        if (requested_size > capacity()) {
+            throw capacity_error(failure_msg);
+        }
+    }
 };
 
 static_assert(sizeof(tiny_vector<char>) == 8,
