@@ -12,6 +12,7 @@
         },
         "fmt",
         "mdspan",
+        "ms-gsl",
         "nlohmann-json",
         "range-v3",
         "tl-expected"
