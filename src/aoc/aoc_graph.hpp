@@ -8,6 +8,8 @@
 #ifndef AOC_GRAPH_HPP
 #define AOC_GRAPH_HPP
 
+#include <fmt/ranges.h>
+
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -99,6 +101,9 @@ template <typename Vertex, typename Adjacencies>
             path_to_destination.push_back(v);
             iter = predecessors.find(v);
         }
+        // XXX I am assuming we don't want the source to appear at the beginning
+        // of the path?
+        path_to_destination.pop_back();
         std::reverse(path_to_destination.begin(), path_to_destination.end());
     }
     return path_to_destination;

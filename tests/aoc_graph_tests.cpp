@@ -40,5 +40,5 @@ TEST_CASE("BFS with map/char and lambda", "[bfs]")
     // specific multimap above.  It's different from the path in the textbook,
     // but I'm too lazy to make the multiset reflect the book because it doesn't
     // matter.
-    REQUIRE(path == std::vector<char>{'s', 'v', 'w', 'z'});
+    REQUIRE(path == std::vector<char>{'v', 'w', 'z'});
 }

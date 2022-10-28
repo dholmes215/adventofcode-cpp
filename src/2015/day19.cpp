@@ -6,7 +6,9 @@
 //
 
 #include <aoc.hpp>
+#include <aoc_graph.hpp>
 #include <aoc_range.hpp>
+#include <coro_generator.hpp>
 
 #include <ctre.hpp>
 
@@ -40,6 +42,12 @@ struct atom_pos_t {
 
 auto split_molecule(std::string_view molecule)
 {
+    // Nasty special-case hack for "e", which the code below doesn't support
+    // because it doesn't start with an upper-case letter.
+    if (molecule == "e") {
+        return std::vector<atom_pos_t>{{0, 1}};
+    }
+
     const auto second_isupper{
         [](auto pair) -> bool { return std::isupper(pair.second); }};
     const auto offset_pair_to_pos{[](auto pair) {
@@ -54,23 +62,35 @@ auto split_molecule(std::string_view molecule)
            r::to<std::vector>;
 }
 
-auto calibrate_machine(const replacement_map_t& replacements,
-                       const std::string_view input_molecule)
+Generator<std::string> generate_replacement_molecules(
+    const replacement_map_t& replacements,
+    const std::string_view input_molecule)
 {
     const auto atom_positions{split_molecule(input_molecule)};
-    std::set<std::string> new_molecules;
 
     for (const auto& [pos, count] : atom_positions) {
         const std::string_view input_atom{input_molecule.substr(pos, count)};
-        const auto [begin, end]{replacements.equal_range(input_atom)};
-        const auto replacement_values{r::subrange{begin, end} | rv::values};
+        const auto replacement_values{
+            multimap_value_range(replacements, input_atom)};
         for (const auto replacement : replacement_values) {
             std::string new_molecule{input_molecule.begin(),
                                      input_molecule.end()};
             new_molecule.replace(pos, count, replacement);
-            new_molecules.insert(std::move(new_molecule));
+            co_yield new_molecule;
         }
     }
+}
+
+auto calibrate_machine(const replacement_map_t& replacements,
+                       const std::string_view input_molecule)
+{
+    std::set<std::string> new_molecules;
+
+    for (auto new_molecule :
+         generate_replacement_molecules(replacements, input_molecule)) {
+        new_molecules.insert(std::move(new_molecule));
+    }
+
     return new_molecules.size();
 }
 
@@ -86,7 +106,18 @@ aoc::solution_result day19(std::string_view input)
 
     const auto part1_result{calibrate_machine(replacements, input_molecule)};
 
-    return {part1_result, ""};
+    // Part 2: BFS? A* with a heuristic based on length of molecule?
+
+    const std::string start{"e"};
+    const std::string destination{input_molecule};
+
+    const auto adj_func{[&](const std::string& s) {
+        return generate_replacement_molecules(replacements, s);
+    }};
+
+    const auto path{bfs_path(adj_func, start, destination)};
+
+    return {part1_result, path.size()};
 }
 
 }  // namespace aoc::year2015
