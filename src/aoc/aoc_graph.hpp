@@ -8,6 +8,7 @@
 #ifndef AOC_GRAPH_HPP
 #define AOC_GRAPH_HPP
 
+#include <cstdint>
 #include <map>
 #include <optional>
 #include <queue>
