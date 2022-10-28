@@ -1,6 +1,7 @@
 add_library(aoc_lib 
     aoc.cpp aoc.hpp 
     aoc_enum.hpp 
+    aoc_graph.hpp
     aoc_grid.hpp 
     aoc_range.hpp 
     aoc_vec.hpp 

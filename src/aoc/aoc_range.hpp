@@ -42,6 +42,15 @@ auto submap(const std::map<Key, Value>& map,
     return r::subrange(map.lower_bound(first_key), map.upper_bound(last_key));
 }
 
+// Given a std::multimap<Key,Value>, return a range of all the values matching
+// the given key.
+template <typename Key, typename Value>
+auto multimap_value_range(const std::multimap<Key, Value>& map, const Key& key)
+{
+    const auto [begin, end]{map.equal_range(key)};
+    return r::subrange(begin, end) | rv::values;
+}
+
 // Convert a char range to a std::string_view.
 // FIXME if the range isn't actually contiguous, this will never work.
 auto sv(auto&& rng)
