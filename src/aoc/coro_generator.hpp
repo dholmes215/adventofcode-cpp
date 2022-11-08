@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2000 various cppreference.com editors:
+// Copyright (C) 2020-2022 various cppreference.com editors:
 // https://en.cppreference.com/mwiki/index.php?title=cpp/coroutine/coroutine_handle&action=history
 //
 // Distributed under the CC BY-SA 3.0 license:
