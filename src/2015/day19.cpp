@@ -35,6 +35,16 @@ replacement_t parse_replacement(std::string_view line)
     throw input_error{fmt::format("failed to parse input: {}", line)};
 }
 
+template <typename Key, typename Value>
+[[nodiscard]] std::multimap<Value, Key> invert_multimap(
+    const std::multimap<Key, Value>& input)
+{
+    const auto flip_pair{[](std::pair<Key, Value> p) {
+        return std::pair<Value, Key>{p.second, p.first};
+    }};
+    return input | rv::transform(flip_pair) | r::to<std::multimap>;
+}
+
 struct atom_pos_t {
     std::size_t pos;
     std::size_t count;
@@ -81,6 +91,31 @@ Generator<std::string> generate_replacement_molecules(
     }
 }
 
+// Iterates all the molecules that could have produced the given molecule
+Generator<std::string> generate_originating_molecules(
+    const replacement_map_t& inverted_replacements,
+    const std::string_view output_molecule)
+{
+    const auto keys{inverted_replacements | rv::keys | rv::unique};
+    for (const auto& key : keys) {
+        auto pos{output_molecule.find(key, 0)};
+        while (pos != std::string_view::npos) {
+            for (const auto& value :
+                 multimap_value_range(inverted_replacements, key)) {
+                std::string orig_molecule{output_molecule};
+                orig_molecule.replace(pos, key.size(), value);
+                if (value == "e" && orig_molecule != "e") {
+                    // Only dead ends this way.
+                    continue;
+                }
+                co_yield orig_molecule;
+            }
+
+            pos = output_molecule.find(key, pos + 1);
+        }
+    }
+}
+
 auto calibrate_machine(const replacement_map_t& replacements,
                        const std::string_view input_molecule)
 {
@@ -108,16 +143,25 @@ aoc::solution_result day19(std::string_view input)
 
     // Part 2: BFS? A* with a heuristic based on length of molecule?
 
-    const std::string start{"e"};
-    const std::string destination{input_molecule};
+    const auto inverted_replacements{invert_multimap(replacements)};
+
+    const std::string start{input_molecule};
+    const std::string destination{"e"};
 
     const auto adj_func{[&](const std::string& s) {
-        return generate_replacement_molecules(replacements, s);
+        return generate_originating_molecules(inverted_replacements, s);
     }};
 
-    const auto path{bfs_path(adj_func, start, destination)};
+    // const auto path{bfs_path(adj_func, start, destination)};
+    const auto path{dfs_path(adj_func, start, destination)};
 
-    return {part1_result, path.size()};
+    // Plain BFS doesn't work.  Try better pruning?  A*? Greedy BFS with
+    // Levenshtein distance heuristic or something? Greedy BFS with just string
+    // length heuristic? IDDFS/IDA*?
+
+    // Try ditching the distance numbers?  Try ditching the path?
+
+    return {part1_result, path.size() - 1};
 }
 
 }  // namespace aoc::year2015

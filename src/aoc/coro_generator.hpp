@@ -72,7 +72,16 @@ class Generator {
     // Range-based for loop support.
     class Iter {
        public:
-        void operator++() { m_coroutine.resume(); }
+        // Thanks to wreien from #include<C++> Discord for fixing this class
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+
+        Iter& operator++()
+        {
+            m_coroutine.resume();
+            return *this;
+        }
+        void operator++(int) { operator++(); }
         const T& operator*() const
         {
             return *m_coroutine.promise().current_value;
