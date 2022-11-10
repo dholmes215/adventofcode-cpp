@@ -346,8 +346,8 @@ Generator<typename BacktrackGraph::candidate_type> backtrack_coro(
 {
     auto candidate{graph.root()};
 
-    std::vector<range_stack_elem<BacktrackGraph>> adjacencies_stack{
-        {graph, candidate.back()}};
+    std::vector<range_stack_elem<BacktrackGraph>> adjacencies_stack;
+    adjacencies_stack.emplace_back(graph, candidate.back());
 
     while (!candidate.empty()) {
         auto iter = adjacencies_stack.back().iter;

@@ -12,9 +12,6 @@
 
 #include <ctre.hpp>
 
-#include <fmt/format.h>
-#include <fmt/ranges.h>
-
 #include <map>
 #include <set>
 #include <string>
@@ -116,6 +113,25 @@ Generator<std::string> generate_originating_molecules(
     }
 }
 
+// Backtracking search in arbitrary order takes basically forever in either
+// direction, but if we start from the medicine molecule and work backwards
+// prioritizing the replacements that shorten the molecule the most, we arrive
+// at the answer very quickly.
+std::vector<std::string> generate_originating_molecules_sorted(
+    const replacement_map_t& inverted_replacements,
+    const std::string_view output_molecule)
+{
+    auto out{
+        generate_originating_molecules(inverted_replacements, output_molecule) |
+        r::to<std::vector>};
+    const auto shorter{[](std::string_view lhs, std::string_view rhs) {
+        return lhs.size() < rhs.size();
+    }};
+    std::sort(out.begin(), out.end(), shorter);
+
+    return out;
+}
+
 auto calibrate_machine(const replacement_map_t& replacements,
                        const std::string_view input_molecule)
 {
@@ -138,30 +154,37 @@ aoc::solution_result day19(std::string_view input)
                                          rv::transform(parse_replacement) |
                                          r::to<std::multimap>};
     const auto input_molecule{lines.back()};
-
     const auto part1_result{calibrate_machine(replacements, input_molecule)};
 
-    // Part 2: BFS? A* with a heuristic based on length of molecule?
-
+    // Part 2
     const auto inverted_replacements{invert_multimap(replacements)};
-
     const std::string start{input_molecule};
     const std::string destination{"e"};
 
     const auto adj_func{[&](const std::string& s) {
-        return generate_originating_molecules(inverted_replacements, s);
+        return generate_originating_molecules_sorted(inverted_replacements, s);
     }};
+    auto start_func{[&]() -> std::vector<std::string> { return {start}; }};
 
-    // const auto path{bfs_path(adj_func, start, destination)};
-    const auto path{dfs_path(adj_func, start, destination)};
+    struct backtrack_graph {
+        using vertex_type = std::string;
+        using candidate_type = std::vector<std::string>;
+        decltype(start_func)& root;
+        bool reject(candidate_type&) const
+        {
+            return false;  // We only stop when we run out of replacements
+        }
+        bool accept(candidate_type& c) const { return c.back() == "e"; }
+        decltype(adj_func)& adjacencies;
+    };
+    backtrack_graph g{start_func, adj_func};
+    // XXX I'm taking the very first path we find and assuming it's the
+    // shortest.  This happens to be true for my own input.  I have no idea if
+    // it's true in general!
+    const auto path{*backtrack_coro(g).begin()};
+    const auto part2_result{path.size() - 1};
 
-    // Plain BFS doesn't work.  Try better pruning?  A*? Greedy BFS with
-    // Levenshtein distance heuristic or something? Greedy BFS with just string
-    // length heuristic? IDDFS/IDA*?
-
-    // Try ditching the distance numbers?  Try ditching the path?
-
-    return {part1_result, path.size() - 1};
+    return {part1_result, part2_result};
 }
 
 }  // namespace aoc::year2015

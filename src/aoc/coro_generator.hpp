@@ -86,11 +86,13 @@ class Generator {
         {
             return *m_coroutine.promise().current_value;
         }
+        bool operator==(const Iter&) const = default;
         bool operator==(std::default_sentinel_t) const
         {
             return !m_coroutine || m_coroutine.done();
         }
 
+        Iter() = default;
         explicit Iter(const Handle coroutine) : m_coroutine{coroutine} {}
 
        private:
