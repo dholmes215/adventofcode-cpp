@@ -168,7 +168,7 @@ aoc::solution_result day19(std::string_view input)
 
     struct backtrack_graph {
         using vertex_type = std::string;
-        using candidate_type = std::vector<std::string>;
+        using candidate_type = std::vector<vertex_type>;
         decltype(start_func)& root;
         bool reject(candidate_type&) const
         {
