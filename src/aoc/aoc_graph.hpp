@@ -375,6 +375,54 @@ Generator<typename BacktrackGraph::candidate_type> backtrack_coro(
     }
 }
 
+template <typename DijkstraGraph>
+struct dijkstra_out {
+    using vertex_type = typename DijkstraGraph::vertex_type;
+    using cost_type = typename DijkstraGraph::cost_type;
+    std::map<vertex_type, cost_type> dist;
+    std::map<vertex_type, vertex_type> prev;
+    std::optional<vertex_type> end;
+};
+
+template <typename DijkstraGraph>
+dijkstra_out<DijkstraGraph> dijkstra(const DijkstraGraph& graph)
+{
+    using queue_entry = typename DijkstraGraph::queue_entry;
+    using vertex_type = typename DijkstraGraph::vertex_type;
+    const vertex_type start = graph.root();
+
+    dijkstra_out<DijkstraGraph> out;
+    out.dist.emplace(start, 0);
+
+    using queue_t = std::priority_queue<queue_entry, std::vector<queue_entry>,
+                                        std::greater<queue_entry>>;
+    queue_t q;
+    q.push({start, 0});
+
+    while (!q.empty()) {
+        const queue_entry e{q.top()};
+        q.pop();
+        const auto u{e.vert};  // best vertex
+        if (graph.accept(u)) {
+            out.end = u;
+            return out;
+        }
+
+        const auto neighbors{graph.adjacencies(u)};
+        for (auto neighbor : neighbors) {
+            const auto& v{neighbor.vert};
+            const auto alt{e.dist + neighbor.dist};
+            if (!out.dist.contains(v) || alt < out.dist.at(v)) {
+                out.dist.insert_or_assign(v, alt);
+                out.prev.insert_or_assign(v, u);
+                q.push({v, alt});
+            }
+        }
+    }
+
+    return out;
+}
+
 }  // namespace aoc
 
 #endif  // AOC_GRAPH_HPP
