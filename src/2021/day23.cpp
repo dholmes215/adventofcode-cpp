@@ -231,13 +231,6 @@ std::optional<vec_t> can_enter_room(const Grid& grid, char c) noexcept
     return {vec_t{col, static_cast<int>(empty_spaces + 1)}};
 }
 
-constexpr std::array<vec_t, 4> directions{{
-    {-1, 0},
-    {1, 0},
-    {0, -1},
-    {0, 1},
-}};
-
 template <typename Grid>
 struct move {
     Grid dest;
@@ -271,8 +264,6 @@ template <typename Grid>
 std::vector<move<Grid>> enumerate_possible_moves(const Grid& grid)
 {
     std::vector<move<Grid>> out;
-
-    (void)directions;
 
     const auto positions{locate_amphipods(grid)};
     // XXX We would partition the positions to put hallway amphipods first,
