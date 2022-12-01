@@ -14,30 +14,22 @@
 
 namespace aoc::year2022 {
 
-namespace {
-
-}  // namespace
-
 aoc::solution_result day01(std::string_view input)
 {
-    const auto lines{sv_lines(trim(input)) | r::to<std::vector>};
-    const auto elf_line_groups{lines | rv::split(std::string_view{""}) |
-                               rv::transform([](const auto elf_snacks) {
-                                   return elf_snacks | r::to<std::vector>;
-                               }) |
-                               r::to<std::vector>};
+    const auto snack_lines_to_ints{[](const auto elf_snacks) {
+        return elf_snacks | rv::transform(to_int);
+    }};
 
-    auto elf_calories{elf_line_groups | rv::transform([](const auto group) {
-                          return r::accumulate(
-                              group | rv::transform([](const auto line) {
-                                  return to_int(line);
-                              }),
-                              0);
-                      }) |
+    const auto elf_snacks{sv_lines(trim(input)) | rv::split("") |
+                          rv::transform(snack_lines_to_ints)};
+
+    const auto add_snacks{
+        [](const auto& snack_rng) { return r::accumulate(snack_rng, 0); }};
+
+    auto elf_calories{elf_snacks | rv::transform(add_snacks) |
                       r::to<std::vector>};
 
-    std::partial_sort(elf_calories.begin(), elf_calories.begin() + 3,
-                      elf_calories.end(), std::greater<int>{});
+    r::partial_sort(elf_calories, elf_calories.begin() + 3, std::greater{});
 
     return {elf_calories.front(), r::accumulate(elf_calories | rv::take(3), 0)};
 }
