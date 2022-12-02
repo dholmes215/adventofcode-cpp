@@ -8,7 +8,7 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 
-#include <fmt/ranges.h>
+#include <fmt/format.h>
 
 #include <string_view>
 #include <utility>
@@ -126,11 +126,6 @@ aoc::solution_result day02(std::string_view input)
                                   return std::make_pair(line[0], line[2]);
                               }) |
                               r::to<std::vector>};
-
-    for (const auto& pair : strategy_guide) {
-        fmt::print("{} {} {}\n", pair, score_shape(pair.second),
-                   score_round(pair));
-    }
 
     const auto part1_score{
         r::accumulate(strategy_guide | rv::transform(score_round), 0)};
