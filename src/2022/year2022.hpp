@@ -10,7 +10,8 @@
 namespace aoc {
 namespace year2022 {
 aoc::solution_result day01(std::string_view);
-aoc::solution_result day02(std::string_view);
+aoc::solution_result day02naive(std::string_view);
+aoc::solution_result day02lookup(std::string_view);
 aoc::solution_result day03(std::string_view);
 aoc::solution_result day04(std::string_view);
 aoc::solution_result day05(std::string_view);
