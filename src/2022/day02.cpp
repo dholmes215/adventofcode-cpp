@@ -120,7 +120,7 @@ constexpr int score_round(const std::pair<char, char> p)
 
 constexpr std::pair<char, char> int_to_pair(int i)
 {
-    return {i % 3 + 'A', i / 3 + 'X'};
+    return {static_cast<char>(i % 3 + 'A'), static_cast<char>(i / 3 + 'X')};
 }
 
 constexpr std::array<int, 9> part1_lookup_func()
