@@ -56,6 +56,8 @@ int score_result(const result r)
         case result::loss:
             return 0;
     }
+    throw input_error(
+        fmt::format("Unsupported result: {}", static_cast<int>(r)));
 }
 
 result needed_result(const char c)
