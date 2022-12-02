@@ -168,8 +168,15 @@ constexpr int chars_to_int(char l, char r)
     return l - 'A' + (r - 'X') * 3;
 }
 
+/// Add two pair-like things member-wise. Could be a std::pair or a std::tuple.
+constexpr auto add_pair{[](const auto l, const auto r) {
+    return decltype(l){std::get<0>(l) + std::get<0>(r),
+                       std::get<1>(l) + std::get<1>(r)};
+}};
+
 }  // namespace
 
+// Solution calculating each score.
 aoc::solution_result day02naive(std::string_view input)
 {
     const auto strategy_guide{sv_lines(input) | rv::transform([](auto line) {
@@ -192,6 +199,7 @@ aoc::solution_result day02naive(std::string_view input)
     return {part1_score, part2_score};
 }
 
+// Solution using a precomputed lookup table.
 aoc::solution_result day02lookup(std::string_view input)
 {
     const auto chunk_to_int{
@@ -199,11 +207,9 @@ aoc::solution_result day02lookup(std::string_view input)
     const auto strategy_guide{input | rv::chunk(4) |
                               rv::transform(chunk_to_int)};
 
-    const auto [part1_score, part2_score]{r::accumulate(
-        strategy_guide | rv::transform(int_to_both_scores),
-        std::pair<int, int>{0, 0}, [](const auto l, const auto r) {
-            return std::pair<int, int>{l.first + r.first, l.second + r.second};
-        })};
+    const auto [part1_score, part2_score]{
+        r::accumulate(strategy_guide | rv::transform(int_to_both_scores),
+                      std::pair<int, int>{0, 0}, add_pair)};
 
     return {part1_score, part2_score};
 }
