@@ -4,6 +4,7 @@
     "dependencies": [
         "abseil",
         "catch2",
+        "cmakerc",
         "ctre",
         "cxxopts",
         {
