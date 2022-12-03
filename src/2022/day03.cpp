@@ -52,7 +52,10 @@ constexpr auto common_items_group{[](const auto& mask_range) {
 
 constexpr int priority_from_mask(std::uint64_t mask)
 {
-    return std::bit_width(mask) - 1;
+    // XXX std::bit_width was patched in the standard to return int, but in the
+    // original C++20 it returned unsigned long long.  This cast is to make it
+    // compile with versions of libstdc++ that haven't caught up yet.
+    return static_cast<int>(std::bit_width(mask)) - 1;
 }
 
 constexpr int priority_from_rucksack(std::string_view rucksack)
