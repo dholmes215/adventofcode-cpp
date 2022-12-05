@@ -46,8 +46,8 @@ std::vector<std::vector<char>> parse_stacks(
                r::to<std::vector>;
     }};
 
-    return rv::ints(0ULL, stack_count) | rv::transform(stack_from_lines) |
-           r::to<std::vector>;
+    return rv::ints(std::size_t{0}, stack_count) |
+           rv::transform(stack_from_lines) | r::to<std::vector>;
 }
 
 using parsed_input_t =
