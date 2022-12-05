@@ -85,6 +85,7 @@ const std::map<date, std::vector<solution>>& solutions()
           {aoc::year2022::day02lookup, "lookup"}}},
         {{2022, 03}, {{aoc::year2022::day03, ""}}},
         {{2022, 04}, {{aoc::year2022::day04, ""}}},
+        {{2022, 05}, {{aoc::year2022::day05, ""}}},
     };
     return solutions;
 }
