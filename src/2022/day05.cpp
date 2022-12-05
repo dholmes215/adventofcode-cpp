@@ -27,7 +27,8 @@ struct move_t {
 move_t parse_move(std::string_view line)
 {
     const auto parts{sv_words(line) | rv::drop(1) | rv::stride(2) |
-                     rv::transform(to_num<std::uint8_t>) | r::to<tiny_vector>};
+                     rv::transform(to_num<std::uint8_t>) |
+                     r::to<tiny_vector<std::uint8_t>>};
     return {parts[0], parts[1] - 1ULL, parts[2] - 1ULL};
 }
 
