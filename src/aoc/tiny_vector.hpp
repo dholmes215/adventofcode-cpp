@@ -62,7 +62,14 @@ class alignas(8) tiny_vector {
     template <typename InputIt>
     tiny_vector(InputIt first, InputIt last)
     {
+#if defined(__GNUC__) && !defined(__llvm__) && !defined(__INTEL_COMPILER)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         auto iter{first};
+#pragma GCC diagnostic pop
+#else
+        auto iter{first};
+#endif
         while (iter != last) {
             push_back(*iter++);
         }
