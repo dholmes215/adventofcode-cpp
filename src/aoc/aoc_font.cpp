@@ -25,6 +25,24 @@ constexpr std::string_view letter_a = R"(
 #..#.
 )";
 
+constexpr std::string_view letter_b = R"(
+###..
+#..#.
+###..
+#..#.
+#..#.
+###..
+)";
+
+constexpr std::string_view letter_e = R"(
+####.
+#....
+###..
+#....
+#....
+####.
+)";
+
 constexpr std::string_view letter_f = R"(
 ####.
 #....
@@ -34,6 +52,15 @@ constexpr std::string_view letter_f = R"(
 #....
 )";
 
+constexpr std::string_view letter_g = R"(
+.##..
+#..#.
+#....
+#.##.
+#..#.
+.###.
+)";
+
 constexpr std::string_view letter_k = R"(
 #..#.
 #.#..
@@ -41,6 +68,15 @@ constexpr std::string_view letter_k = R"(
 #.#..
 #.#..
 #..#.
+)";
+
+constexpr std::string_view letter_p = R"(
+###..
+#..#.
+#..#.
+###..
+#....
+#....
 )";
 
 constexpr std::string_view letter_r = R"(
@@ -79,8 +115,10 @@ std::array<char, 30> to_array(std::string_view s)
 }
 
 const std::map<std::array<char, 30>, char> char_lookup_map{
-    {to_array(letter_a), 'A'}, {to_array(letter_f), 'F'},
-    {to_array(letter_k), 'K'}, {to_array(letter_r), 'R'},
+    {to_array(letter_a), 'A'}, {to_array(letter_b), 'B'},
+    {to_array(letter_e), 'E'}, {to_array(letter_f), 'F'},
+    {to_array(letter_g), 'G'}, {to_array(letter_k), 'K'},
+    {to_array(letter_p), 'P'}, {to_array(letter_r), 'R'},
     {to_array(letter_u), 'U'}, {to_array(letter_z), 'Z'},
 };
 
