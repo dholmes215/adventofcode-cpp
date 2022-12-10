@@ -7,7 +7,6 @@
 
 #include <aoc.hpp>
 #include <aoc_font.hpp>
-#include <aoc_grid.hpp>
 #include <aoc_range.hpp>
 #include <tiny_vector.hpp>
 
@@ -35,16 +34,16 @@ const auto signal_strength{[](auto pair) {
     return static_cast<int>(cycle) * x;
 }};
 
-const auto pixel_on{[](auto pair) {
-    auto [cycle, x_reg]{pair};
-    int crt_pos{(static_cast<int>(cycle) - 1) % 40};
-    return std::abs(x_reg - crt_pos) <= 1;
-}};
-
 char bool_to_char(bool b)
 {
     return b ? '#' : '.';
 }
+
+const auto crt_char{[](auto pair) {
+    auto [cycle, x_reg]{pair};
+    int crt_pos{(static_cast<int>(cycle) - 1) % 40};
+    return bool_to_char(std::abs(x_reg - crt_pos) <= 1);
+}};
 
 }  // namespace
 
@@ -65,17 +64,8 @@ aoc::solution_result day10(std::string_view input)
                                            rv::drop(20) | rv::stride(40),
                                        0)};
 
-    static_grid<char, 40, 6> grid;
-    r::copy(x_register | rv::enumerate | rv::drop(1) | rv::transform(pixel_on) |
-                rv::transform(bool_to_char),
-            grid.data().data());
-
-    std::string message;
-    for (int i{0}; i < 8; i++) {
-        std::array<char, 30> char_array;
-        r::copy(grid.subgrid({{i * 5, 0}, {5, 6}}).data(), char_array.begin());
-        message += recognize_char(char_array);
-    }
+    std::string message{recognize_string_rng<8>(
+        x_register | rv::enumerate | rv::drop(1) | rv::transform(crt_char))};
 
     return {signal_sum, message};
 }
