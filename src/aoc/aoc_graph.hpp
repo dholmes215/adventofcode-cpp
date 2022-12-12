@@ -173,6 +173,95 @@ template <typename Vertex, typename Adjacencies>
     // TODO: also figure out a way to output the tree
 }
 
+// TODO: Combine this version and the previous into one
+
+/// @brief Implementation of Breadth-First Search based on
+/// _Introduction to Algorithms, 4th Edition_.
+/// @tparam Adjacencies Callable object type which takes a
+/// `Vertex` parameter and returns a range of all other vertexes
+/// adjacent to the given vertex.
+/// @tparam Vertex Type of the vertexes in the graph.
+/// @tparam AcceptFunc Predicate taking a Vertex and returning true if the
+/// vertex is a valid destination.
+/// @param adj Instance of the `Adjacencies` function.  This
+/// replaces "G" in the CLRS version, which represents the graph
+/// but which isn't used for anything except finding the
+/// adjacent vertexes.
+/// @param source The source `Vertex` from which to begin the
+/// search.
+/// @param destination The destination `Vertex` to search for,
+/// if any.
+template <typename Vertex, typename Adjacencies, typename AcceptFunc>
+[[nodiscard]] std::vector<Vertex> bfs_accept(Adjacencies&& adj,
+                                             const Vertex& source,
+                                             const AcceptFunc& accept)
+{
+    enum class graph_color { white, gray, black };
+    using distance = std::uint_fast32_t;
+    // const distance
+    // infinity_value{std::numeric_limits<distance>::max()};
+
+    using queue = std::queue<Vertex>;
+
+    std::map<Vertex, graph_color> colors;
+
+    // "d" in the CLRS version.  If a vertex is missing from
+    // this map, that's equivalent to being "infinity" in the
+    // CLRS version.
+    std::map<Vertex, distance> distances;
+
+    // "pi" in CLRS version. If a vertex is missing from this
+    // map, that's equivalent to being "NIL" in the CLRS
+    // version.
+    std::map<Vertex, Vertex> predecessors;
+
+    // Here CLRS initializes the colors, distances and
+    // predecessors for each vertex.  We don't know the vertexes
+    // yet but will take advantage of `std::map`'s
+    // zero-initialization for colors and will assume missing
+    // predecessors are NIL and missing distances are infinity.
+
+    colors[source] = graph_color::gray;
+    distances[source] = 0;
+    // predecessors[source] = NIL
+
+    queue q;
+    q.push(source);
+
+    bool found_destination{false};
+    Vertex accepted;
+
+    while (!q.empty() && !found_destination) {
+        Vertex u{q.front()};
+        q.pop();
+        for (const Vertex& v : adj(u)) {
+            auto& v_color{colors[v]};
+            if (v_color == graph_color::white) {
+                v_color = graph_color::gray;
+                distances[v] = distances[u] + 1;
+                predecessors[v] = u;
+                q.push(v);
+                if (accept(v)) {
+                    found_destination = true;
+                    accepted = v;
+                }
+            }
+        }
+        colors[u] = graph_color::black;
+    }
+
+    std::vector<Vertex> path_to_destination;
+    if (found_destination) {
+        const auto get_predecessor{
+            [&](const Vertex& v) { return try_at(predecessors, v); }};
+        return get_path(get_predecessor, source, accepted);
+    }
+
+    return {};
+
+    // TODO: also figure out a way to output the tree
+}
+
 /// @brief Search for the shortest path between two vertexes using breadth-first
 /// search.
 /// @tparam Adjacencies Callable object type which takes a `Vertex` parameter
