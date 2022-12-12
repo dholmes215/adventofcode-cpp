@@ -55,22 +55,22 @@ aoc::solution_result day12(std::string_view input)
     auto [grid_, start, end]{parse_input(input)};
     const auto& grid{grid_};
     const auto adj_func1{[&](point_t p) {
-        const auto can_move{[&](point_t dest) {
+        const auto can_move{[p, &grid](point_t dest) {
             return grid.area().contains(dest) && (grid[dest] - grid[p] <= 1);
         }};
 
-        return directions | rv::transform([=](point_t d) { return d + p; }) |
-               rv::filter(can_move) | r::to<std::vector>;
+        return directions | rv::transform([p](point_t d) { return d + p; }) |
+               rv::filter(can_move);
     }};
     auto path1{bfs_path(adj_func1, start, end)};
 
     const auto adj_func2{[&](point_t p) {
-        const auto can_move{[&](point_t dest) {
+        const auto can_move{[p, &grid](point_t dest) {
             return grid.area().contains(dest) && (grid[p] - grid[dest] <= 1);
         }};
 
-        return directions | rv::transform([=](point_t d) { return d + p; }) |
-               rv::filter(can_move) | r::to<std::vector>;
+        return directions | rv::transform([p](point_t d) { return d + p; }) |
+               rv::filter(can_move);
     }};
     auto path2{
         bfs_accept(adj_func2, end, [&](point_t p) { return grid[p] == 'a'; })};
