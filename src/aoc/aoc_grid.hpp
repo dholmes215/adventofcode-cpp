@@ -94,9 +94,12 @@ class subgrid_view {
         return r_.all_points() | rv::transform(at_point);
     }  // namespace aoc
 
-    auto area() const noexcept { return r_; }
     auto width() const noexcept { return r_.dimensions.x; }
     auto height() const noexcept { return r_.dimensions.y; }
+    auto area() const noexcept
+    {
+        return rect<int>{{0, 0}, {width(), height()}};
+    }
 
     auto& operator[](vec2<int> index) const noexcept
     {
