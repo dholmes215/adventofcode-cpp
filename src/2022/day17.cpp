@@ -18,11 +18,11 @@ namespace aoc::year2022 {
 
 namespace {
 
-constexpr int rock_count{2022};
-constexpr int tallest_rock{4};
-constexpr int tower_height{rock_count * tallest_rock + 10};
+constexpr std::size_t rock_count1{2022};
+constexpr std::size_t rock_count2{1000000000000ULL};
+constexpr int room_height{1000000};
 
-using grid_t = heap_grid<char, 9, tower_height>;
+using grid_t = dynamic_grid<char>;
 using piece_t = static_grid<char, 4, 4>;
 using pos_t = vec2<int>;
 
@@ -88,7 +88,7 @@ int piece_height(const piece_t& piece)
 
 grid_t initialize_room()
 {
-    grid_t out;
+    grid_t out{9, room_height};
     r::fill(out.data(), '.');
     r::fill(out.row(out.height() - 1), '-');
     r::fill(out.col(0), '|');
@@ -98,14 +98,15 @@ grid_t initialize_room()
     return out;
 }
 
-void print_grid(const grid_t& grid)
-{
-    auto subgrid{grid.subgrid({{0, grid.height() - 25}, {grid.width(), 25}})};
-    for (const auto& row : subgrid.rows()) {
-        fmt::print("{}\n", row | r::to<std::string>);
-    }
-    fmt::print("\n");
-}
+// void print_grid(const grid_t& grid, int height)
+// {
+//     auto subgrid{
+//         grid.subgrid({{0, grid.height() - height}, {grid.width(), height}})};
+//     for (const auto& row : subgrid.rows()) {
+//         fmt::print("{}\n", row | r::to<std::string>);
+//     }
+//     fmt::print("\n");
+// }
 
 // void print_piece_in_room(const grid_t& grid, const piece_t& piece, pos_t pos)
 // {
@@ -158,24 +159,21 @@ pos_t jet_move(char c)
     throw input_error(fmt::format("Invalid character: '{}'", c));
 }
 
-}  // namespace
-
-aoc::solution_result day17(std::string_view input)
+std::vector<std::int64_t> drop_blocks(grid_t& grid,
+                                      std::size_t block_count,
+                                      const std::vector<pos_t>& jet_patterns)
 {
-    const auto jet_patterns(trim(input) | rv::transform(jet_move) |
-                            r::to<std::vector>);
     const auto jet_cycle(jet_patterns | rv::cycle);
-    const auto piece_cycle(pieces | rv::cycle);
     auto jet_iter{jet_cycle.begin()};
+
+    const auto piece_cycle(pieces | rv::cycle);
     auto piece_iter{piece_cycle.begin()};
 
-    auto grid{initialize_room()};
-
-    print_grid(grid);
-
     auto highest_rock_row{grid.height() - 1};
+    std::vector<std::int64_t> tower_height_by_block;
+    tower_height_by_block.reserve(static_cast<std::size_t>(grid.height()));
 
-    for (int r{0}; r < rock_count; r++) {
+    for (std::size_t r{0}; r < block_count; r++) {
         auto piece{*piece_iter++};
         pos_t pos{3, highest_rock_row - piece.height() - 3};
         // print_piece_in_room(grid, piece, pos);
@@ -197,11 +195,56 @@ aoc::solution_result day17(std::string_view input)
                 // print_piece_in_room(grid, piece, pos);
             }
         }
-        highest_rock_row = pos.y + (4 - piece_height(piece));
+        highest_rock_row =
+            std::min(highest_rock_row, pos.y + (4 - piece_height(piece)));
+        tower_height_by_block.push_back(grid.height() - highest_rock_row - 1);
     }
-    print_grid(grid);
 
-    return {grid.height() - highest_rock_row, ""};
+    return tower_height_by_block;
+}
+
+}  // namespace
+
+aoc::solution_result day17(std::string_view input)
+{
+    const auto jet_patterns(trim(input) | rv::transform(jet_move) |
+                            r::to<std::vector>);
+
+    auto grid1{initialize_room()};
+    // print_grid(grid);
+    std::vector<std::int64_t> tower_height1{
+        drop_blocks(grid1, rock_count1, jet_patterns)};
+    // print_grid(grid, 3000);
+
+    auto grid2{initialize_room()};
+    const std::size_t rocks_to_actually_drop2{200000};
+    std::vector<std::int64_t> tower_height2{
+        drop_blocks(grid2, rocks_to_actually_drop2, jet_patterns)};
+
+    // detect cycle period
+    std::vector<std::int64_t> differences;
+    differences.resize(tower_height2.size() - 1);
+    r::adjacent_difference(tower_height2, differences.begin());
+    r::reverse(differences);
+    const auto section{differences | rv::take(20) | r::to<std::vector>};
+    auto search_result{r::search(differences | rv::drop(1), section)};
+
+    const auto cycle_period{static_cast<std::size_t>(
+        r::distance(differences.begin(), search_result.begin()))};
+
+    const auto tower_height_reversed{tower_height2 | rv::reverse |
+                                     r::to<std::vector>};
+    const std::size_t cycle_height_diff{static_cast<std::size_t>(
+        tower_height_reversed[0] - tower_height_reversed[cycle_period])};
+    const std::size_t rocks_after_drop{rock_count2 - rocks_to_actually_drop2};
+    const std::size_t cycles_to_multiply{rocks_after_drop / cycle_period + 1};
+    const auto rocks_calculated{cycles_to_multiply * cycle_period};
+    const auto final_tower_height2{
+        cycles_to_multiply * cycle_height_diff +
+        static_cast<std::size_t>(
+            tower_height_reversed[rocks_calculated - rocks_after_drop])};
+
+    return {tower_height1.back(), final_tower_height2};
 }
 
 }  // namespace aoc::year2022

@@ -180,6 +180,11 @@ class dynamic_grid_adapter {
         return {*this, r.base, r.dimensions};
     }
 
+    subgrid_view<const dynamic_grid_adapter> subgrid(rect<int> r) const noexcept
+    {
+        return {*this, r.base, r.dimensions};
+    }
+
    protected:
     // Protected is a hack to make ill-concieved copy assignment work
     Range* range_;
