@@ -253,18 +253,21 @@ class heap_data {
     std::unique_ptr<std::array<Value, allowed_size>> data_;
 };
 
-template <typename Value, int width, int height>
-class heap_grid : public grid_adapter<heap_data<Value, width * height>, width> {
+template <typename Value, int Width, int Height>
+class heap_grid : public grid_adapter<heap_data<Value, Width * Height>, Width> {
    public:
-    static constexpr rect<int> area{{0, 0}, {width, height}};
+    static constexpr rect<int> area{{0, 0}, {Width, Height}};
     heap_grid() noexcept
         // FIXME: passign `data_` by reference before it's initialized is
         // undefined behavior
-        : grid_adapter<heap_data<Value, width * height>, width>{data_}, data_{}
+        : grid_adapter<heap_data<Value, Width * Height>, Width>{data_}, data_{}
     {
     }
 
-    heap_data<Value, width * height> data_;
+    static int width() noexcept { return Width; }
+    static int height() noexcept { return Height; }
+
+    heap_data<Value, Width * Height> data_;
 };
 
 template <typename Value>
