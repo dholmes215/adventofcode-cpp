@@ -24,7 +24,7 @@ namespace {
 
 }  // namespace
 
-constexpr size_t minute_deadline{30};
+constexpr size_t minute_deadline1{30};
 
 using valve_t = std::size_t;
 using valve_name_t = std::string_view;
@@ -230,6 +230,8 @@ flow_t count_flow(const network_t& network, valve_set_t open_valves)
     return out;
 }
 
+// TODO: This is all wrong now
+// Matbe separate cumulative minutes so far and minutes for this task.
 flow_t evaluate_flow(const network_t& network,
                      const std::vector<state_t>& candidate)
 {
@@ -286,40 +288,41 @@ aoc::solution_result day16(std::string_view input)
         // rv::transform(valve_name)); fmt::print("Valves to open: {}\n",
         //            to_open_vec | rv::transform(valve_name));
 
-        const auto next_min{state.minute + 1};
+        // const auto next_min{state.minute + 1};
         // TODO not new vector
         std::vector<state_t> out{};
-        if (network.flows[state.location] > 0 &&
-            set_contains(to_open, state.location)) {
-            out.push_back({state.location,
-                           set_with(state.opened, state.location), next_min});
-        }
-        valve_set_t neighbors_to_visit{0};
+        // if (network.flows[state.location] > 0 &&
+        //     set_contains(to_open, state.location)) {
+        //     out.push_back({state.location,
+        //                    set_with(state.opened, state.location),
+        //                    next_min});
+        // }
+        // valve_set_t neighbors_to_visit{0};
         for (valve_t v : set_range(to_open)) {
             if (v == state.location) {
                 // Don't "move to self" unless we're waiting
                 continue;
             }
-            valve_t next{network.shortest_paths.next()[state.location][v]};
+            // valve_t next{network.shortest_paths.next()[state.location][v]};
             std::size_t distance{
                 network.shortest_paths.dist()[state.location][v]};
             // Can we get there in time?
             // if (v == 7) {
             //     fmt::print("distance to 7: {}\n", distance);
             // }
-            if (state.minute + distance <= minute_deadline) {
-                set_insert(neighbors_to_visit, next);
+            if (state.minute + distance + 1 <= minute_deadline1) {
+                out.push_back({v, set_with(state.opened, v),
+                               state.minute + distance + 1});
+                // set_insert(neighbors_to_visit, next);
             }
         }
-        for (valve_t v : set_range(neighbors_to_visit)) {
-            out.push_back({v, state.opened, next_min});
-        }
+        // for (valve_t v : set_range(neighbors_to_visit)) {
+        //     out.push_back({v, state.opened, next_min});
+        // }
         if (out.empty()) {
             // There are no useful moves to take, so just wait out the
             // remaining time.
-            auto wait{state};
-            wait.minute = next_min;
-            out.push_back(wait);
+            out.push_back({state.location, state.opened, minute_deadline1});
         }
         // fmt::print("Proposed states: {}\n",
         //            out | rv::transform(format_with_name));
@@ -339,17 +342,7 @@ aoc::solution_result day16(std::string_view input)
         decltype(start_func)& root;
         bool reject(const candidate_type& c) const
         {
-            const auto equal_location_and_valves{[&](const state_t s) {
-                return s.location == c.back().location &&
-                       s.opened == c.back().opened;
-            }};
-            const bool waiting{c.size() >= 2 &&
-                               equal_location_and_valves(c[c.size() - 2])};
-            const bool useless_cycle{
-                !waiting &&
-                (std::find_if(c.crbegin() + 2, c.crend(),
-                              equal_location_and_valves) != c.crend())};
-            bool reject_result = useless_cycle || (c.size() > minute_deadline);
+            bool reject_result{c.back().minute > minute_deadline1};
             // if (reject_result && example_starts_with(c)) {
             //     fmt::print("REJECTING: {}\n", c |
             //     rv::transform(format_state));
@@ -362,11 +355,11 @@ aoc::solution_result day16(std::string_view input)
             //     fmt::print("CONSIDERING: {}\n",
             //                c | rv::transform(format_state));
             // }
-            // if (c.size() == minute_deadline && example_starts_with(c)) {
+            // if (c.size() == minute_deadline1 && example_starts_with(c)) {
             //     fmt::print("ACCEPTING: {}\n", c |
             //     rv::transform(format_state));
             // }
-            return c.size() == minute_deadline;
+            return c.back().minute == minute_deadline1;
         }
         decltype(adj_func)& adjacencies;
     };
