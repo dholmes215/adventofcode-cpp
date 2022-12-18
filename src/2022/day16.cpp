@@ -16,15 +16,15 @@
 #include <cstdint>
 #include <map>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace aoc::year2022 {
 
 namespace {
 
-}  // namespace
-
 constexpr size_t minute_deadline1{30};
+constexpr size_t minute_deadline2{26};
 
 using valve_t = std::size_t;
 using valve_name_t = std::string_view;
@@ -46,10 +46,10 @@ valve_set_t set_with(valve_set_t set, valve_t valve)
     return set | (valve_t{1} << valve);
 }
 
-void set_remove(valve_set_t& set, valve_t valve)
-{
-    set |= ~(valve_t{1} << valve);
-}
+// void set_remove(valve_set_t& set, valve_t valve)
+// {
+//     set |= ~(valve_t{1} << valve);
+// }
 
 Generator<valve_t> set_range(valve_set_t set)
 {
@@ -60,11 +60,11 @@ Generator<valve_t> set_range(valve_set_t set)
     }
 }
 
-std::vector<valve_t> set_vector(valve_set_t set)
-{
-    auto rng{set_range(set)};
-    return rng | r::to<std::vector>;
-}
+// std::vector<valve_t> set_vector(valve_set_t set)
+// {
+//     auto rng{set_range(set)};
+//     return rng | r::to<std::vector>;
+// }
 
 struct line_parse_t {
     valve_name_t valve;
@@ -194,29 +194,9 @@ struct state_t {
     valve_t location;
     valve_set_t opened;
     std::size_t minute;
-    friend bool operator==(const state_t&, const state_t&) = default;
+    flow_t flow_so_far;
+    // friend bool operator==(const state_t&, const state_t&) = default;
 };
-
-const std::vector<valve_t> example_best{0, 3, 3, 2, 1, 1, 0, 8, 9, 9,
-                                        8, 0, 3, 4, 5, 6, 7, 6, 6, 5,
-                                        4, 4, 3, 2, 2, 2, 2, 2, 2, 2};
-
-bool example_starts_with(const std::vector<state_t>& candidate)
-{
-    return r::equal(
-        candidate | rv::transform([](const state_t& s) { return s.location; }),
-        example_best | rv::take(candidate.size()));
-}
-
-std::string format_state(const state_t& s)
-{
-    return fmt::format("{}:{}", s.location, s.opened);
-}
-
-valve_t to_location(const state_t& s)
-{
-    return s.location;
-}
 
 flow_t count_flow(const network_t& network, valve_set_t open_valves)
 {
@@ -230,160 +210,133 @@ flow_t count_flow(const network_t& network, valve_set_t open_valves)
     return out;
 }
 
-// TODO: This is all wrong now
-// Matbe separate cumulative minutes so far and minutes for this task.
-flow_t evaluate_flow(const network_t& network,
-                     const std::vector<state_t>& candidate)
-{
-    flow_t out{0};
-    for (const auto& state : candidate) {
-        out += count_flow(network, state.opened);
-    }
-    return out;
-}
+// void print_dot(const network_t& network)
+// {
+//     fmt::print("{}", "strict graph G {\n");
 
-void print_dot(const network_t& network)
-{
-    fmt::print("{}", "strict graph G {\n");
+//     std::vector<std::array<valve_name_t, 2>> pairs;
+//     for (valve_t v{0}; v < network.valve_count; v++) {
+//         const auto v_name{network.names[v]};
+//         fmt::print("  {} [label=\"{}: {}\"]\n", v_name, v_name,
+//                    network.flows[v]);
+//         for (valve_t u : set_range(network.adjs[v])) {
+//             std::array<valve_name_t, 2> name_pair{v_name, network.names[u]};
+//             r::sort(name_pair);
+//             pairs.push_back(name_pair);
+//         }
+//     }
+//     r::sort(pairs);
+//     pairs.erase(r::unique(pairs), pairs.end());
+//     for (const auto& [a, b] : pairs) {
+//         fmt::print("  {} -- {}\n", a, b);
+//     }
+//     fmt::print("{}", "}\n");
+// }
 
-    std::vector<std::array<valve_name_t, 2>> pairs;
-    for (valve_t v{0}; v < network.valve_count; v++) {
-        const auto v_name{network.names[v]};
-        fmt::print("  {} [label=\"{}: {}\"]\n", v_name, v_name,
-                   network.flows[v]);
-        for (valve_t u : set_range(network.adjs[v])) {
-            std::array<valve_name_t, 2> name_pair{v_name, network.names[u]};
-            r::sort(name_pair);
-            pairs.push_back(name_pair);
-        }
-    }
-    r::sort(pairs);
-    pairs.erase(r::unique(pairs), pairs.end());
-    for (const auto& [a, b] : pairs) {
-        fmt::print("  {} -- {}\n", a, b);
-    }
-    fmt::print("{}", "}\n");
-}
+}  // namespace
 
 aoc::solution_result day16(std::string_view input)
 {
     const network_t network{parse_network(input)};
-    const auto valve_name{[&](const valve_t v) { return network.names[v]; }};
-    const auto format_with_name{[&](const state_t& s) {
-        return fmt::format("{}:{}", valve_name(s.location), s.opened);
-    }};
-
-    // const auto flow_valves_vec{set_vector(network.flow_valves)};
-
-    // fmt::print("Valves to open: {}\n",
-    //            flow_valves_vec | rv::transform(valve_name));
-
     // print_dot(network);
-    const auto adj_func{[&](const state_t& state) {
-        valve_set_t to_open{network.flow_valves ^ state.opened};
 
-        // const auto open_vec{set_vector(state.opened)};
-        // const auto to_open_vec{set_vector(to_open)};
-        // fmt::print("Open valves: {}\n", open_vec |
-        // rv::transform(valve_name)); fmt::print("Valves to open: {}\n",
-        //            to_open_vec | rv::transform(valve_name));
-
-        // const auto next_min{state.minute + 1};
-        // TODO not new vector
-        std::vector<state_t> out{};
-        // if (network.flows[state.location] > 0 &&
-        //     set_contains(to_open, state.location)) {
-        //     out.push_back({state.location,
-        //                    set_with(state.opened, state.location),
-        //                    next_min});
-        // }
-        // valve_set_t neighbors_to_visit{0};
-        for (valve_t v : set_range(to_open)) {
-            if (v == state.location) {
-                // Don't "move to self" unless we're waiting
-                continue;
+    const auto adj_func_for_deadline{[&](std::size_t minute_deadline) {
+        return [&, minute_deadline](const state_t& state) {
+            valve_set_t to_open{network.flow_valves ^ state.opened};
+            const flow_t current_flow_per_minute{
+                count_flow(network, state.opened)};
+            // TODO not new vector
+            std::vector<state_t> out{};
+            for (valve_t v : set_range(to_open)) {
+                if (v == state.location) {
+                    // Don't "move to self" unless we're waiting
+                    continue;
+                }
+                std::size_t distance{
+                    network.shortest_paths.dist()[state.location][v]};
+                int minutes_to_get_here{static_cast<int>(distance)};
+                int flow_this_move{current_flow_per_minute *
+                                   (minutes_to_get_here + 1)};
+                // Can we get there in time?
+                if (state.minute + distance + 1 <= minute_deadline) {
+                    out.push_back({v, set_with(state.opened, v),
+                                   state.minute + distance + 1,
+                                   state.flow_so_far + flow_this_move});
+                }
             }
-            // valve_t next{network.shortest_paths.next()[state.location][v]};
-            std::size_t distance{
-                network.shortest_paths.dist()[state.location][v]};
-            // Can we get there in time?
-            // if (v == 7) {
-            //     fmt::print("distance to 7: {}\n", distance);
-            // }
-            if (state.minute + distance + 1 <= minute_deadline1) {
-                out.push_back({v, set_with(state.opened, v),
-                               state.minute + distance + 1});
-                // set_insert(neighbors_to_visit, next);
-            }
-        }
-        // for (valve_t v : set_range(neighbors_to_visit)) {
-        //     out.push_back({v, state.opened, next_min});
-        // }
-        if (out.empty()) {
-            // There are no useful moves to take, so just wait out the
-            // remaining time.
-            out.push_back({state.location, state.opened, minute_deadline1});
-        }
-        // fmt::print("Proposed states: {}\n",
-        //            out | rv::transform(format_with_name));
-        return out;
+            // ...or just wait out the remaining time.
+            out.push_back(
+                {state.location, state.opened, minute_deadline,
+                 state.flow_so_far +
+                     current_flow_per_minute *
+                         static_cast<flow_t>(minute_deadline - state.minute)});
+            return out;
+        };
     }};
-    auto start_func{[&]() -> std::vector<state_t> { return {{0, 0, 1}}; }};
-    // auto start_func{[&]() -> std::vector<state_t> {
-    //     return {{0, 0, 1},    {3, 0, 2},    {3, 8, 3},    {2, 8, 4},
-    //             {1, 8, 5},    {1, 10, 6},   {1, 0, 7},    {8, 10, 8},
-    //             {9, 10, 9},   {9, 522, 10}, {8, 522, 11}, {0, 522, 12},
-    //             {3, 522, 13}, {4, 522, 14}};
-    // }};
+
+    auto start_func{[&]() -> std::vector<state_t> { return {{0, 0, 0, 0}}; }};
+
+    const auto adj_func1(adj_func_for_deadline(minute_deadline1));
+    const auto adj_func2(adj_func_for_deadline(minute_deadline2));
 
     struct backtrack_graph {
         using vertex_type = state_t;
         using candidate_type = std::vector<vertex_type>;
         decltype(start_func)& root;
-        bool reject(const candidate_type& c) const
+        bool reject(const candidate_type& /*c*/) const
         {
-            bool reject_result{c.back().minute > minute_deadline1};
-            // if (reject_result && example_starts_with(c)) {
-            //     fmt::print("REJECTING: {}\n", c |
-            //     rv::transform(format_state));
-            // }
-            return reject_result;
+            // bool reject_result{c.back().minute > minute_deadline};
+            // With current code we should never reject a candidate
+            return false;
         }
         bool accept(const candidate_type& c) const
         {
-            // if (example_starts_with(c)) {
-            //     fmt::print("CONSIDERING: {}\n",
-            //                c | rv::transform(format_state));
-            // }
-            // if (c.size() == minute_deadline1 && example_starts_with(c)) {
-            //     fmt::print("ACCEPTING: {}\n", c |
-            //     rv::transform(format_state));
-            // }
-            return c.back().minute == minute_deadline1;
+            return c.back().minute == minute_deadline;
         }
-        decltype(adj_func)& adjacencies;
+        decltype(adj_func2)& adjacencies;
+        std::size_t minute_deadline;
     };
-    backtrack_graph g{start_func, adj_func};
-    auto all_paths{backtrack_coro(g)};
+    backtrack_graph g1{start_func, adj_func1, minute_deadline1};
+    auto all_paths1{backtrack_coro(g1)};
 
-    const auto evaluate_flow1{[&](const auto& candidate) {
-        return evaluate_flow(network, candidate);
-    }};
-    const auto zip_with_flow{[&](const auto& candidate) {
-        return std::pair{candidate, evaluate_flow1(candidate)};
-    }};
-    // for (const auto& p : all_paths) {
-    //     fmt::print("{}\n", p | rv::transform(format_state));
-    // }
-    const auto part1_best_with_flow{r::max(
-        all_paths | rv::transform(zip_with_flow),
-        [](const auto& a, const auto& b) { return a.second < b.second; })};
-    fmt::print("{}\n",
-               part1_best_with_flow.first | rv::transform(format_with_name));
-    const flow_t part1_flow{part1_best_with_flow.second};
-    // const flow_t part1_flow{0};
+    const auto part1_candidate_best_flow{
+        r::max(all_paths1, [](const auto& a, const auto& b) {
+            return a.back().flow_so_far < b.back().flow_so_far;
+        })};
+    const flow_t part1_flow{part1_candidate_best_flow.back().flow_so_far};
 
-    return {part1_flow, ""};
+    backtrack_graph g2{start_func, adj_func2, minute_deadline2};
+    auto all_paths2{backtrack_coro(g2)};
+
+    // Pairs of valve sets and associated flows
+    const auto path_map_entry{[](const auto& candidate) {
+        return std::pair{candidate.back().opened, candidate.back().flow_so_far};
+    }};
+    std::unordered_map<valve_set_t, flow_t> best_flow_per_valve_set;
+    for (const auto& [valves_opened, flow] :
+         all_paths2 | rv::transform(path_map_entry)) {
+        auto& best_flow{best_flow_per_valve_set[valves_opened]};
+        best_flow = std::max(best_flow, flow);
+    }
+
+    flow_t best_total_flow{0};
+
+    for (const auto& [valves_opened, flow] : best_flow_per_valve_set) {
+        // Find the best complement for this set of valves
+        flow_t best_complement_flow{0};
+        for (const auto& [valves_opened_complement, flow_complement] :
+             best_flow_per_valve_set) {
+            if (valves_opened & valves_opened_complement) {
+                // This valve set is not a complement
+                continue;
+            }
+            best_complement_flow =
+                std::max(best_complement_flow, flow_complement);
+        }
+        const flow_t combined_flow{best_complement_flow + flow};
+        best_total_flow = std::max(best_total_flow, combined_flow);
+    }
+
+    return {part1_flow, best_total_flow};
 }
-
 }  // namespace aoc::year2022
