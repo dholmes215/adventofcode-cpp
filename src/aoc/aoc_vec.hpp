@@ -109,6 +109,44 @@ rect<Scalar> rect_from_corner_strings(
     return rect_from_corners<Scalar>(sv_to_vec(corner1), sv_to_vec(corner2));
 }
 
+template <typename Scalar>
+struct vec3 {
+    Scalar x{};
+    Scalar y{};
+    Scalar z{};
+
+    friend vec3 operator+(vec3 const& lhs, vec3 const& rhs)
+    {
+        return {static_cast<Scalar>(lhs.x + rhs.x),
+                static_cast<Scalar>(lhs.y + rhs.y),
+                static_cast<Scalar>(lhs.z + rhs.z)};
+    }
+    friend vec3 operator-(vec3 const& lhs, vec3 const& rhs)
+    {
+        return {static_cast<Scalar>(lhs.x - rhs.x),
+                static_cast<Scalar>(lhs.y - rhs.y),
+                static_cast<Scalar>(lhs.z - rhs.z)};
+    }
+    friend vec3& operator+=(vec3& lhs, const vec3& rhs)
+    {
+        return lhs = lhs + rhs;
+    }
+    friend vec3& operator-=(vec3& lhs, const vec3& rhs)
+    {
+        return lhs = lhs - rhs;
+    }
+
+    friend auto operator<=>(const vec3&, const vec3&) = default;
+};
+
+template <typename Scalar>
+vec3<Scalar> vec_from_strings(std::string_view x,
+                              std::string_view y,
+                              std::string_view z) noexcept
+{
+    return {to_num<Scalar>(x), to_num<Scalar>(y), to_num<Scalar>(z)};
+}
+
 }  // namespace aoc
 
 template <typename Scalar>
@@ -118,6 +156,18 @@ struct std::hash<aoc::vec2<Scalar>> {
         std::size_t h1 = std::hash<Scalar>{}(v.x);
         std::size_t h2 = std::hash<Scalar>{}(v.y);
         return h1 ^ (h2 << 1);
+    }
+};
+
+template <typename Scalar>
+struct std::hash<aoc::vec3<Scalar>> {
+    std::size_t operator()(const aoc::vec3<Scalar>& v) const noexcept
+    {
+        // XXX This is not a great hash function
+        std::size_t h1 = std::hash<Scalar>{}(v.x);
+        std::size_t h2 = std::hash<Scalar>{}(v.y);
+        std::size_t h3 = std::hash<Scalar>{}(v.z);
+        return h1 ^ (h2 << 1) ^ (h3 << 2);
     }
 };
 
