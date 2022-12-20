@@ -431,7 +431,7 @@ struct range_stack_elem {
 
 template <typename BacktrackGraph>
 Generator<typename BacktrackGraph::candidate_type> backtrack_coro(
-    const BacktrackGraph& graph)
+    BacktrackGraph& graph)
 {
     auto candidate{graph.root()};
 
