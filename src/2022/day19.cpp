@@ -138,19 +138,34 @@ auto adj_func_for_blueprint(const blueprint_t& blueprint,
             return out;
         }
 
-        if (state.inv.robots[obsidian] > 0 &&
-            state.inv.robots[obsidian] < robot_max[obsidian]) {
-            out.push_back(wait_and_buy_robot(state, geode, blueprint));
+        // Geode robot?
+        if (state.inv.robots[obsidian] > 0) {
+            state_t next{wait_and_buy_robot(state, geode, blueprint)};
+            if (next.minute <= minute_deadline) {
+                out.push_back(next);
+            }
         }
+        // Obsidian robot?
         if (state.inv.robots[clay] > 0 &&
-            state.inv.robots[clay] < robot_max[clay]) {
-            out.push_back(wait_and_buy_robot(state, obsidian, blueprint));
+            state.inv.robots[obsidian] < robot_max[obsidian]) {
+            state_t next{wait_and_buy_robot(state, obsidian, blueprint)};
+            if (next.minute <= minute_deadline) {
+                out.push_back(next);
+            }
         }
-        out.push_back(wait_and_buy_robot(state, clay, blueprint));
+        // Clay robot?
+        if (state.inv.robots[clay] < robot_max[clay]) {
+            state_t next{wait_and_buy_robot(state, clay, blueprint)};
+            if (next.minute <= minute_deadline) {
+                out.push_back(next);
+            }
+        }
+        // Ore robot?
         if (state.inv.robots[ore] < robot_max[ore]) {
             out.push_back(wait_and_buy_robot(state, ore, blueprint));
         }
-        if (state.inv.robots[geode] > 0) {
+        // Finished building robots?
+        if (state.inv.robots[geode] > 0 && out.empty()) {
             out.push_back(wait_until(state, minute_deadline));
         }
 
@@ -245,6 +260,7 @@ aoc::solution_result day19(std::string_view input)
         const auto quality_level{geode_count * blueprint.id};
         quality_sum += quality_level;
     }
+    fmt::print("Part 1: {}\n", quality_sum);
 
     int_t geode_product{1};
     for (const auto& blueprint : blueprints | rv::take(3)) {
@@ -257,6 +273,7 @@ aoc::solution_result day19(std::string_view input)
                                 geode_compare)};
         const auto geode_count{most_geodes.back().inv.minerals[geode]};
         geode_product *= geode_count;
+        fmt::print("Part 2 blueprint {}: {}\n", blueprint.id, geode_count);
     }
 
     return {quality_sum, geode_product};
