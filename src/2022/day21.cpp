@@ -20,7 +20,7 @@ namespace aoc::year2022 {
 
 namespace {
 
-using int_t = std::int64_t;
+using int_t = double;
 
 struct operation_t {
     char op;
@@ -118,7 +118,7 @@ std::pair<std::string_view, monkey_t> parse_monkey(std::string_view line)
             operation_t{line[11], line.substr(6, 4), line.substr(13, 4)};
     }
     else {
-        monkey.value = to_num<int_t>(line.substr(6));
+        monkey.value = static_cast<int_t>(to_int(line.substr(6)));
     }
 
     return std::pair{monkey.name, monkey};
@@ -167,14 +167,6 @@ aoc::solution_result day21(std::string_view input)
             max = i;
         }
     }
-
-    // FIXME: There are three matching numbers; only one of them works
-
-    // for (int_t i{part2 - 10}; i < part2 + 10; i++) {
-    //     humn.value = i;
-    //     int_t lhs_value{lhs.evaluate(monkeys2)};
-    //     fmt::print("{}: {} {}\n", i, lhs_value, rhs_value);
-    // }
 
     return {part1, part2};
 }
