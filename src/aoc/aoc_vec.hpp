@@ -42,6 +42,23 @@ struct vec2 {
         return lhs = lhs - rhs;
     }
 
+    friend vec2 operator*(const vec2& lhs, const Scalar& rhs)
+    {
+        return {lhs.x * rhs, lhs.y * rhs};
+    }
+    friend vec2 operator*(const Scalar& lhs, const vec2& rhs)
+    {
+        return rhs * lhs;
+    }
+    friend vec2& operator*=(vec2& lhs, const Scalar& rhs)
+    {
+        return lhs = lhs * rhs;
+    }
+    friend vec2& operator*=(Scalar& lhs, const vec2& rhs)
+    {
+        return rhs = lhs * rhs;
+    }
+
     friend auto operator<=>(const vec2&, const vec2&) = default;
 };
 

@@ -35,11 +35,16 @@ struct pos_t {
     facing_t facing;
 };
 
-// const int edge_len_example{4};
-// const int edge_len_real{50};
+const int edge_len_example{4};
+const int edge_len_real{50};
 
 using side_t = vec2<int>;
 enum class corner_t { ne, nw, se, sw };
+
+struct coord_range_t {
+    coord_t first;
+    coord_t last;
+};
 
 std::vector<move_t> parse_moves(std::string_view line)
 {
@@ -140,11 +145,38 @@ int score_pos(const pos_t& pos)
            score_facing(pos.facing);
 }
 
-// auto pos_mapping(side_t side, corner_t corner, int edge_len) {
-//     return [=](const pos_t& p) {
-//         // TODO
-//     };
-// }
+coord_t side_corner_pos(side_t side, corner_t corner, int edge_len)
+{
+    coord_t out{side * edge_len};
+    if (corner == corner_t::ne || corner == corner_t::se) {
+        out.x += edge_len - 1;
+    }
+    if (corner == corner_t::sw || corner == corner_t::se) {
+        out.y += edge_len - 1;
+    }
+    return out;
+}
+
+auto coord_mapping(coord_range_t c_in, coord_range_t c_out)
+{
+    coord_t in_delta{c_in.first - c_in.last};
+    coord_t out_delta{c_out.first - c_out.last};
+
+    enum class axis_t { x, y };
+    axis_t in_axis{in_delta.x == 0 ? axis_t::y : axis_t::x};
+
+    coord_t out_step{out_delta.x / std::abs(out_delta.x),
+                     out_delta.y / std::abs(out_delta.y)};
+
+    return [=](const coord_t& c) {
+        coord_t delta{c_in.first - c};
+
+        int distance{in_axis == axis_t::x ? delta.x : delta.y};
+        distance = std::abs(distance);
+
+        return c_out.first + (out_step * distance);
+    };
+}
 
 // // FIXME: Need to come up with a general solution to these that's not just my
 // // own hardcoded input
@@ -153,9 +185,13 @@ int score_pos(const pos_t& pos)
 //     auto [x, y]{p.coords};
 //     switch (p.facing) {
 //         case '^': {
-//             // 7,3  to 4,3  <-> 7,3  to 7,0
-//             // 3,3  to 0,3  <-> 7,11 to 7,8
-//             // 12,7 to 15,7 <-> 12,7 to 12,4
+//             // 0,1 ne-nw to 2,0 nw-ne
+//             // 1,1 ne-nw to 2,0 sw-nw
+//             // 2,0 ne-se to 3,2 se-ne
+//             // 1,2 ne-se to 3,2 ne-nw
+//             // 3,2 se-sw to 0,1 nw-sw
+//             // 2,2 sw-se to 0,1 se-sw
+//             // 2,2 sw-nw to 1,1 sw-se
 
 //             if (y == 3 && x >= 4 && x <= 7) {
 //                 int new_x{7};
@@ -235,7 +271,12 @@ aoc::solution_result day22(std::string_view input)
         me = move1(board, me, m);
     }
 
-    return {score_pos(me), ""};
+    const auto part1_answer{score_pos(me)};
+
+    // Part 2
+    const auto edge_len{board_width > 20 ? edge_len_real : edge_len_example};
+
+    return {part1_answer, edge_len};
 }
 
 }  // namespace aoc::year2022
