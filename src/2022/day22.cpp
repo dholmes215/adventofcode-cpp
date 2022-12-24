@@ -178,20 +178,36 @@ auto coord_mapping(coord_range_t c_in, coord_range_t c_out)
     };
 }
 
-// // FIXME: Need to come up with a general solution to these that's not just my
-// // own hardcoded input
+struct edge_t {
+    side_t side;
+    corner_t corner1;
+    corner_t corner2;
+};
+
+using edge_pair_t = std::pair<edge_t, edge_t>;
+
+const std::array edge_pairs_example{
+    edge_pair_t{{{0, 1}, corner_t::ne, corner_t::nw},
+                {{2, 0}, corner_t::nw, corner_t::ne}},
+    edge_pair_t{{{1, 1}, corner_t::ne, corner_t::nw},
+                {{2, 0}, corner_t::sw, corner_t::nw}},
+    edge_pair_t{{{2, 0}, corner_t::ne, corner_t::se},
+                {{3, 2}, corner_t::se, corner_t::ne}}};
+// 0,1 ne-nw to 2,0 nw-ne
+// 1,1 ne-nw to 2,0 sw-nw
+// 2,0 ne-se to 3,2 se-ne
+// 1,2 ne-se to 3,2 ne-nw
+// 3,2 se-sw to 0,1 nw-sw
+// 2,2 sw-se to 0,1 se-sw
+// 2,2 sw-nw to 1,1 sw-se
+
+// // FIXME: Need to come up with a general solution to these that's not just
+// // my own hardcoded input
 // pos_t edge_transform_example(pos_t p)
 // {
 //     auto [x, y]{p.coords};
 //     switch (p.facing) {
 //         case '^': {
-//             // 0,1 ne-nw to 2,0 nw-ne
-//             // 1,1 ne-nw to 2,0 sw-nw
-//             // 2,0 ne-se to 3,2 se-ne
-//             // 1,2 ne-se to 3,2 ne-nw
-//             // 3,2 se-sw to 0,1 nw-sw
-//             // 2,2 sw-se to 0,1 se-sw
-//             // 2,2 sw-nw to 1,1 sw-se
 
 //             if (y == 3 && x >= 4 && x <= 7) {
 //                 int new_x{7};
@@ -275,6 +291,8 @@ aoc::solution_result day22(std::string_view input)
 
     // Part 2
     const auto edge_len{board_width > 20 ? edge_len_real : edge_len_example};
+
+    (void)edge_pairs_example;
 
     return {part1_answer, edge_len};
 }
