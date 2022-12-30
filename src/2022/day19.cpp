@@ -20,7 +20,6 @@
 namespace aoc::year2022 {
 
 namespace {
-}  // namespace
 
 using int_t = std::int16_t;
 using minute_t = int;
@@ -32,7 +31,8 @@ constexpr std::uint8_t mineral_count{4};
 struct inventory_t {
     std::array<int_t, mineral_count> minerals;
     std::array<int_t, mineral_count> robots;
-    friend auto operator<=>(const inventory_t&, const inventory_t&) = default;
+    [[maybe_unused]] friend auto operator<=>(const inventory_t&,
+                                             const inventory_t&) = default;
 };
 
 const inventory_t initial_inventory{{}, {1, 0, 0, 0}};
@@ -59,7 +59,8 @@ struct state_t {
     minute_t minute{0};
     inventory_t inv{initial_inventory};
 
-    friend auto operator<=>(const state_t&, const state_t&) = default;
+    [[maybe_unused]] friend auto operator<=>(const state_t&,
+                                             const state_t&) = default;
 };
 
 const state_t initial_state{};
@@ -162,7 +163,10 @@ auto adj_func_for_blueprint(const blueprint_t& blueprint,
         }
         // Ore robot?
         if (state.inv.robots[ore] < robot_max[ore]) {
-            out.push_back(wait_and_buy_robot(state, ore, blueprint));
+            state_t next{wait_and_buy_robot(state, ore, blueprint)};
+            if (next.minute <= minute_deadline) {
+                out.push_back(next);
+            }
         }
         // Finished building robots?
         if (state.inv.robots[geode] > 0 && out.empty()) {
@@ -181,7 +185,7 @@ std::string format_state(const state_t& state)
                        state.inv.minerals, state.inv.robots);
 }
 
-std::string format_candidate(const std::vector<state_t>& c)
+[[maybe_unused]] std::string format_candidate(const std::vector<state_t>& c)
 {
     return fmt::format("{}\n", c | rv::transform(format_state));
 }
@@ -191,6 +195,8 @@ bool geode_compare(const std::vector<state_t>& c1,
 {
     return c1.back().inv.minerals[geode] < c2.back().inv.minerals[geode];
 }
+
+}  // namespace
 
 aoc::solution_result day19(std::string_view input)
 {
@@ -223,8 +229,6 @@ aoc::solution_result day19(std::string_view input)
                 best_candidates.clear();
             }
             best_geodes = geode_count;
-            // TODO
-            // best_candidates.insert(c);
 
             return true;
         }
@@ -250,30 +254,24 @@ aoc::solution_result day19(std::string_view input)
         auto adj_func(adj_func_for_blueprint(blueprint, minute_deadline1));
         backtrack_graph g{start_func, adj_func, minute_deadline1};
         auto candidates{backtrack_coro(g)};
-        auto most_geodes{r::max(candidates | rv::transform([](const auto& c) {
-                                    return c;
-                                }) /* | rv::take(100000000)*/,
-                                geode_compare)};
+        auto most_geodes{
+            r::max(candidates | rv::transform([](const auto& c) { return c; }),
+                   geode_compare)};
         const auto geode_count{most_geodes.back().inv.minerals[geode]};
-        fmt::print("Blueprint {}: {}: {}\n", blueprint.id, geode_count,
-                   format_candidate(most_geodes));
         const auto quality_level{geode_count * blueprint.id};
         quality_sum += quality_level;
     }
-    fmt::print("Part 1: {}\n", quality_sum);
 
     int_t geode_product{1};
     for (const auto& blueprint : blueprints | rv::take(3)) {
         auto adj_func(adj_func_for_blueprint(blueprint, minute_deadline2));
         backtrack_graph g{start_func, adj_func, minute_deadline2};
         auto candidates{backtrack_coro(g)};
-        auto most_geodes{r::max(candidates | rv::transform([](const auto& c) {
-                                    return c;
-                                }) /* | rv::take(100000000)*/,
-                                geode_compare)};
+        auto most_geodes{
+            r::max(candidates | rv::transform([](const auto& c) { return c; }),
+                   geode_compare)};
         const auto geode_count{most_geodes.back().inv.minerals[geode]};
         geode_product *= geode_count;
-        fmt::print("Part 2 blueprint {}: {}\n", blueprint.id, geode_count);
     }
 
     return {quality_sum, geode_product};
