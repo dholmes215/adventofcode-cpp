@@ -14,6 +14,10 @@ project(aoc VERSION 0.0.1
             HOMEPAGE_URL https://github.com/dholmes215/adventofcode-cpp
             LANGUAGES C CXX)
 
+# All source files in this project should be UTF-8.
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 # Find dependencies.
 # find_package(absl REQUIRED)
 find_package(Catch2 REQUIRED)
