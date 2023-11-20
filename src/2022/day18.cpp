@@ -104,7 +104,6 @@ aoc::solution_result day18(std::string_view input)
 
     const auto water{bfs_water_cubes_from_origin(dimensions, cubes)};
     std::set<coord_t> droplet_and_interior{cubes};
-    fmt::print("{} {} {}\n", dimensions.x, dimensions.y, dimensions.z);
     for (int x : rv::iota(0, dimensions.x)) {
         for (int y : rv::iota(0, dimensions.y)) {
             for (int z : rv::iota(0, dimensions.z)) {
