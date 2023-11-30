@@ -151,7 +151,7 @@ int main(int argc, char** argv)
     const auto cmakelists_path{year_path / "CMakeLists.txt"};
     check_exists(cmakelists_path);
     const auto yearcpp_path{year_path /
-                            fmt::format("year{}.cpp", options.year)};
+                            fmt::format("year{}.hpp", options.year)};
     check_exists(yearcpp_path);
 
     for (int day{1}; day <= 25; day++) {
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
         {"%COPYRIGHT_YEARS%", options.copyright_years}};
     aoc::generate_file("template_CMakeLists.txt", cmakelists_path,
                        replacements);
-    aoc::generate_file("template_year.cpp.txt", yearcpp_path, replacements);
+    aoc::generate_file("template_year.hpp.txt", yearcpp_path, replacements);
     for (int day{1}; day <= 25; day++) {
         std::string day_string{fmt::format("{:02}", day)};
         const auto day_path{year_path / fmt::format("day{:02}.cpp", day)};
