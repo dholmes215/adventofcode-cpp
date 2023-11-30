@@ -10,6 +10,7 @@
 #include <year2015.hpp>
 #include <year2021.hpp>
 #include <year2022.hpp>
+#include <year2023.hpp>
 
 #include <vector>
 
@@ -106,6 +107,7 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2022, 23}, {{aoc::year2022::day23, ""}}},
         {{2022, 24}, {{aoc::year2022::day24, ""}}},
         {{2022, 25}, {{aoc::year2022::day25, ""}}},
+        {{2023, 01}, {{aoc::year2023::day01, ""}}},
     };
     return solutions;
 }
