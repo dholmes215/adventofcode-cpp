@@ -10,8 +10,9 @@
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
+#include <execution>
+#include <numeric>
 #include <string_view>
 #include <utility>
 
@@ -25,11 +26,26 @@ int part1_to_int(std::string_view line)
     return 10 * (digits.front() - '0') + (digits.back() - '0');
 }
 
-const std::array<std::pair<std::string_view, int>, 19> digits_by_text{{
-    {"one", 1}, {"two", 2},   {"three", 3}, {"four", 4}, {"five", 5},
-    {"six", 6}, {"seven", 7}, {"eight", 8}, {"nine", 9}, {"0", 0},
-    {"1", 1},   {"2", 2},     {"3", 3},     {"4", 4},    {"5", 5},
-    {"6", 6},   {"7", 7},     {"8", 8},     {"9", 9}}};
+const std::array<std::pair<std::string_view, int>, 19> digits_by_text{
+    {{"one", 1},
+     {"two", 2},
+     {"three", 3},
+     {"four", 4},
+     {"five", 5},
+     {"six", 6},
+     {"seven", 7},
+     {"eight", 8},
+     {"nine", 9},
+     {"0", 0},
+     {"1", 1},
+     {"2", 2},
+     {"3", 3},
+     {"4", 4},
+     {"5", 5},
+     {"6", 6},
+     {"7", 7},
+     {"8", 8},
+     {"9", 9}}};
 
 int part2_find_first_digit(std::string_view line)
 {
@@ -71,6 +87,26 @@ aoc::solution_result day01(std::string_view input)
     const std::vector lines{sv_lines(trim(input)) | r::to<std::vector>};
     int part1{r::accumulate(lines | rv::transform(part1_to_int), 0)};
     int part2{r::accumulate(lines | rv::transform(part2_to_int), 0)};
+    return {part1, part2};
+}
+
+aoc::solution_result day01par_unseq(std::string_view input)
+{
+    const std::vector lines{sv_lines(trim(input)) | r::to<std::vector>};
+
+    std::vector<int> part1_ints;
+    part1_ints.resize(lines.size());
+    std::transform(std::execution::par_unseq, lines.begin(), lines.end(),
+                   part1_ints.begin(), part1_to_int);
+    int part1{std::reduce(std::execution::par_unseq, part1_ints.begin(),
+                          part1_ints.end())};
+
+    std::vector<int> part2_ints;
+    part2_ints.resize(lines.size());
+    std::transform(std::execution::par_unseq, lines.begin(), lines.end(),
+                   part2_ints.begin(), part2_to_int);
+    int part2{std::reduce(std::execution::par_unseq, part2_ints.begin(),
+                          part2_ints.end())};
     return {part1, part2};
 }
 

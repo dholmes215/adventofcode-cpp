@@ -10,6 +10,7 @@
 namespace aoc {
 namespace year2023 {
 aoc::solution_result day01(std::string_view);
+aoc::solution_result day01par_unseq(std::string_view);
 aoc::solution_result day02(std::string_view);
 aoc::solution_result day03(std::string_view);
 aoc::solution_result day04(std::string_view);
