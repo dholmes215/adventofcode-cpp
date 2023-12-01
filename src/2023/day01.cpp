@@ -11,9 +11,10 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <array>
 #include <map>
 #include <string_view>
-#include <vector>
+#include <utility>
 
 namespace aoc::year2023 {
 
@@ -25,11 +26,12 @@ int part1_to_int(std::string_view line)
     return 10 * (digits.front() - '0') + (digits.back() - '0');
 }
 
-const std::map<std::string_view, int> digits_by_text{
+using namespace std::literals;
+const std::array<std::pair<std::string_view, int>, 19> digits_by_text{{
     {"one", 1}, {"two", 2},   {"three", 3}, {"four", 4}, {"five", 5},
     {"six", 6}, {"seven", 7}, {"eight", 8}, {"nine", 9}, {"0", 0},
     {"1", 1},   {"2", 2},     {"3", 3},     {"4", 4},    {"5", 5},
-    {"6", 6},   {"7", 7},     {"8", 8},     {"9", 9}};
+    {"6", 6},   {"7", 7},     {"8", 8},     {"9", 9}}};
 
 int part2_find_first_digit(std::string_view line)
 {
