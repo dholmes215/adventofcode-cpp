@@ -109,13 +109,27 @@ aoc::solution_result day05(std::string_view input)
     const std::int64_t part1{
         r::min(initial_seeds | rv::transform(apply_map_func(flattened_map)))};
 
-    std::int64_t part2{9999999999};
     auto pairs{initial_seeds | rv::chunk(2) | rv::transform([](auto&& p) {
                    return std::pair<std::int64_t, std::int64_t>{p[0], p[1]};
                })};
+    std::map<std::int64_t, bool> seed_range_map{{0, false}};
     for (const auto& [seed, length] : pairs) {
-        for (std::int64_t i{0}; i < length; i++) {
-            part2 = std::min(part2, apply_map_func(flattened_map)(seed + i));
+        seed_range_map[seed] = true;
+        seed_range_map.try_emplace(seed + length, false);
+    }
+
+    std::int64_t part2{9999999999};
+    for (const auto& [key, value] : flattened_map) {
+        auto prev{key - 1};
+        if (prev >= 0) {
+            auto seed_bounds{*std::prev(seed_range_map.upper_bound(prev))};
+            if (seed_bounds.second) {
+                part2 = std::min(part2, apply_map_func(flattened_map)(prev));
+            }
+        }
+        auto seed_bounds{*std::prev(seed_range_map.upper_bound(key))};
+        if (seed_bounds.second) {
+            part2 = std::min(part2, apply_map_func(flattened_map)(key));
         }
     }
 
