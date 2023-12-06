@@ -21,13 +21,54 @@ namespace {
 
 using range_map = std::map<std::int64_t, std::int64_t>;
 
-// range_map flatten_maps(const range_map& first, const range_map& second) {
-//     range_map out;
-//     auto first_iter{first.begin()};
-//     auto second_iter{first.begin()};
+range_map flatten_section(const range_map::const_iterator first_section,
+                          const range_map& first,
+                          const range_map& second)
+{
+    range_map out;
 
-//     auto first_to_second{first_iter->second}
-// }
+    auto first_left{first_section};
+    auto first_right{std::next(first_left)};
+    auto second_left{
+        std::prev(second.upper_bound(first_left->first + first_left->second))};
+    auto second_right{
+        first_right == first.end()
+            ? second.end()
+            : second.lower_bound(first_right->first + first_left->second)};
+
+    while (second_left != second_right && second_left != second.end() &&
+           (first_right == first.end() ||
+            (second_left->first - first_left->second < first_right->first))) {
+        auto key{std::max(first_left->first,
+                          second_left->first - first_left->second)};
+        out[key] = first_left->second + second_left->second;
+        second_left++;
+    }
+
+    return out;
+}
+
+range_map flatten_maps(const range_map& first, const range_map& second)
+{
+    range_map out;
+    auto first_iter{first.begin()};
+    auto second_iter{first.begin()};
+
+    if (first_iter == first.end()) {
+        throw input_error("empty 'first' map");
+    }
+    if (second_iter == second.end()) {
+        throw input_error("empty 'second' map");
+    }
+
+    // Merge a range from `first` will all the range sections of `second` it
+    // spans
+    for (auto iter{first_iter}; iter != first.end(); iter++) {
+        out.merge(flatten_section(iter, first, second));
+    }
+
+    return out;
+}
 
 }  // namespace
 
@@ -38,10 +79,10 @@ aoc::solution_result day05(std::string_view input)
         numbers<std::int64_t>(lines[0].substr(7)) | r::to<std::vector>};
 
     const auto sections{lines | rv::drop(2) | rv::split("")};
-    std::vector<std::map<std::int64_t, std::int64_t>> section_offset_maps;
+    std::vector<range_map> section_offset_maps;
 
     for (auto&& section : sections) {
-        std::map<std::int64_t, std::int64_t> section_offset_map;
+        range_map section_offset_map;
         section_offset_map[0] = 0;
         for (auto line : section | rv::drop(1)) {
             std::array<std::int64_t, 3> nums;
@@ -54,15 +95,19 @@ aoc::solution_result day05(std::string_view input)
         section_offset_maps.emplace_back(std::move(section_offset_map));
     }
 
-    const auto follow_all_maps{[&](std::int64_t seed) {
-        for (const auto& map : section_offset_maps) {
-            seed += std::prev(map.upper_bound(seed))->second;
-        }
-        return seed;
+    range_map flattened_map{{{0LL, 0LL}}};
+    for (const auto& map : section_offset_maps /* | rv::take(3)*/) {
+        flattened_map = flatten_maps(flattened_map, map);
+    }
+
+    auto apply_map_func{[](const range_map& map) {
+        return [&](std::int64_t key) {
+            return key + std::prev(map.upper_bound(key))->second;
+        };
     }};
 
     const std::int64_t part1{
-        r::min(initial_seeds | rv::transform(follow_all_maps))};
+        r::min(initial_seeds | rv::transform(apply_map_func(flattened_map)))};
 
     std::int64_t part2{9999999999};
     auto pairs{initial_seeds | rv::chunk(2) | rv::transform([](auto&& p) {
@@ -70,7 +115,7 @@ aoc::solution_result day05(std::string_view input)
                })};
     for (const auto& [seed, length] : pairs) {
         for (std::int64_t i{0}; i < length; i++) {
-            part2 = std::min(part2, follow_all_maps(seed + i));
+            part2 = std::min(part2, apply_map_func(flattened_map)(seed + i));
         }
     }
 
