@@ -52,7 +52,7 @@ range_map flatten_maps(const range_map& first, const range_map& second)
 {
     range_map out;
     auto first_iter{first.begin()};
-    auto second_iter{first.begin()};
+    auto second_iter{second.begin()};
 
     if (first_iter == first.end()) {
         throw input_error("empty 'first' map");
