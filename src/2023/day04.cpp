@@ -57,7 +57,9 @@ aoc::solution_result day04(std::string_view input)
     for (std::size_t i{0}; i < card_counts.size(); i++) {
         int card_stack_size{card_counts[i]};
         int wins{winning_number_counts[i]};
-        for (std::size_t j{i+1}; j < card_counts.size() && j < (i+1+wins); j++) {
+        for (std::size_t j{i + 1}; j < card_counts.size() &&
+                                   j < (i + 1 + static_cast<std::size_t>(wins));
+             j++) {
             card_counts[j] += card_stack_size;
         }
     }

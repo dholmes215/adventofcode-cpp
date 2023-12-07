@@ -27,7 +27,7 @@ aoc::solution_result day06(std::string_view input)
         r::to<std::vector>};
 
     int part1{1};
-    for (int race{0}; race < static_cast<int>(input_ints[0].size()); race++) {
+    for (std::size_t race{0}; race < input_ints[0].size(); race++) {
         int time{input_ints[0][race]};
         int record_distance{input_ints[1][race]};
         int ways{0};
