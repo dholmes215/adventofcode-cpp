@@ -107,15 +107,16 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2022, 23}, {{aoc::year2022::day23, ""}}},
         {{2022, 24}, {{aoc::year2022::day24, ""}}},
         {{2022, 25}, {{aoc::year2022::day25, ""}}},
-        {{2023, 01},
+        {{2023, 1},
          {{aoc::year2023::day01, ""},
           {aoc::year2023::day01par_unseq, "par_unseq"}}},
-        {{2023, 02}, {{aoc::year2023::day02, ""}}},
-        {{2023, 03}, {{aoc::year2023::day03, ""}}},
-        {{2023, 04}, {{aoc::year2023::day04, ""}}},
-        {{2023, 05}, {{aoc::year2023::day05, ""}}},
-        {{2023, 06}, {{aoc::year2023::day06, ""}}},
-        {{2023, 07}, {{aoc::year2023::day07, ""}}},
+        {{2023, 2}, {{aoc::year2023::day02, ""}}},
+        {{2023, 3}, {{aoc::year2023::day03, ""}}},
+        {{2023, 4}, {{aoc::year2023::day04, ""}}},
+        {{2023, 5}, {{aoc::year2023::day05, ""}}},
+        {{2023, 6}, {{aoc::year2023::day06, ""}}},
+        {{2023, 7}, {{aoc::year2023::day07, ""}}},
+        {{2023, 8}, {{aoc::year2023::day08, ""}}},
     };
     return solutions;
 }
