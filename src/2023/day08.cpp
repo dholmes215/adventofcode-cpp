@@ -9,6 +9,7 @@
 #include <aoc_range.hpp>
 
 #include <algorithm>
+#include <execution>
 #include <map>
 #include <numeric>
 #include <string_view>
@@ -81,9 +82,16 @@ aoc::solution_result day08(std::string_view input)
         nodes | rv::keys | rv::filter(is_start_node) | r::to<std::vector>};
     const auto part2_transform_func{
         [&](std::string_view key) { return solve_part1(key, is_end_node); }};
-    const std::vector<std::int64_t> part2_steps_taken{
-        part2_start_nodes | rv::transform(part2_transform_func) |
-        r::to<std::vector>};
+    
+    // const std::vector<std::int64_t> part2_steps_taken{
+    //     part2_start_nodes | rv::transform(part2_transform_func) |
+    //     r::to<std::vector>};
+    
+    std::vector<std::int64_t> part2_steps_taken;
+    part2_steps_taken.resize(part2_start_nodes.size());
+    std::transform(std::execution::par_unseq, part2_start_nodes.begin(),
+                   part2_start_nodes.end(), part2_steps_taken.begin(),
+                   part2_transform_func);
 
     return {part1, lcm_vector(part2_steps_taken)};
 }
