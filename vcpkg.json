@@ -11,6 +11,7 @@
             "name": "dh-term",
             "version>=": "0.0.2"
         },
+        "flux",
         "fmt",
         "mdspan",
         "ms-gsl",
