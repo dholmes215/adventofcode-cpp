@@ -89,11 +89,11 @@ auto int_lines(auto&& rng) noexcept
 
 // Split a range of characters into a range of ints separated by any non-digit
 // characters
-// FIXME: include '-' before digits as allowed
+// FIXME: Should only allow '-' at the beginning of a number, not anywhere
 template <typename Number>
 auto numbers(auto&& rng)
 {
-    auto is_not_digit = [](char c) { return !is_digit(c); };
+    auto is_not_digit = [](char c) { return !is_digit(c) && (c != '-'); };
     return rng | rv::split_when(is_not_digit) |
            rv::transform([](auto&& r) { return sv(r); }) | rv::remove("") |
            rv::transform(to_num<Number>);
