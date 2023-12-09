@@ -8,6 +8,8 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 
+#include <fmt/ranges.h>
+
 #include <algorithm>
 #include <string_view>
 #include <vector>
