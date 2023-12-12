@@ -77,8 +77,7 @@ auto sv_lines(auto&& rng) noexcept
 auto sv_words(auto&& rng) noexcept
 {
     return rng | rv::split_when(is_whitespace) |
-                    rv::transform([](auto&& r) { return sv(r); }) |
-                    rv::remove("");
+           rv::transform([](auto&& r) { return sv(r); }) | rv::remove("");
 }
 
 // Split a range of characters into a range of ints by line
@@ -96,7 +95,7 @@ auto numbers(auto&& rng)
     auto is_not_digit = [](char c) { return !is_digit(c) && (c != '-'); };
     return rng | rv::split_when(is_not_digit) |
            rv::transform([](auto&& r) { return sv(r); }) | rv::remove("") |
-           rv::transform(to_num<Number>);
+           rv::remove("-") | rv::transform(to_num<Number>);
 }
 
 int bool_range_to_int(auto&& bits)
