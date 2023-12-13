@@ -33,7 +33,7 @@ find_package(tl-expected REQUIRED)
 
 # Targets can "link" this "library" to inherit project options.
 add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_20) # Require _at least_ C++20.
+target_compile_features(project_options INTERFACE cxx_std_23) # Require _at least_ C++23.
 
 # /Zc:__cplusplus is required to make __cplusplus accurate
 # /Zc:__cplusplus is available starting with Visual Studio 2017 version 15.7

@@ -106,7 +106,7 @@ int bool_range_to_int(auto&& bits)
 }
 
 template <typename BitType>
-inline auto bit_range(int i, std::size_t count)
+inline auto bit_range(std::int64_t i, std::size_t count)
 {
     auto generator{
         [=]() mutable { return static_cast<BitType>((i >> --count) & 1); }};
