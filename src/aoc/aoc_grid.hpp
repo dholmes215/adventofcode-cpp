@@ -169,6 +169,7 @@ class dynamic_grid_adapter {
     rect<int> area() const noexcept { return {{0, 0}, {width_, height_}}; }
 
     auto data() noexcept { return rv::all(*range_); }
+    const auto data() const noexcept { return rv::all(*range_); }
 
     auto& operator[](vec2<int> index) const noexcept
     {
@@ -320,7 +321,7 @@ class dynamic_heap_data {
                                             rhs.end());
     }
 
-    friend auto operator==(const dynamic_heap_data& lhs,
+    friend bool operator==(const dynamic_heap_data& lhs,
                            const dynamic_heap_data& rhs) noexcept
     {
         return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
