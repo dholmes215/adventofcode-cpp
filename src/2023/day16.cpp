@@ -13,6 +13,8 @@
 #include <fmt/ranges.h>
 
 #include <algorithm>
+#include <execution>
+#include <numeric>
 #include <set>
 #include <string_view>
 #include <vector>
@@ -172,6 +174,31 @@ aoc::solution_result day16(std::string_view input)
     for (const beam_head& head : enumerate_all_start_tiles(grid)) {
         part2 = std::max(part2, test_start_tile(grid, head));
     }
+
+    return {part1, part2};
+}
+
+aoc::solution_result day16par_unseq(std::string_view input)
+{
+    const grid_t grid(parse_grid(input));
+
+    const auto part1{test_start_tile(grid, {{0, 0}, right})};
+
+    std::vector<beam_head> start_tiles;
+    for (const beam_head& head : enumerate_all_start_tiles(grid)) {
+        start_tiles.push_back(head);
+    }
+
+    std::vector<std::size_t> energized_counts(start_tiles.size());
+    const auto transform_func{
+        [&grid](const beam_head& head) { return test_start_tile(grid, head); }};
+    std::transform(std::execution::par_unseq, start_tiles.begin(),
+                   start_tiles.end(), energized_counts.begin(), transform_func);
+
+    const auto part2{
+        std::reduce(std::execution::par_unseq, energized_counts.begin(),
+                    energized_counts.end(), std::size_t{0},
+                    [](auto a, auto b) { return std::max(a, b); })};
 
     return {part1, part2};
 }
