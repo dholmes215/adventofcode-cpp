@@ -65,8 +65,6 @@ using seen_grid_t = dynamic_grid<std::uint8_t>;
 struct beam_head {
     pos_t pos{0, 0};
     pos_t dir{right};
-    friend auto operator<=>(const beam_head&,
-                            const beam_head&) noexcept = default;
 };
 
 void move_all_heads(const grid_t& grid,

@@ -97,16 +97,6 @@ int_t calculate_load(const grid_t& grid)
                          int_t{0});
 }
 
-auto cycle_generator(const grid_t& grid)
-{
-    auto func{[copy = grid]() mutable -> const grid_t& {
-        spin_once(copy);
-        return copy;
-    }};
-
-    return rv::generate(func);
-}
-
 std::size_t hash_char_range(auto&& rng) {
     std::size_t hash{0};
     for (char c : rng) {

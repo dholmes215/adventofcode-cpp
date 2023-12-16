@@ -52,11 +52,6 @@ constexpr bool match_char(char record, char candidate)
     return record == '?' || record == candidate;
 }
 
-constexpr bool match_tuple(std::tuple<char, char> t)
-{
-    return match_char(std::get<0>(t), std::get<1>(t));
-}
-
 constexpr bool test_candidate(std::string_view records,
                               std::string_view candidate)
 {
@@ -96,7 +91,7 @@ static_assert(!test_candidate("??.", ".##"));
     std::string_view subregion,
     int group)
 {
-    if (group > subregion.size()) {
+    if (group > static_cast<int>(subregion.size())) {
         return 0;
     }
 

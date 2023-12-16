@@ -80,7 +80,7 @@ class hashmap {
 
    private:
     std::array<std::vector<value_type>, 256> data_{};
-    static auto pair_key_(const value_type& p) { return p.first; }
+    static key_type pair_key_(const value_type& p) { return p.first; }
 };
 
 int_t focusing_power(const hashmap& h)

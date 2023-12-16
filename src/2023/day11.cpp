@@ -45,7 +45,7 @@ std::vector<std::int64_t> new_rng_map(auto&& rng, std::int64_t expansion_factor)
 
     out.resize(rng.size());
     std::int64_t offset{0};
-    for (int i{0}; i < out.size(); i++) {
+    for (int i{0}; i < static_cast<int>(out.size()); i++) {
         if (empty_range(rng[i])) {
             offset += (expansion_factor - 1);
         }

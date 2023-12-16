@@ -207,17 +207,17 @@ aoc::solution_result day07(std::string_view input)
         sv_lines(trim(input)) | rv::transform(parse_line) | r::to<std::vector>};
     std::sort(hand_bids.begin(), hand_bids.end(), part1_compare_hand_bid);
     std::int64_t part1{0};
-    for (int i{0}; i < hand_bids.size(); i++) {
+    for (int i{0}; i < static_cast<int>(hand_bids.size()); i++) {
         std::int64_t rank{i + 1};
         part1 += rank * hand_bids[i].bid;
     }
     std::sort(hand_bids.begin(), hand_bids.end(), part2_compare_hand_bid);
     std::int64_t part2{0};
-    for (int i{0}; i < hand_bids.size(); i++) {
+    for (int i{0}; i < static_cast<int>(hand_bids.size()); i++) {
         std::int64_t rank{i + 1};
         part2 += rank * hand_bids[i].bid;
     }
-    
+
     return {part1, part2};
 }
 
