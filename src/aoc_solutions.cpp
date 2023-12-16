@@ -124,6 +124,7 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2023, 13}, {{aoc::year2023::day13, ""}}},
         {{2023, 14}, {{aoc::year2023::day14, ""}}},
         {{2023, 15}, {{aoc::year2023::day15, ""}}},
+        {{2023, 16}, {{aoc::year2023::day16, ""}}},
     };
     return solutions;
 }
