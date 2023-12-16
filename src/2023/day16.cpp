@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <execution>
 #include <numeric>
-#include <set>
 #include <string_view>
 #include <vector>
 
@@ -43,6 +42,26 @@ constexpr const pos_t right{1, 0};
 constexpr const pos_t up{0, -1};
 constexpr const pos_t down{0, 1};
 
+constexpr std::uint8_t dir_to_byte(pos_t dir)
+{
+    if (dir == left) {
+        return 1;
+    }
+    if (dir == right) {
+        return 2;
+    }
+    if (dir == up) {
+        return 4;
+    }
+    if (dir == down) {
+        return 8;
+    }
+    return 0;
+}
+
+// Using bits in a grid to store heads and directions suggested by Philipp Lenk
+using seen_grid_t = dynamic_grid<std::uint8_t>;
+
 struct beam_head {
     pos_t pos{0, 0};
     pos_t dir{right};
@@ -53,7 +72,7 @@ struct beam_head {
 void move_all_heads(const grid_t& grid,
                     grid_t& energized_grid,
                     std::vector<beam_head>& heads,
-                    std::set<beam_head>& heads_already_computed)
+                    seen_grid_t& heads_already_computed)
 {
     std::vector<beam_head> new_heads;
     const auto move_head_straight{[&](beam_head& head) {
@@ -66,10 +85,10 @@ void move_all_heads(const grid_t& grid,
     }};
 
     for (const beam_head& head : heads) {
-        if (heads_already_computed.contains(head)) {
+        if (heads_already_computed[head.pos] & dir_to_byte(head.dir)) {
             continue;
         }
-        heads_already_computed.insert(head);
+        heads_already_computed[head.pos] |= dir_to_byte(head.dir);
         bool move_straight{grid[head.pos] == '.' ||
                            (grid[head.pos] == '|' && head.dir.x == 0) ||
                            (grid[head.pos] == '-' && head.dir.y == 0)};
@@ -133,7 +152,7 @@ auto test_start_tile(const grid_t& grid, beam_head start)
     r::fill(energized_grid.data(), '.');
     energized_grid[start.pos] = '#';
 
-    std::set<beam_head> heads_already_computed;
+    seen_grid_t heads_already_computed{grid.width(), grid.height()};
 
     while (!heads.empty()) {
         move_all_heads(grid, energized_grid, heads, heads_already_computed);
