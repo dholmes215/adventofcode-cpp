@@ -128,6 +128,7 @@ const std::map<date, std::vector<solution>>& solutions()
          {{aoc::year2023::day16, ""},
           {aoc::year2023::day16par_unseq, "par_unseq"}}},
         {{2023, 17}, {{aoc::year2023::day17, ""}}},
+        {{2023, 18}, {{aoc::year2023::day18, ""}}},
     };
     return solutions;
 }
