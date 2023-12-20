@@ -19,7 +19,7 @@ add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 # Find dependencies.
-# find_package(absl REQUIRED)
+find_package(absl CONFIG REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(ctre CONFIG REQUIRED)
 find_package(cxxopts REQUIRED)

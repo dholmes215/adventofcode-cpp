@@ -5,4 +5,4 @@ add_library(aoc2023 year2023.hpp
         day22.cpp day23.cpp day24.cpp day25.cpp)
 target_include_directories(aoc2023 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(aoc2023 PUBLIC project_options
-        PRIVATE project_warnings aoc_lib ctre::ctre)
+        PRIVATE project_warnings aoc_lib ctre::ctre absl::hash)
