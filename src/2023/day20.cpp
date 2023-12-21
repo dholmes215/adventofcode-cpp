@@ -7,11 +7,13 @@
 
 #include <aoc.hpp>
 #include <aoc_range.hpp>
+#include <coro_generator.hpp>
 
 #include <fmt/ranges.h>
 
 #include <algorithm>
 #include <bitset>
+#include <numeric>
 #include <queue>
 #include <string_view>
 #include <vector>
@@ -115,6 +117,16 @@ struct pulse_t {
     bool pulse;
 };
 
+template <std::size_t N>
+Generator<std::size_t> bitset_members(const std::bitset<N>& bitset)
+{
+    for (std::size_t i{0}; i < N; i++) {
+        if (bitset[i]) {
+            co_yield i;
+        }
+    }
+}
+
 }  // namespace
 
 aoc::solution_result day20(std::string_view input)
@@ -142,15 +154,15 @@ aoc::solution_result day20(std::string_view input)
         }
     }
 
-    // Visualize modules
-    fmt::print("digraph \"modules\" {}\n", '{');
-    for (const module_t& module : modules_by_name) {
-        for (module_name_t output : module.outputs) {
-            fmt::print("    {} -> {}\n", sorted_names[module.name],
-                       sorted_names[output]);
-        }
-    }
-    fmt::print("{}\n", '}');
+    // // Visualize modules
+    // fmt::print("digraph \"modules\" {}\n", '{');
+    // for (const module_t& module : modules_by_name) {
+    //     for (module_name_t output : module.outputs) {
+    //         fmt::print("    {} -> {}\n", sorted_names[module.name],
+    //                    sorted_names[output]);
+    //     }
+    // }
+    // fmt::print("{}\n", '}');
 
     std::vector<module_set_t> input_memories(sorted_names.size());
     for (const module_t& module : modules) {
@@ -165,21 +177,25 @@ aoc::solution_result day20(std::string_view input)
 
     int_t low_pulses_sent{0};
     int_t high_pulses_sent{0};
-    std::vector<module_name_t> grandparents{to_idx("dp"), to_idx("dh"),
-                                            to_idx("qd"), to_idx("bb")};
-    std::map<module_name_t, bool> grandparents_current;
     module_name_t rx_index{to_idx("rx")};
-    bool rx_sent{false};
+
+    module_name_t parent{static_cast<module_name_t>(
+        *(bitset_members(modules_by_name[rx_index].input_mask).begin()))};
+    std::vector<module_name_t> grandparents;
+    std::map<module_name_t, bool> grandparents_current;
+    for (auto grandparent :
+         bitset_members(modules_by_name[parent].input_mask)) {
+        grandparents.push_back(static_cast<module_name_t>(grandparent));
+        grandparents_current[static_cast<module_name_t>(grandparent)] = false;
+    }
+
     const auto send_pulse{[&](pulse_t pulse) {
-        // fmt::print("{} -{}-> {}\n", pulse.source, pulse.pulse ? "high" :
-        // "low", pulse.dest);
         pulse_queue.push(pulse);
         if (pulse.pulse) {
             high_pulses_sent++;
         }
         else {
             low_pulses_sent++;
-            rx_sent |= pulse.dest == rx_index;
 
             for (module_name_t grandparent : grandparents) {
                 if (pulse.dest == grandparent) {
@@ -194,8 +210,6 @@ aoc::solution_result day20(std::string_view input)
             pulse_t pulse{pulse_queue.front()};
             pulse_queue.pop();
             module_t& module{modules_by_name[pulse.dest]};
-            // fmt::print("  processing {} -{}-> {}\n", pulse.source,
-            //            pulse.pulse ? "high" : "low", pulse.dest);
             switch (module.type) {
                 case 'b':
                     for (const module_name_t& output : module.outputs) {
@@ -231,29 +245,37 @@ aoc::solution_result day20(std::string_view input)
         }
     }};
 
-    int_t part2{0};
-
     module_name_t button_idx{to_idx("button")};
     module_name_t broadcaster_idx{to_idx("broadcaster")};
-    for (int_t i{1}; i < 1001 || !rx_sent; i++) {
+    std::map<module_name_t, int> grandparent_iteration;
+    const auto all_grandparents_found{[&]() {
+        for (module_name_t grandparent : grandparents) {
+            if (grandparent_iteration[grandparent] == 0) {
+                return false;
+            }
+        }
+        return true;
+    }};
+
+    int_t part1{0};
+    for (int i{1}; i < 1001 || !all_grandparents_found(); i++) {
         send_pulse({button_idx, broadcaster_idx, false});
         process_queue();
-        if (part2 == 0 && rx_sent) {
-            part2 = i;
-        }
-        if ((i % 1000000) == 0) {
-            fmt::print("{}\n", i);
-        }
 
         for (module_name_t grandparent : grandparents) {
-            if (grandparents_current[grandparent]) {
-                fmt::print("{}: {}\n", i, sorted_names[grandparent]);
+            if (grandparents_current[grandparent] &&
+                (grandparent_iteration[grandparent] == 0)) {
+                grandparent_iteration[grandparent] = i;
             }
         }
         grandparents_current.clear();
+        if (i == 1000) {
+            part1 = low_pulses_sent * high_pulses_sent;
+        }
     }
 
-    const int_t part1{low_pulses_sent * high_pulses_sent};
+    const int_t part2{*r::fold_left_first(grandparent_iteration | rv::values,
+                                          std::lcm<int_t, int_t>)};
 
     return {part1, part2};
 }
