@@ -53,6 +53,12 @@ class subgrid_view {
     {
     }
 
+    // subgrid_view(const subgrid_view&) = delete;
+    // subgrid_view(subgrid_view&&) = delete;
+
+    // subgrid_view& operator=(const subgrid_view&) = delete;
+    // subgrid_view& operator=(subgrid_view&&) = delete;
+
     auto row(int y) const noexcept
     {
         return base_.row(r_.base.y + y) | rv::drop(r_.base.x) |
