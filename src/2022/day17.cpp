@@ -223,7 +223,7 @@ aoc::solution_result day17(std::string_view input)
 
     // detect cycle period
     std::vector<std::int64_t> differences;
-    differences.resize(tower_height2.size() - 1);
+    differences.resize(tower_height2.size());
     r::adjacent_difference(tower_height2, differences.begin());
     r::reverse(differences);
     const auto section{differences | rv::take(20) | r::to<std::vector>};
