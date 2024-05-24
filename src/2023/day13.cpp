@@ -65,7 +65,7 @@ Generator<int> find_reflections(auto lines)
         }
         int width{end - start};
         auto adjusted_rows{lines | rv::transform([&](auto&& line) {
-                               return line | rv::drop(start) | rv::take(width);
+                               return line | rv::drop(start) | rv::take(width) | r::to<std::vector>;
                            })};
 
         if (r::all_of(adjusted_rows, is_mirror)) {
