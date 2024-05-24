@@ -48,7 +48,7 @@ template <int Chars, typename Rng>
 std::string recognize_string_rng(Rng&& pixel_rng)
 {
     static_grid<char, Chars * 5, 6> grid;
-    r::copy(pixel_rng, grid.data().data());
+    r::copy(pixel_rng | rv::take(Chars * 5 * 6), grid.data().data());
     return recognize_string_grid(grid);
 }
 
