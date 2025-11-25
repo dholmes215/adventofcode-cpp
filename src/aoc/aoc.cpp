@@ -11,10 +11,8 @@
 #include <fmt/format.h>
 #include <tl/expected.hpp>
 
-#include <charconv>
 #include <filesystem>
 #include <fstream>
-#include <functional>
 #include <string_view>
 
 namespace aoc {
@@ -59,7 +57,9 @@ struct istream_range {
 
 std::string slurp(std::istream& stream)
 {
-    // return ranges::istream_view<char>(stream) | ranges::to<std::string>;
+    if (!stream) {
+        return {};
+    }
     const istream_range input{stream};
     return input | r::to<std::string>;
 }
