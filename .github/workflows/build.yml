@@ -32,7 +32,10 @@ jobs:
       # anymore, so install it manually if running Linux or Mac.
     - name: Install Mono (Ubuntu)
       if: ${{ matrix.platform.os == 'ubuntu-24.04' }}
-      run: sudo apt install mono-complete
+      run: >
+        sudo apt update
+        sudo apt install mono-complete
+
     - name: Install Mono (macOS)
       if: ${{ matrix.platform.os == 'macos-15' }}
       run: brew install mono
