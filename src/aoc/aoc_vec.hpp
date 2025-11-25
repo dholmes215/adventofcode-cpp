@@ -190,7 +190,7 @@ struct std::hash<aoc::vec3<Scalar>> {
 
 template <typename Scalar>
 struct fmt::formatter<aoc::vec2<Scalar>> {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
     {
         // No formatting options for this type.
         const auto it{ctx.begin()};
@@ -201,7 +201,7 @@ struct fmt::formatter<aoc::vec2<Scalar>> {
     }
 
     template <typename FormatContext>
-    auto format(const aoc::vec2<Scalar>& p, FormatContext& ctx)
+    auto format(const aoc::vec2<Scalar>& p, FormatContext& ctx) const
         -> decltype(ctx.out())
     {
         return fmt::format_to(ctx.out(), "{},{}", p.x, p.y);

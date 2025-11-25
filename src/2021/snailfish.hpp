@@ -126,7 +126,7 @@ snail_num_t parse_snail(std::string_view line);
 
 template <>
 struct fmt::formatter<aoc::year2021::num_t> {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
     {
         // No formatting options for this type.
         const auto it{ctx.begin()};
@@ -137,7 +137,7 @@ struct fmt::formatter<aoc::year2021::num_t> {
     }
 
     template <typename FormatContext>
-    auto format(const aoc::year2021::num_t& p, FormatContext& ctx)
+    auto format(const aoc::year2021::num_t& p, FormatContext& ctx) const
         -> decltype(ctx.out())
     {
         if (std::holds_alternative<aoc::year2021::regular_num_t>(p)) {
@@ -154,7 +154,7 @@ struct fmt::formatter<aoc::year2021::num_t> {
 
 template <>
 struct fmt::formatter<aoc::year2021::snail_num_t> {
-    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin())
+    constexpr auto parse(format_parse_context& ctx) const -> decltype(ctx.begin())
     {
         // No formatting options for this type.
         const auto it{ctx.begin()};
@@ -165,7 +165,7 @@ struct fmt::formatter<aoc::year2021::snail_num_t> {
     }
 
     template <typename FormatContext>
-    auto format(const aoc::year2021::snail_num_t& p, FormatContext& ctx)
+    auto format(const aoc::year2021::snail_num_t& p, FormatContext& ctx) const
         -> decltype(ctx.out())
     {
         return fmt::format_to(ctx.out(), "[{},{}]", p.left_, p.right_);

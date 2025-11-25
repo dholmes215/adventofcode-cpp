@@ -58,6 +58,7 @@ struct istream_range {
 std::string slurp(std::istream& stream)
 {
     if (!stream) {
+        // TODO: Throw exception
         return {};
     }
     const istream_range input{stream};
