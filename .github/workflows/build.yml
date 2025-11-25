@@ -36,18 +36,6 @@ jobs:
       if: ${{ matrix.platform.os == 'ubuntu-24.04' || matrix.platform.os == 'macos-15' }}
       run: ./vcpkg/bootstrap-vcpkg.sh
 
-    # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
-    - name: 'Setup NuGet Credentials'
-      shell: 'bash'
-      run: >
-        ${{ matrix.platform.mono }} `vcpkg/vcpkg fetch nuget | tail -n 1`
-        sources add
-        -source "https://nuget.pkg.github.com/dholmes215/index.json"
-        -storepasswordincleartext
-        -name "GitHub"
-        -username "dholmes215"
-        -password "${{ secrets.GITHUB_TOKEN }}"
-
     - name: Create Build Environment
       # We'll use this as our working directory for all subsequent commands.
       run: cmake -E make_directory ${{env.BUILD_DIR}}
