@@ -27,9 +27,9 @@ json_number_t part1(std::string_view input)
 {
     // XXX The ctre::range docs say this API might change.  If the build fails
     // here, go see what it changed to.
-    constexpr auto& pattern{
+    constexpr const auto& pattern{
         R"((\-?)(0|(?:[1-9]\d*))(\.\d+)?([eE][\+\-]?\d+)?)"};
-    const auto range{ctre::range<pattern>(input)};
+    const auto range{ctre::search_all<pattern>(input)};
     // XXX All the input numbers are ints, but I wrote the above regex to
     // support any JSON number before I realized that.
 

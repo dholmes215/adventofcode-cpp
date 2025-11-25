@@ -109,7 +109,7 @@ auto abs(auto i) noexcept
 template <>
 struct fmt::formatter<aoc::date> : public formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const aoc::date& date, FormatContext& ctx)
+    auto format(const aoc::date& date, FormatContext& ctx) const
     {
         const auto out{
             fmt::format("Year {:04} Day {:02}", date.year, date.day)};
