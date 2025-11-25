@@ -9,10 +9,10 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-        - { os: windows-2022, cc: cl.exe,   cxx: cl.exe,      mono: '' }
-        - { os: ubuntu-22.04, cc: gcc-11,   cxx: g++-11,      mono: 'mono' }
-        - { os: ubuntu-22.04, cc: clang-14, cxx: clang++-14,  mono: 'mono' }
-        # - { os: macos-10.15,  cc: clang,    cxx: clang++ }  # Presently doesn't support enough of C++20
+          - { os: windows-2025, cc: cl.exe,   cxx: cl.exe }
+          - { os: ubuntu-24.04, cc: gcc-14,   cxx: g++-14 }
+          - { os: ubuntu-24.04, cc: clang-18, cxx: clang++-18 }
+          - { os: macos-15,  cc: clang,    cxx: clang++ }
         build_type: [Release, Debug]
 
     env:
@@ -29,11 +29,11 @@ jobs:
         submodules: recursive
 
     - name: Bootstrap vcpkg (Windows)
-      if: ${{ matrix.platform.os == 'windows-2022' }}
+      if: ${{ matrix.platform.os == 'windows-2025' }}
       run: ./vcpkg/bootstrap-vcpkg
 
-    - name: Bootstrap vcpkg (Ubuntu)
-      if: ${{ matrix.platform.os == 'ubuntu-22.04' }}
+    - name: Bootstrap vcpkg (Ubuntu/MacOS)
+      if: ${{ matrix.platform.os == 'ubuntu-24.04' || matrix.platform.os == 'macos-15' }}
       run: ./vcpkg/bootstrap-vcpkg.sh
 
     # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
