@@ -9,10 +9,10 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - { os: windows-2025, cc: cl.exe,   cxx: cl.exe }
-          - { os: ubuntu-24.04, cc: gcc-14,   cxx: g++-14 }
-          - { os: ubuntu-24.04, cc: clang-18, cxx: clang++-18 }
-          - { os: macos-15,  cc: clang,    cxx: clang++ }
+          - { os: windows-2025, cc: cl.exe,   cxx: cl.exe}
+          - { os: ubuntu-24.04, cc: gcc-14,   cxx: g++-14,      mono: mono }
+          - { os: ubuntu-24.04, cc: clang-18, cxx: clang++-18,  mono: mono }
+          - { os: macos-15,  cc: clang,       cxx: clang++,     mono: mono }
         build_type: [Release, Debug]
 
     env:
@@ -32,9 +32,7 @@ jobs:
       # anymore, so install it manually if running Linux or Mac.
     - name: Install Mono (Ubuntu)
       if: ${{ matrix.platform.os == 'ubuntu-24.04' }}
-      run: >
-        sudo apt update
-        sudo apt install mono-complete
+      run: sudo apt update && sudo apt install mono-complete
 
     - name: Install Mono (macOS)
       if: ${{ matrix.platform.os == 'macos-15' }}
