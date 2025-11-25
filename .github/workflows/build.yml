@@ -28,6 +28,15 @@ jobs:
       with:
         submodules: recursive
 
+      # Some vcpkg projects require Mono, and vcpkg seems unable to fetch it
+      # anymore, so install it manually if running Linux or Mac.
+    - name: Install Mono (Ubuntu)
+      if: ${{ matrix.platform.os == 'ubuntu-24.04' }}
+      run: sudo apt install mono-complete
+    - name: Install Mono (macOS)
+      if: ${{ matrix.platform.os == 'macos-15' }}
+      run: brew install mono
+
     - name: Bootstrap vcpkg (Windows)
       if: ${{ matrix.platform.os == 'windows-2025' }}
       run: ./vcpkg/bootstrap-vcpkg
@@ -35,6 +44,18 @@ jobs:
     - name: Bootstrap vcpkg (Ubuntu/MacOS)
       if: ${{ matrix.platform.os == 'ubuntu-24.04' || matrix.platform.os == 'macos-15' }}
       run: ./vcpkg/bootstrap-vcpkg.sh
+
+    # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
+    - name: 'Setup NuGet Credentials'
+      shell: 'bash'
+      run: >
+        dotnet `vcpkg/vcpkg  fetch nuget| tail -n 1`
+        sources add
+        -source "https://nuget.pkg.github.com/dholmes215/index.json"
+        -storepasswordincleartext
+        -name "GitHub"
+        -username "dholmes215"
+        -password "${{ secrets.GITHUB_TOKEN }}"
 
     - name: Create Build Environment
       # We'll use this as our working directory for all subsequent commands.
