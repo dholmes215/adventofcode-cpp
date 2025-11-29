@@ -171,7 +171,7 @@ bool part2_compare_hands_by_card_strength(std::string_view hand_a,
 
 struct hand_bid {
     std::string_view hand;
-    int bid;
+    unsigned int bid;
 };
 
 bool part1_compare_hand_bid(const hand_bid& a, const hand_bid& b)
@@ -196,7 +196,8 @@ bool part2_compare_hand_bid(const hand_bid& a, const hand_bid& b)
 
 hand_bid parse_line(std::string_view line)
 {
-    return {line.substr(0, 5), to_int(line.substr(6))};
+    return {line.substr(0, 5),
+            static_cast<unsigned int>(to_int(line.substr(6)))};
 }
 
 }  // namespace
