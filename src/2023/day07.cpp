@@ -206,15 +206,16 @@ aoc::solution_result day07(std::string_view input)
     std::vector<hand_bid> hand_bids{
         sv_lines(trim(input)) | rv::transform(parse_line) | r::to<std::vector>};
     std::sort(hand_bids.begin(), hand_bids.end(), part1_compare_hand_bid);
-    std::int64_t part1{0};
-    for (int i{0}; i < static_cast<int>(hand_bids.size()); i++) {
-        std::int64_t rank{i + 1};
+    const auto hand_bids_size{hand_bids.size()};
+    std::uint64_t part1{0};
+    for (auto i{0UZ}; i < hand_bids_size; i++) {
+        const auto rank{i + 1};
         part1 += rank * hand_bids[i].bid;
     }
     std::sort(hand_bids.begin(), hand_bids.end(), part2_compare_hand_bid);
-    std::int64_t part2{0};
-    for (int i{0}; i < static_cast<int>(hand_bids.size()); i++) {
-        std::int64_t rank{i + 1};
+    std::uint64_t part2{0};
+    for (auto i{0UZ}; i < hand_bids_size; i++) {
+        const auto rank{i + 1};
         part2 += rank * hand_bids[i].bid;
     }
 
