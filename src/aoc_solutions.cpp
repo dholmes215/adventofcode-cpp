@@ -18,6 +18,7 @@ namespace aoc {
 
 const std::map<date, std::vector<solution>>& solutions()
 {
+    // NOLINTBEGIN(*-use-designated-initializers)
     static const std::map<date, std::vector<solution>> solutions{
         {{2015, 1},
          {{aoc::year2015::day01, "imperative"},
@@ -134,6 +135,7 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2023, 21}, {{aoc::year2023::day21, ""}}},
         {{2023, 22}, {{aoc::year2023::day22, ""}}},
     };
+    // NOLINTEND(*-use-designated-initializers)
     return solutions;
 }
 
