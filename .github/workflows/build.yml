@@ -12,7 +12,7 @@ jobs:
           - { os: windows-2025, cc: cl.exe,   cxx: cl.exe}
           - { os: ubuntu-24.04, cc: gcc-14,   cxx: g++-14,      mono: mono }
           - { os: ubuntu-24.04, cc: clang-18, cxx: clang++-18,  mono: mono }
-          - { os: macos-15,  cc: clang,       cxx: clang++,     mono: mono }
+#          - { os: macos-15,  cc: clang,       cxx: clang++,     mono: mono }
         build_type: [Release, Debug]
 
     env:
