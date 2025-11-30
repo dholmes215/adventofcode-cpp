@@ -45,7 +45,7 @@ std::vector<std::int64_t> new_rng_map(auto&& rng, std::int64_t expansion_factor)
 
     out.resize(rng.size());
     std::int64_t offset{0};
-    for (int i{0}; i < static_cast<int>(out.size()); i++) {
+    for (auto i{0UZ}; i < out.size(); i++) {
         if (empty_range(rng[i])) {
             offset += (expansion_factor - 1);
         }
@@ -79,7 +79,7 @@ aoc::solution_result day11(std::string_view input)
         for (pos_t pos : grid.area().all_points()) {
             if (grid[pos] == '#') {
                 galaxy_positions.push_back(
-                    pos_t2{new_col_map[pos.x], new_row_map[pos.y]});
+                    pos_t2{new_col_map[static_cast<size_t>(pos.x)], new_row_map[static_cast<size_t>(pos.y)]});
             }
         }
 
