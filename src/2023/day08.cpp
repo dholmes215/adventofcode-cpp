@@ -20,7 +20,7 @@ namespace aoc::year2023 {
 namespace {
 
 // We convert 'L' and 'R' to 0 and 1 to use them as array indexes
-int instruction_as_index(char instruction)
+std::size_t instruction_as_index(char instruction)
 {
     switch (instruction) {
         case 'L':
@@ -65,8 +65,8 @@ aoc::solution_result day08(std::string_view input)
         auto part1_current_instruction_iter{r::begin(cycled_idx_instructions)};
         while (!is_end_predicate(part1_current_node)) {
             part1_steps_taken++;
-            int inst{*part1_current_instruction_iter++};
-            part1_current_node = nodes.at(part1_current_node)[inst];
+            auto inst{*part1_current_instruction_iter++};
+            part1_current_node = nodes.at(part1_current_node).at(inst);
         }
         return part1_steps_taken;
     }};
