@@ -39,12 +39,12 @@ const auto equals_char{[](char c) { return [c](char c2) { return c == c2; }; }};
 const auto empty_range{
     [](auto&& rng) -> bool { return r::all_of(rng, equals_char('.')); }};
 
-std::vector<std::int64_t> new_rng_map(auto&& rng, std::int64_t expansion_factor)
+std::vector<std::int64_t> new_rng_map(auto&& rng, std::uint64_t expansion_factor)
 {
     std::vector<std::int64_t> out;
 
     out.resize(rng.size());
-    std::int64_t offset{0};
+    auto offset{0UZ};
     for (auto i{0UZ}; i < out.size(); i++) {
         if (empty_range(rng[i])) {
             offset += (expansion_factor - 1);
