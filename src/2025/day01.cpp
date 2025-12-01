@@ -33,30 +33,23 @@ struct rotate_result {
     std::uint64_t zero_count;
 };
 
-rotate_result rotate_dial(int64_t dial, const rotation r)
+rotate_result rotate_dial(std::int64_t dial, const rotation r)
 {
     uint64_t zero_count = 0;
     if (r.direction == 'L') {
-        for (int i = 0; i < r.turns; i++) {
-            dial--;
-            if (dial == -1) {
-                dial = dial_max - 1;
-            }
-            if (dial == 0) {
-                zero_count++;
-            }
-        }
+        auto new_dial = dial - r.turns;
+        auto new_dial_mod = (new_dial % dial_max + dial_max) % dial_max;
+        const std::int64_t adjustment =
+            static_cast<std::int64_t>(new_dial_mod == 0) -
+            static_cast<std::int64_t>(dial == 0);
+        zero_count += (new_dial_mod - new_dial) / dial_max + adjustment;
+        dial = new_dial_mod;
     }
     else {
-        for (int i = 0; i < r.turns; i++) {
-            dial++;
-            if (dial == dial_max) {
-                dial = 0;
-            }
-            if (dial == 0) {
-                zero_count++;
-            }
-        }
+        auto new_dial = dial + r.turns;
+        auto new_dial_mod = new_dial % dial_max;
+        zero_count += (new_dial - new_dial_mod) / dial_max;
+        dial = new_dial_mod;
     }
 
     return {dial, zero_count};
