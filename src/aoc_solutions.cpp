@@ -11,6 +11,7 @@
 #include <year2021.hpp>
 #include <year2022.hpp>
 #include <year2023.hpp>
+#include <year2025.hpp>
 
 #include <vector>
 
@@ -134,6 +135,7 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2023, 20}, {{aoc::year2023::day20, ""}}},
         {{2023, 21}, {{aoc::year2023::day21, ""}}},
         {{2023, 22}, {{aoc::year2023::day22, ""}}},
+        {{2025, 1}, {{aoc::year2025::day01, ""}}},
     };
     // NOLINTEND(*-use-designated-initializers)
     return solutions;
