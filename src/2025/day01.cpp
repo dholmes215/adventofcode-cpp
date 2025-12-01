@@ -8,9 +8,6 @@
 #include <aoc.hpp>
 #include <aoc_range.hpp>
 
-#include <fmt/ranges.h>
-
-#include <algorithm>
 #include <string_view>
 #include <vector>
 
@@ -31,6 +28,40 @@ rotation parse_rotation(std::string_view line)
     return {line[0], to_int(line.substr(1))};
 }
 
+struct rotate_result {
+    std::int64_t dial;
+    std::uint64_t zero_count;
+};
+
+rotate_result rotate_dial(int64_t dial, const rotation r)
+{
+    uint64_t zero_count = 0;
+    if (r.direction == 'L') {
+        for (int i = 0; i < r.turns; i++) {
+            dial--;
+            if (dial == -1) {
+                dial = dial_max - 1;
+            }
+            if (dial == 0) {
+                zero_count++;
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < r.turns; i++) {
+            dial++;
+            if (dial == dial_max) {
+                dial = 0;
+            }
+            if (dial == 0) {
+                zero_count++;
+            }
+        }
+    }
+
+    return {dial, zero_count};
+}
+
 }  // namespace
 
 aoc::solution_result day01(std::string_view input)
@@ -40,37 +71,15 @@ aoc::solution_result day01(std::string_view input)
         sv_lines(input) | rv::transform(parse_rotation) | r::to<std::vector>;
 
     auto dial = dial_start;
-    int p1_zero_count = 0;
-    int p2_zero_count = 0;
+    std::uint64_t p1_zero_count = 0;
+    std::uint64_t p2_zero_count = 0;
     for (const auto& r : rotations) {
-        if (r.direction == 'L') {
-            for (int i = 0; i < r.turns; i++) {
-                dial--;
-                if (dial == -1) {
-                    dial = dial_max - 1;
-                }
-                if (dial == 0) {
-                    p2_zero_count++;
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < r.turns; i++) {
-                dial++;
-                if (dial == dial_max) {
-                    dial = 0;
-                }
-                if (dial == 0) {
-                    p2_zero_count++;
-                }
-            }
-        }
-
+        const auto [new_dial, zero_count] = rotate_dial(dial, r);
+        dial = new_dial;
+        p2_zero_count += zero_count;
         if (dial == 0) {
             p1_zero_count++;
         }
-        fmt::print("Rotating {} {} times, dial is {}\n",
-                   r.direction, r.turns, dial);
     }
 
     return {p1_zero_count, p2_zero_count};
