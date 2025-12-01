@@ -9,13 +9,14 @@
 #include <aoc_range.hpp>
 
 #include <string_view>
-#include <vector>
 
 namespace aoc::year2025 {
 
 namespace {
 
-constexpr std::int64_t dial_start = 50;
+// To avoid having to deal with wrapping when underflowing, just use a big
+// number and only look at the last two digits to know the actual dial value.
+constexpr std::int64_t dial_start = 1000000050;
 constexpr std::int64_t dial_max = 100;
 
 struct rotation {
@@ -36,23 +37,16 @@ struct rotate_result {
 rotate_result rotate_dial(std::int64_t dial, const rotation r)
 {
     uint64_t zero_count = 0;
-    if (r.direction == 'L') {
-        auto new_dial = dial - r.turns;
-        auto new_dial_mod = (new_dial % dial_max + dial_max) % dial_max;
-        const std::int64_t adjustment =
-            static_cast<std::int64_t>(new_dial_mod == 0) -
-            static_cast<std::int64_t>(dial == 0);
-        zero_count += (new_dial_mod - new_dial) / dial_max + adjustment;
-        dial = new_dial_mod;
-    }
-    else {
-        auto new_dial = dial + r.turns;
-        auto new_dial_mod = new_dial % dial_max;
-        zero_count += (new_dial - new_dial_mod) / dial_max;
-        dial = new_dial_mod;
-    }
+    const std::int64_t sign = r.direction == 'L' ? -1 : 1;
+    const auto new_dial = dial + (sign * r.turns);
+    const std::int64_t adjustment =
+        r.direction == 'L' ? static_cast<std::int64_t>(new_dial % 100 == 0) -
+                                 static_cast<std::int64_t>(dial % 100 == 0)
+                           : 0;
+    zero_count +=
+        std::abs((new_dial / dial_max) - (dial / dial_max)) + adjustment;
 
-    return {dial, zero_count};
+    return {new_dial, zero_count};
 }
 
 }  // namespace
@@ -60,8 +54,7 @@ rotate_result rotate_dial(std::int64_t dial, const rotation r)
 aoc::solution_result day01(std::string_view input)
 {
     input = trim(input);
-    const auto rotations =
-        sv_lines(input) | rv::transform(parse_rotation) | r::to<std::vector>;
+    const auto rotations = sv_lines(input) | rv::transform(parse_rotation);
 
     auto dial = dial_start;
     std::uint64_t p1_zero_count = 0;
@@ -70,7 +63,7 @@ aoc::solution_result day01(std::string_view input)
         const auto [new_dial, zero_count] = rotate_dial(dial, r);
         dial = new_dial;
         p2_zero_count += zero_count;
-        if (dial == 0) {
+        if (dial % dial_max == 0) {
             p1_zero_count++;
         }
     }
