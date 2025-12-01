@@ -34,7 +34,7 @@ std::vector<int_t> mix(const std::vector<int_t>& nums, int times)
     }
 
     for (int i{0}; i < times; i++) {
-        for (const iter_t iter : iter_vec) {
+        for (const iter_t& iter : iter_vec) {
             const auto num{*iter};
 
             auto insertion_iter{std::next(iter)};

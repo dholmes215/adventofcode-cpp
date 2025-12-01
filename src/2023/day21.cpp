@@ -26,17 +26,17 @@ using int_t = std::int64_t;
 using grid_t = dynamic_grid<char>;
 using pos_t = vec2<int>;
 
-constexpr const int part2_expansion_factor{13};
+constexpr int part2_expansion_factor{13};
 
-// constexpr const int part2_step_goal{26501365};
-constexpr const int part2_step_goal{5000};
+// constexpr int part2_step_goal{26501365};
+// constexpr int part2_step_goal{5000};
 
-constexpr const pos_t up{0, -1};
-constexpr const pos_t down{0, 1};
-constexpr const pos_t left{-1, 0};
-constexpr const pos_t right{1, 0};
+constexpr pos_t up{0, -1};
+constexpr pos_t down{0, 1};
+constexpr pos_t left{-1, 0};
+constexpr pos_t right{1, 0};
 
-constexpr const std::array<pos_t, 4> cardinal_directions{
+constexpr std::array<pos_t, 4> cardinal_directions{
     {up, down, left, right}};
 
 grid_t parse_grid(std::string_view input)
@@ -61,22 +61,22 @@ pos_t find_start(grid_t& grid)
     throw input_error("failed to find start");
 }
 
-void print_grid(const grid_t& grid)
-{
-    for (int row{0}; row < grid.height(); row++) {
-        if (row % (grid.height() / part2_expansion_factor) == 0) {
-            fmt::print("\n");
-        }
-        for (int col{0}; col < grid.width(); col++) {
-            if (col % (grid.width() / part2_expansion_factor) == 0) {
-                fmt::print(" ");
-            }
-            fmt::print("{}", grid[{col, row}]);
-        }
-        fmt::print("\n");
-    }
-    fmt::print("\n");
-}
+// void print_grid(const grid_t& grid)
+// {
+//     for (int row{0}; row < grid.height(); row++) {
+//         if (row % (grid.height() / part2_expansion_factor) == 0) {
+//             fmt::print("\n");
+//         }
+//         for (int col{0}; col < grid.width(); col++) {
+//             if (col % (grid.width() / part2_expansion_factor) == 0) {
+//                 fmt::print(" ");
+//             }
+//             fmt::print("{}", grid[{col, row}]);
+//         }
+//         fmt::print("\n");
+//     }
+//     fmt::print("\n");
+// }
 
 grid_t expand_grid(const grid_t& grid)
 {
@@ -162,7 +162,7 @@ aoc::solution_result day21(std::string_view input)
     grids_by_step[0][expanded_start] = 'O';
     // print_grid(grids_by_step[0]);
 
-    using SubgridType = decltype(expanded_grid.subgrid({1, 1}));
+    // using SubgridType = decltype(expanded_grid.subgrid({{1, 1}}));
     std::unordered_map<std::size_t, int> discovered_subgrid_indexes;
     std::vector<grid_t> discovered_subgrids_by_index;
     int current_discovery{0};

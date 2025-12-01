@@ -34,10 +34,6 @@ struct module_t {
     bool state{false};
 };
 
-#define MEMBER(member) [](const auto& o) { return o.member; }
-
-constexpr const std::string_view part2_output_name{"rx"};
-
 std::string_view trim_non_letters(std::string_view input)
 {
     while (!input.empty() && !is_letter(input.front())) {
