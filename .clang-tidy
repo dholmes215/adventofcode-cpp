@@ -1,5 +1,5 @@
 ---
-Checks:             '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm*,-altera-*,-readability-identifier-length,-modernize-use-designated-initializers,-misc-use-internal-linkage,-readability-magic-numbers,-cppcoreguidelines-avoid-magic-numbers'
+Checks:             '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm*,-altera-*,-readability-identifier-length,-modernize-use-designated-initializers,-misc-use-internal-linkage,-readability-magic-numbers,-cppcoreguidelines-avoid-magic-numbers,-misc-no-recursion'
 WarningsAsErrors:   ''
 HeaderFilterRegex:  ''
 FormatStyle:        file
