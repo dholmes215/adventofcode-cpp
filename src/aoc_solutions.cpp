@@ -138,6 +138,7 @@ const std::map<date, std::vector<solution>>& solutions()
         {{2025, 1}, {{aoc::year2025::day01, ""}}},
         {{2025, 2}, {{aoc::year2025::day02, ""}}},
         {{2025, 3}, {{aoc::year2025::day03, ""}}},
+        {{2025, 4}, {{aoc::year2025::day04, ""}}},
     };
     // NOLINTEND(*-use-designated-initializers)
     return solutions;
