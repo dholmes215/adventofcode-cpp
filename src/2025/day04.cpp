@@ -37,7 +37,7 @@ auto neighbor_tiles(const dynamic_grid<char>& grid, vec2<int> p)
            rv::transform([&grid](auto p) { return grid[p]; });
 }
 
-int count_neighbor_rolls(const dynamic_grid<char>& grid, vec2<int> p)
+std::size_t count_neighbor_rolls(const dynamic_grid<char>& grid, vec2<int> p)
 {
     return r::count(neighbor_tiles(grid, p), '@');
 }
